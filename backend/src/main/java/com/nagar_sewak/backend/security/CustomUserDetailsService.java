@@ -15,16 +15,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository repo;
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        var user = repo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Not found"));
+    public UserDetails loadUserByUsername(String identifier) {
+        // Support both email and username for backward compatibility
+        var user = repo.findByEmail(identifier)
+                .or(() -> repo.findByUsername(identifier))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + identifier));
 
         var authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.name()))  // role.getName() → "ROLE_ADMIN" etc.
                 .collect(Collectors.toList());
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
+                .withUsername(user.getUsername()) // Always use username for Spring Security context
                 .password(user.getPassword())
                 .authorities(authorities)
                 .build();

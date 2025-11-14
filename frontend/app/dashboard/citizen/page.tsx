@@ -1,5 +1,7 @@
 // frontend/app/dashboard/citizen/page.tsx
 
+'use client';
+
 import dynamic from 'next/dynamic';
 
 const DynamicCitizenDashboard = dynamic(

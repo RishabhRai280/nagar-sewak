@@ -8,61 +8,167 @@ import com.nagar_sewak.backend.repositories.ComplaintRepository;
 import com.nagar_sewak.backend.repositories.ProjectRepository;
 import com.nagar_sewak.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.*;
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/complaints")
+@CrossOrigin("*")
 public class ComplaintController {
-	
+
     private final ComplaintRepository complaintRepo;
     private final UserRepository userRepo;
     private final ProjectRepository projectRepo;
 
-    // GET /complaints (Public/Map View)
+    private final Path uploadBase = Paths.get("uploads/complaints");
+
     @GetMapping
     public List<Complaint> all() {
         return complaintRepo.findAll();
     }
 
-    // POST /complaints (Citizen Only - Secured by SecurityConfig)
-    @PostMapping
-    public ResponseEntity<Complaint> create(
-            @RequestBody ComplaintRequest req,
-            @AuthenticationPrincipal UserDetails userDetails) {
+    @GetMapping("/{id}")
+    public ComplaintResponse getById(@PathVariable Long id) {
+        Complaint complaint = complaintRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Complaint not found"));
 
-        // 1. Fetch User from DB using the principal's username (which is email/username)
-        User citizen = userRepo.findByUsername(userDetails.getUsername()) 
+        String photo = complaint.getPhotoUrl();
+        String photoUrl = photo != null ? "/uploads/complaints/" + photo : null;
+
+        return new ComplaintResponse(
+                complaint.getId(),
+                complaint.getTitle(),
+                complaint.getDescription(),
+                complaint.getSeverity(),
+                complaint.getStatus(),
+                complaint.getLat(),
+                complaint.getLng(),
+                photoUrl,
+                complaint.getCreatedAt(),
+                complaint.getUser() != null ? complaint.getUser().getId() : null,
+                complaint.getUser() != null ? complaint.getUser().getFullName() : null,
+                complaint.getProject() != null ? complaint.getProject().getId() : null
+        );
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Complaint> create(
+            @RequestPart(value = "data") ComplaintRequest req,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+
+        if (userDetails == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+
+        if (req.getTitle() == null || req.getTitle().trim().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required");
+
+        if (req.getDescription() == null || req.getDescription().trim().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
+
+        if (req.getSeverity() == null || req.getSeverity() < 1 || req.getSeverity() > 5)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Severity must be between 1 and 5");
+
+        if (req.getLat() == null || req.getLng() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Latitude and longitude are required");
+
+        User citizen = userRepo.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // 2. Create the Complaint entity from the request DTO
         Complaint complaint = new Complaint();
-        complaint.setTitle(req.getTitle());
-        complaint.setDescription(req.getDescription());
+        complaint.setTitle(req.getTitle().trim());
+        complaint.setDescription(req.getDescription().trim());
         complaint.setSeverity(req.getSeverity());
         complaint.setLat(req.getLat());
         complaint.setLng(req.getLng());
         complaint.setUser(citizen);
         complaint.setStatus("Pending");
+        complaint.setCreatedAt(Instant.now());
 
         if (req.getProjectId() != null) {
-            Optional<Project> project = projectRepo.findById(req.getProjectId());
-            complaint.setProject(project.orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Linked project not found")));
+            Project project = projectRepo.findById(req.getProjectId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+            complaint.setProject(project);
         }
 
-        // NOTE: Photo upload logic should be added here later.
-        
-        Complaint savedComplaint = complaintRepo.save(complaint);
-        return new ResponseEntity<>(savedComplaint, HttpStatus.CREATED);
+        if (file != null && !file.isEmpty()) {
+            Files.createDirectories(uploadBase);
+            String filename = System.currentTimeMillis() + "_" + Path.of(file.getOriginalFilename()).getFileName();
+            Path target = uploadBase.resolve(filename);
+            Files.write(target, file.getBytes(), StandardOpenOption.CREATE_NEW);
+            complaint.setPhotoUrl(filename);
+        }
+
+        Complaint saved = complaintRepo.save(complaint);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Complaint> updateComplaint(
+            @PathVariable Long id,
+            @RequestBody ComplaintRequest req,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+
+        Complaint complaint = complaintRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Complaint not found"));
+
+        if (req.getTitle() != null && !req.getTitle().trim().isEmpty())
+            complaint.setTitle(req.getTitle().trim());
+
+        if (req.getDescription() != null && !req.getDescription().trim().isEmpty())
+            complaint.setDescription(req.getDescription().trim());
+
+        if (req.getSeverity() != null && req.getSeverity() >= 1 && req.getSeverity() <= 5)
+            complaint.setSeverity(req.getSeverity());
+
+        if (req.getStatus() != null && !req.getStatus().trim().isEmpty())
+            complaint.setStatus(req.getStatus().trim());
+
+        return ResponseEntity.ok(complaintRepo.save(complaint));
+    }
+
+    public static final class ComplaintResponse {
+        public final Long id;
+        public final String title;
+        public final String description;
+        public final int severity;
+        public final String status;
+        public final Double lat;
+        public final Double lng;
+        public final String photoUrl;
+        public final Instant createdAt;
+        public final Long userId;
+        public final String userFullName;
+        public final Long projectId;
+
+        public ComplaintResponse(Long id, String title, String description, int severity, String status,
+                                 Double lat, Double lng, String photoUrl, Instant createdAt,
+                                 Long userId, String userFullName, Long projectId) {
+            this.id = id;
+            this.title = title;
+            this.description = description;
+            this.severity = severity;
+            this.status = status;
+            this.lat = lat;
+            this.lng = lng;
+            this.photoUrl = photoUrl;
+            this.createdAt = createdAt;
+            this.userId = userId;
+            this.userFullName = userFullName;
+            this.projectId = projectId;
+        }
     }
 }

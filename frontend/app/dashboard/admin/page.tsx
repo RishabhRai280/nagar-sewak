@@ -1,4 +1,6 @@
-// frontend/app/dashboard/citizen/page.tsx
+// frontend/app/dashboard/admin/page.tsx
+
+'use client';
 
 import dynamic from 'next/dynamic';
 

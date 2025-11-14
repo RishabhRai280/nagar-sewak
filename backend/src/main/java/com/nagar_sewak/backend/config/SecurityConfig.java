@@ -35,7 +35,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     // ================= PUBLIC READ ACCESS =================
                     .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect").permitAll()
-                    .requestMatchers("/auth/**").permitAll() 
+                    .requestMatchers("/auth/**", "/login", "/register").permitAll()
                     
                     // ================= ADMIN WRITE/MANAGEMENT =================
                     .requestMatchers(POST, "/projects").hasAuthority(Role.ADMIN.name())

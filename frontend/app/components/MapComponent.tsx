@@ -6,15 +6,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { fetchMapData, MapData } from '@/lib/api';
 
+// Fix for Leaflet default icon in Next.js
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
 const DefaultIcon = L.icon({
-  iconUrl: markerIcon.src,
-  iconRetinaUrl: markerIcon2x.src,
-  shadowUrl: markerShadow.src,
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -74,10 +79,16 @@ export default function MapComponent() {
 
       {geoData.projects.map((project) => {
         const formattedBudget = project?.budget !== undefined
-          ? project.budget.toLocaleString()
+          ? typeof project.budget === 'number' 
+            ? project.budget.toLocaleString()
+            : String(project.budget)
           : 'N/A';
         return (
-        <Marker key={`project-${project.id}`} position={[project.lat, project.lng]}>
+        <Marker 
+          key={`project-${project.id}`} 
+          position={[project.lat, project.lng]}
+          icon={DefaultIcon}
+        >
           <Popup>
             <strong className="text-blue-600">Project: {project.title}</strong>
             <br />Status: {project.status}
@@ -88,7 +99,11 @@ export default function MapComponent() {
       })}
 
       {geoData.complaints.map((complaint) => (
-        <Marker key={`complaint-${complaint.id}`} position={[complaint.lat, complaint.lng]}>
+        <Marker 
+          key={`complaint-${complaint.id}`} 
+          position={[complaint.lat, complaint.lng]}
+          icon={DefaultIcon}
+        >
           <Popup>
             <strong className="text-red-600">Complaint: {complaint.title}</strong>
             <br />Severity: {complaint.severity}

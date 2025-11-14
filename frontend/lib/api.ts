@@ -1,5 +1,3 @@
-// frontend/lib/api.ts
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 // ===================== TOKEN MANAGEMENT =====================
@@ -18,18 +16,24 @@ const buildUrl = (path: string) =>
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    const contentType = response.headers.get('content-type') ?? '';
+    if (contentType.includes('application/json')) {
+      try {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || `Request failed with status ${response.status}`;
+        throw new Error(errorMessage);
+      } catch (e) {
+        if (e instanceof Error) throw e;
+      }
+    }
     const message = await response.text();
     throw new Error(message || `Request failed with status ${response.status}`);
   }
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
+  if (response.status === 204) return undefined as T;
 
   const contentType = response.headers.get('content-type') ?? '';
-  if (contentType.includes('application/json')) {
-    return response.json() as Promise<T>;
-  }
+  if (contentType.includes('application/json')) return response.json() as Promise<T>;
 
   return (await response.text()) as unknown as T;
 }
@@ -42,9 +46,7 @@ async function request<T>(path: string, options: RequestInit = {}, requireAuth =
 
   if (requireAuth) {
     const token = Token.get();
-    if (!token) {
-      throw new Error('Authentication required. Please log in.');
-    }
+    if (!token) throw new Error('Authentication required. Please log in.');
     headers.set('Authorization', `Bearer ${token}`);
   }
 
@@ -120,30 +122,50 @@ export interface RatingSubmitData {
   score: number;
   comment: string;
 }
+export interface ComplaintDetail {
+  id: number;
+  title: string;
+  description: string;
+  severity: number;
+  status: string;
+  lat: number;
+  lng: number;
+  photoUrl?: string | null;
+  createdAt?: string | null;
+  userId?: number | null;
+  userFullName?: string | null;
+  projectId?: number | null;
+}
+
+
+
 
 // ===================== AUTH API =====================
 
-export async function login(username: string, password: string): Promise<string> {
-  const jwtToken = await request<string>(
+export async function login(email: string, password: string): Promise<string> {
+  const response = await request<{ token: string; message: string; username: string; fullName: string; email: string }>(
     '/auth/login',
     {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     },
   );
 
-  Token.set(jwtToken);
-  return jwtToken;
+  Token.set(response.token);
+  return response.token;
 }
 
 export async function register(data: { username: string; password: string; email: string; fullName: string }): Promise<string> {
-  return request<string>(
+  const response = await request<{ token: string; message: string; username: string; fullName: string; email: string }>(
     '/auth/register',
     {
       method: 'POST',
       body: JSON.stringify(data),
     },
   );
+
+  Token.set(response.token);
+  return response.message;
 }
 
 export async function fetchCurrentUserProfile(): Promise<UserProfile> {
@@ -151,6 +173,10 @@ export async function fetchCurrentUserProfile(): Promise<UserProfile> {
 }
 
 // ===================== PUBLIC DATA FETCHERS =====================
+export async function fetchProjects(): Promise<ProjectData[]> {
+  return request<ProjectData[]>('/projects', { method: 'GET' });
+}
+
 
 export async function fetchMapData(): Promise<MapData> {
   const [projects, complaints] = await Promise.all([
@@ -162,13 +188,48 @@ export async function fetchMapData(): Promise<MapData> {
 }
 
 export async function fetchProjectById(projectId: number): Promise<ProjectData> {
-  return request<ProjectData>(`/projects/${projectId}`);
+  const project = await request<ProjectData>(`/projects/${projectId}`);
+  return project;
 }
+export async function fetchComplaintById(id: number): Promise<ComplaintDetail> {
+  const token = Token.get();
+  if (!token) throw new Error("Authentication required. Please log in.");
+
+  return request<ComplaintDetail>(
+    `/complaints/${id}`,
+    { method: "GET" },
+    true // means requireAuth = true → automatically adds Authorization header
+  );
+}
+
 
 // ===================== PROTECTED ACTIONS =====================
 
-export async function submitComplaint(data: ComplaintSubmitData): Promise<string> {
-  await request('/complaints', { method: 'POST', body: JSON.stringify(data) }, true);
+// ⬇⬇ UPDATED FOR IMAGE UPLOAD ⬇⬇
+export async function submitComplaint(data: ComplaintSubmitData, imageFile?: File): Promise<string> {
+  const token = Token.get();
+  if (!token) throw new Error('Authentication required. Please log in.');
+
+  const formData = new FormData();
+  formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+
+  if (imageFile) {
+    formData.append('file', imageFile);
+  }
+
+  const response = await fetch(buildUrl('/complaints'), {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || 'Complaint submission failed');
+  }
+
   return 'Complaint submitted successfully!';
 }
 

@@ -1,138 +1,194 @@
 // frontend/app/components/CitizenDashboard.tsx
 
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Token, fetchCurrentUserProfile, UserProfile } from '@/lib/api';
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Sidebar from "./Sidebar";
+import Link from "next/link";
+import { Token, fetchCurrentUserProfile, UserProfile } from "@/lib/api";
 
- export default function CitizenDashboardComponent() {
-     const router = useRouter();
-     const [userData, setUserData] = useState<UserProfile | null>(null);
-     const [error, setError] = useState<string | null>(null);
-     const [loading, setLoading] = useState(true);
+export default function CitizenDashboardComponent() {
+  const router = useRouter();
+  const [userData, setUserData] = useState<UserProfile | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-     useEffect(() => {
-         if (!Token.get()) {
-             alert("Please log in to view your dashboard.");
-             router.push('/login');
-             return;
-         }
+  useEffect(() => {
+    if (!Token.get()) {
+      alert("Please log in to view your dashboard.");
+      router.push("/login");
+      return;
+    }
 
-         const loadProfile = async () => {
-             try {
-                 const profile = await fetchCurrentUserProfile();
-                 setUserData(profile);
-             } catch (err: unknown) {
-                 const message = err instanceof Error ? err.message : 'Unable to load your profile.';
-                 setError(message);
-             } finally {
-                 setLoading(false);
-             }
-         };
+    const loadProfile = async () => {
+      try {
+        const profile = await fetchCurrentUserProfile();
+        setUserData(profile);
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Unable to load your profile.";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-         loadProfile();
-     }, [router]);
+    loadProfile();
+  }, [router]);
 
-     const stats = useMemo(() => {
-         const complaints = userData?.complaints ?? [];
-         const pending = complaints.filter((c) => c.status?.toLowerCase() === 'pending').length;
-         return {
-             total: complaints.length,
-             pending,
-             resolved: complaints.length - pending,
-         };
-     }, [userData]);
+  const stats = useMemo(() => {
+    const complaints = userData?.complaints ?? [];
+    const pending = complaints.filter(
+      (c) => c.status?.toLowerCase() === "pending"
+    ).length;
+    return {
+      total: complaints.length,
+      pending,
+      resolved: complaints.length - pending,
+    };
+  }, [userData]);
 
-     if (loading) {
-         return <div className="text-center py-20 text-xl text-gray-500">Loading your profile...</div>;
-     }
+  if (loading) {
+    return (
+      <div className="text-center py-20 text-xl text-gray-500">
+        Loading your profile...
+      </div>
+    );
+  }
 
-     if (error) {
-         return <div className="text-center py-20 text-xl text-red-600">{error}</div>;
-     }
+  if (error) {
+    return (
+      <div className="text-center py-20 text-xl text-red-600">{error}</div>
+    );
+  }
 
-     if (!userData) {
-         return null;
-     }
+  if (!userData) {
+    return null;
+  }
 
-     return (
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-             <h1 className="text-4xl font-extrabold text-green-700 mb-2">
-                 Welcome Back, {userData.fullName || userData.username}
-             </h1>
-             <p className="text-lg text-gray-500 mb-8">Citizen Dashboard</p>
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <Sidebar />
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                 <div className="lg:col-span-1 space-y-6">
-                     <div className="bg-white p-6 rounded-xl shadow-xl border-t-4 border-green-500">
-                         <h2 className="text-xl font-semibold mb-3">Your Impact</h2>
-                         <div className="space-y-2">
-                             <p className="text-gray-700">
-                                 Total Reports:{' '}
-                                 <span className="font-bold text-lg">
-                                     {stats.total}
-                                 </span>
-                             </p>
-                             <p className="text-gray-700">
-                                 Pending Issues:{' '}
-                                 <span className="font-bold text-lg text-red-500">
-                                     {stats.pending}
-                                 </span>
-                             </p>
-                             <p className="text-gray-700">
-                                 Resolved:{' '}
-                                 <span className="font-bold text-lg text-green-600">
-                                     {stats.resolved}
-                                 </span>
-                             </p>
-                         </div>
-                     </div>
+      {/* Main Content */}
+      <main className="flex-1 p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          Welcome Back, {userData.fullName || userData.username}
+        </h1>
+        <p className="text-gray-500 mb-8">Citizen Dashboard</p>
 
-                     <Link href="/report" passHref>
-                         <button className="w-full bg-red-600 text-white py-3 rounded-xl text-lg font-semibold shadow-lg hover:bg-red-700 transition">
-                             + Submit New Complaint
-                         </button>
-                     </Link>
-                 </div>
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600">
+            <p className="text-gray-700">Total Complaints</p>
+            <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+          </div>
 
-                 <div className="lg:col-span-2 space-y-8">
-                     <div className="bg-white p-6 rounded-xl shadow-xl">
-                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Your Reported Issues</h2>
-                         {userData.complaints.length === 0 ? (
-                             <p className="text-gray-500">No complaints submitted yet. Use the button on the left to file your first report.</p>
-                         ) : (
-                             <ul className="space-y-4">
-                                 {userData.complaints.map((complaint) => (
-                                     <li key={complaint.id} className="border-b pb-4 last:border-b-0">
-                                         <div className="flex justify-between items-start gap-4">
-                                             <div>
-                                                 <h3 className="font-bold text-gray-900">{complaint.title}</h3>
-                                                 <p className="text-sm text-gray-500">
-                                                     Severity: {complaint.severity}/5
-                                                 </p>
-                                                 {complaint.description && (
-                                                     <p className="text-sm text-gray-600 mt-1">{complaint.description}</p>
-                                                 )}
-                                             </div>
-                                             <span
-                                                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                     complaint.status?.toLowerCase() === 'resolved'
-                                                         ? 'bg-green-100 text-green-800'
-                                                         : 'bg-gray-100 text-gray-800'
-                                                 }`}
-                                             >
-                                                 {complaint.status}
-                                             </span>
-                                         </div>
-                                     </li>
-                                 ))}
-                             </ul>
-                         )}
-                     </div>
-                 </div>
-             </div>
-         </div>
-     );
- }
+          <div className="bg-white p-6 rounded-xl shadow border-l-4 border-yellow-500">
+            <p className="text-gray-700">Pending Complaints</p>
+            <p className="text-3xl font-bold text-yellow-600">
+              {stats.pending}
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow border-l-4 border-green-600">
+            <p className="text-gray-700">Resolved Complaints</p>
+            <p className="text-3xl font-bold text-green-700">
+              {stats.resolved}
+            </p>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <Link href="/report">
+          <button className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-red-700 transition w-fit mb-8">
+            + Submit New Complaint
+          </button>
+        </Link>
+
+        {/* Complaints List */}
+        <div className="bg-white p-6 rounded-xl shadow">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            Complaint History
+          </h2>
+
+          {userData.complaints.length === 0 ? (
+            <p className="text-gray-500">
+              No complaints yet — start by clicking submit complaint.
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {userData.complaints.map((complaint) => (
+                <li
+                  key={complaint.id}
+                  className="border-b last:border-none pb-4"
+                >
+                  <div className="flex justify-between items-start gap-6">
+                    <div className="flex gap-4">
+                      {complaint.photoUrl && (
+                        <img
+                          src={`http://localhost:8080/uploads/${complaint.photoUrl}`}
+                          className="w-20 h-20 rounded-md object-cover border"
+                          alt="proof"
+                        />
+                      )}
+
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-lg">
+                          {complaint.title}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                          Severity: {complaint.severity} / 5
+                        </p>
+
+                        {complaint.description && (
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                            {complaint.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 text-xs rounded-full font-semibold ${
+                        complaint.status?.toLowerCase() === "resolved"
+                          ? "bg-green-100 text-green-700"
+                          : complaint.status?.toLowerCase() === "in_progress"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {complaint.status}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-6 mt-2 text-sm font-semibold">
+                    <Link
+                      href={`/dashboard/citizen/complaints/${complaint.id}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      View Details
+                    </Link>
+
+                    {complaint.status?.toLowerCase() === "resolved" &&
+                      !complaint.rating && (
+                        <Link
+                          href={`/rate?id=${complaint.id}`}
+                          className="text-green-600 hover:underline"
+                        >
+                          Rate Work
+                        </Link>
+                      )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

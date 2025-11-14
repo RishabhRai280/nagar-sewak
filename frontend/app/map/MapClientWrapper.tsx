@@ -1,22 +1,19 @@
-// frontend/app/map/MapClientWrapper.tsx
+// app/map/MapClientWrapper.tsx
+"use client";
 
-'use client'; // This is now a Client Component
+import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
+import "leaflet/dist/leaflet.css";
+import LoadingState from "@/app/components/map/LoadingState";
 
-import dynamic from 'next/dynamic';
-
-// Use dynamic import with ssr: false here, where it is allowed.
-const DynamicMapComponent = dynamic(
-  () => import('../components/MapComponent'),
-  { 
-    ssr: false,
-    loading: () => <p className="text-center p-20 text-lg text-gray-600">Loading Interactive Map...</p>
-  }
-);
+const Map = dynamic(() => import("@/app/components/map/Map"), { ssr: false });
 
 export default function MapClientWrapper() {
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
-      <DynamicMapComponent />
+    <div className="w-full h-[70vh] md:h-[78vh]">
+      <Suspense fallback={<LoadingState />}>
+        <Map />
+      </Suspense>
     </div>
   );
 }

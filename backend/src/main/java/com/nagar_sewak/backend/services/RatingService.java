@@ -75,7 +75,8 @@ public class RatingService {
 
         // 4. Check Flagging Criteria (Avg rating <= 2.5)
         if (newAvg.compareTo(new BigDecimal("2.5")) <= 0) {
-            if (!contractor.getIsFlagged()) {
+            Boolean currentFlagged = contractor.getIsFlagged();
+            if (currentFlagged == null || !currentFlagged) {
                 contractor.setIsFlagged(true);
                 contractor.setFlaggedAt(ZonedDateTime.now());
                 // NOTE: An Admin notification service would be called here.

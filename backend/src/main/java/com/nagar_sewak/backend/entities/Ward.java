@@ -5,8 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(name = "wards")
 @Getter
-@Setter // FIX: Generates setLatitude/setLongitude required by DataSeeder
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,6 +21,9 @@ public class Ward {
     private String zone;
 
     // Getters required by WardService
+    @Column(nullable = false)
     private Double latitude;
+    
+    @Column(nullable = false)
     private Double longitude;
 }

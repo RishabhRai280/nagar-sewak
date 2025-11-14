@@ -1,12 +1,15 @@
 package com.nagar_sewak.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 @Entity
-@Data // FIX: Generates setUser, setCompanyName, etc.
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "contractors")
 public class Contractor {
 

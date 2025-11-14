@@ -1,23 +1,30 @@
 package com.nagar_sewak.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Data
+@Table(name = "projects")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Project {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // Getter/Setter required for DataSeeder and RatingService
+    @Column(name = "contractor_id")
     private Long contractorId;
 
     private String title;
     private String description;
 
     // Getter required for AdminDashboardService
+    @Column(precision = 15, scale = 2)
     private BigDecimal budget;
 
     private String status;

@@ -1,14 +1,19 @@
 package com.nagar_sewak.backend.entities;
 
-
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import java.time.Instant;
 
 @Entity
-@Data
+@Table(name = "complaints")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Complaint {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -21,10 +26,15 @@ public class Complaint {
 
     private String status = "Pending";
 
-    // Setter required by ComplaintController
+    private String photoUrl;
+
+    private Instant createdAt;
+
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user; 
 
     @ManyToOne
+    @JoinColumn(name = "project_id")
     private Project project;
 }

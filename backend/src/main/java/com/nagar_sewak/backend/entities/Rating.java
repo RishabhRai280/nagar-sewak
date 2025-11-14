@@ -1,11 +1,14 @@
 package com.nagar_sewak.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import java.time.ZonedDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "ratings")
 public class Rating {
 
