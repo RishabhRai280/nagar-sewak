@@ -1,161 +1,237 @@
+// frontend/app/dashboard/citizen/complaints/[id]/page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { fetchComplaintById, ComplaintDetail } from "@/lib/api";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, AlertTriangle, Clock, Star, CheckCircle, Edit, Link2, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import CitizenDashboardLayout from "@/app/components/CitizenDashboardLayout"; 
+
+// Dynamically load MiniMap (prevents server-side Leaflet rendering)
+const MiniMap = dynamic(() => import("@/app/components/MiniMap"), { ssr: false });
+
+// Extend the ComplaintDetail type for fields used in the UI
+// These fields are returned by the backend's ComplaintResponse
+interface FullComplaintDetail extends ComplaintDetail {
+    photoUrl?: string | null;
+    projectId?: number | null;
+    projectTitle?: string | null;
+    rating?: number | null; 
+    userFullName?: string | null; 
+}
 
 export default function CitizenComplaintDetails() {
   const [id, setId] = useState<number | null>(null);
-
-  useEffect(() => {
-    const path = window.location.pathname;
-    const parts = path.split("/");
-    const parsed = parseInt(parts[parts.length - 1], 10);
-    if (!isNaN(parsed)) setId(parsed);
-  }, []);
-
-  const [data, setData] = useState<ComplaintDetail | null>(null);
+  const [data, setData] = useState<FullComplaintDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 1. Get ID from URL path (Client-side)
+  useEffect(() => {
+    const path = window.location.pathname;
+    const parts = path.split("/");
+    // Find the last numeric part of the URL
+    const parsed = parseInt(parts[parts.length - 1], 10); 
+    if (!isNaN(parsed)) setId(parsed);
+    else setError("Invalid complaint ID.");
+  }, []);
+
+  // 2. Fetch data once ID is set
   useEffect(() => {
     if (id == null) return;
     setLoading(true);
     fetchComplaintById(id)
-      .then((d) => setData(d))
-      .catch((e) => setError(e.message ?? "Failed to load"))
+      .then((d) => {
+          // Type cast the fetched data to our extended type
+          setData(d as FullComplaintDetail);
+      })
+      .catch((e) => {
+          setError(e.message ?? "Failed to load complaint details.");
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Setup Leaflet map after data loads
-  useEffect(() => {
-    if (!data?.lat || !data?.lng) return;
-
-    // Load Leaflet CSS
-    const leafletCSS = document.createElement("link");
-    leafletCSS.rel = "stylesheet";
-    leafletCSS.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(leafletCSS);
-
-    // Load Leaflet JS
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => {
-      const L = (window as any).L;
-      const map = L.map("complaint-map").setView([data.lat, data.lng], 16);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-      }).addTo(map);
-
-      L.marker([data.lat, data.lng])
-        .addTo(map)
-        .bindPopup(data.title)
-        .openPopup();
-    };
-    document.body.appendChild(script);
-  }, [data]);
-
   if (loading)
-    return <div className="p-10 text-center">Loading complaint...</div>;
+    return (
+      <CitizenDashboardLayout>
+        <div className="flex items-center justify-center h-[50vh] text-xl text-slate-600">
+          <Clock className="animate-spin mr-3" /> Loading complaint...
+        </div>
+      </CitizenDashboardLayout>
+    );
+
   if (error)
-    return <div className="p-10 text-center text-red-600">{error}</div>;
-  if (!data) return <div className="p-10 text-center">No data</div>;
+    return (
+      <CitizenDashboardLayout>
+        <div className="p-10 text-center bg-red-50 border border-red-300 rounded-lg text-red-700">
+          <AlertCircle className="inline mr-2" /> Error: {error}
+        </div>
+      </CitizenDashboardLayout>
+    );
+      
+  if (!data) return <CitizenDashboardLayout><div className="p-10 text-center text-slate-500">Complaint not found.</div></CitizenDashboardLayout>;
+
+  // --- Helper Constants for UI ---
+  const severityColor = data.severity >= 4 ? 'bg-red-600' : data.severity === 3 ? 'bg-yellow-600' : 'bg-emerald-600';
+  const statusColor = data.status?.toLowerCase() === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 
+                      data.status?.toLowerCase() === 'in_progress' ? 'bg-blue-100 text-blue-700' : 
+                      'bg-orange-100 text-orange-700';
+  const isResolved = data.status?.toLowerCase() === 'resolved';
+  // Photo URL correction: The backend ComplaintResponse provides the full path starting with /uploads/complaints/filename.jpg
+  // Example: data.photoUrl = "/uploads/complaints/1763131283439_blueberry.jpg"
+  const fullPhotoUrl = data.photoUrl ? `http://localhost:8080${data.photoUrl}` : null; 
+
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <button
-        onClick={() => history.back()}
-        className="flex items-center gap-2 text-gray-700 hover:text-black transition"
-      >
-        <ArrowLeft size={18} />
-        Back
-      </button>
-
-      <div className="bg-white shadow-md rounded-lg border">
-        <div className="p-6 border-b">
-          <h1 className="text-3xl font-semibold text-gray-900">{data.title}</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Reported by {data.userFullName ?? "Citizen"} •{" "}
-            {data.createdAt ? new Date(data.createdAt).toLocaleString() : ""}
-          </p>
-        </div>
-
-        {data.photoUrl && (
-          <div className="p-6 space-y-2">
-            <img
-              src={`http://localhost:8080/uploads/${data.photoUrl}`}
-              alt="Complaint image"
-              className="rounded-md shadow-md w-full max-h-[370px] object-cover"
-            />
-            <a
-              href={`http://localhost:8080/uploads/${data.photoUrl}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-blue-600 underline hover:text-blue-800"
+    <CitizenDashboardLayout>
+        <div className="max-w-4xl mx-auto space-y-8">
+            {/* Back Button */}
+            <motion.button
+                onClick={() => window.history.back()}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition"
             >
-              View full size image
-            </a>
-          </div>
-        )}
+                <ArrowLeft size={18} />
+                Back to Dashboard
+            </motion.button>
 
-        <div className="p-6 border-t space-y-6">
-          <p className="text-gray-700 leading-relaxed text-[15.5px]">
-            {data.description}
-          </p>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white shadow-xl rounded-2xl border border-slate-100 overflow-hidden"
+            >
+                {/* Header Section */}
+                <div className="p-6 md:p-8 border-b border-slate-100">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{data.title}</h1>
+                            <p className="text-sm text-slate-500">
+                                Reported by <span className="font-semibold">{data.userFullName ?? "Citizen"}</span> on 
+                                {data.createdAt ? ` ${new Date(data.createdAt).toLocaleDateString()}` : " N/A"}
+                            </p>
+                        </div>
+                        
+                        <span className={`px-4 py-2 text-sm font-bold rounded-full whitespace-nowrap ${statusColor}`}>
+                            {data.status}
+                        </span>
+                    </div>
+                </div>
 
-          <div className="flex flex-wrap gap-6 text-sm">
-            <div className="space-x-1">
-              <span className="text-gray-500">Severity:</span>
-              <span
-                className={`px-2 py-0.5 rounded text-white ${
-                  data.severity >= 4
-                    ? "bg-red-600"
-                    : data.severity === 3
-                    ? "bg-yellow-600"
-                    : "bg-green-600"
-                }`}
-              >
-                {data.severity}/5
-              </span>
-            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3">
+                    
+                    {/* Left Column: Details & Description (2/3 width) */}
+                    <div className="lg:col-span-2 p-6 md:p-8 space-y-6">
+                        
+                        <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-2">Issue Details</h2>
 
-            <div className="space-x-1">
-              <span className="text-gray-500">Status:</span>
-              <span className="px-2 py-0.5 rounded bg-gray-200 text-gray-800 font-medium">
-                {data.status}
-              </span>
-            </div>
+                        <p className="text-slate-700 leading-relaxed text-[16px]">
+                            {data.description || "No detailed description provided."}
+                        </p>
 
-            <div className="space-x-1">
-              <span className="text-gray-500">Location:</span>
-              <strong>
-                {data.lat?.toFixed(4)}, {data.lng?.toFixed(4)}
-              </strong>
-            </div>
-          </div>
+                        <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm font-medium">
+                            <div className="flex items-center gap-2">
+                                <Star size={16} className="text-slate-500" />
+                                <span className="text-slate-600">Severity:</span>
+                                <span className={`px-3 py-1 rounded-full text-white font-bold ${severityColor}`}>
+                                    {data.severity}/5
+                                </span>
+                            </div>
 
-          {/* LEAFLET MAP */}
-          {data.lat && data.lng && (
-            <div className="mt-4">
-              <p className="text-gray-600 mb-2 font-medium">Location Map</p>
-              <div
-                id="complaint-map"
-                style={{ height: "350px", width: "100%", borderRadius: "8px" }}
-                className="shadow-md"
-              ></div>
-              <a
-                href={`https://www.google.com/maps?q=${data.lat},${data.lng}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-blue-600 underline hover:text-blue-800 block mt-2"
-              >
-                Open in Google Maps
-              </a>
-            </div>
-          )}
+                            <div className="flex items-center gap-2">
+                                <MapPin size={16} className="text-slate-500" />
+                                <span className="text-slate-600">GPS:</span>
+                                <span className="text-blue-700">
+                                    {data.lat?.toFixed(5)}, {data.lng?.toFixed(5)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {/* Project Link */}
+                        {data.projectId && (
+                            <Link href={`/projects/${data.projectId}`} className="text-blue-600 hover:text-blue-800 flex items-center gap-2 font-medium">
+                                <Link2 size={18} /> Linked Project: <span className="underline">{data.projectTitle || `Project ID ${data.projectId}`}</span>
+                            </Link>
+                        )}
+                        
+                        {/* Action Buttons */}
+                        <div className="pt-4 flex gap-4">
+                            {/* Rate Work Button */}
+                            {isResolved && !data.rating && (
+                                <Link href={`/rate/${data.id}`} className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition shadow-lg">
+                                    <Star size={20} /> Rate the Resolution
+                                </Link>
+                            )}
+                            {/* Edit Complaint Button (only if status is pending) */}
+                            {data.status?.toLowerCase() === 'pending' && (
+                                <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-lg">
+                                    <Edit size={20} /> Edit Complaint
+                                </button>
+                            )}
+                            {/* Rating Display */}
+                            {data.rating && (
+                                <div className="flex items-center gap-2 text-indigo-600 font-bold">
+                                    <CheckCircle size={20} /> Rated {data.rating}/5
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+
+                    {/* Right Column: Image & Map (1/3 width) */}
+                    <div className="lg:col-span-1 border-t lg:border-t-0 lg:border-l border-slate-100 bg-slate-50 p-6 md:p-8 space-y-6">
+                        
+                        {/* Image Proof */}
+                        {fullPhotoUrl ? (
+                            <div className="space-y-3">
+                                <p className="text-lg font-bold text-slate-800">Photo Evidence</p>
+                                <img
+                                    src={fullPhotoUrl} 
+                                    alt="Complaint photo proof"
+                                    className="w-full h-48 object-cover rounded-xl shadow-md border border-slate-200"
+                                />
+                                <a
+                                    href={fullPhotoUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                                >
+                                    View Full Image <ExternalLink size={14} />
+                                </a>
+                            </div>
+                        ) : (
+                            <div className="p-4 bg-gray-100 text-slate-500 rounded-lg text-sm text-center">
+                                No Photo Proof Available.
+                            </div>
+                        )}
+
+                        {/* Location Map */}
+                        <div className="space-y-3">
+                            <p className="text-lg font-bold text-slate-800">Exact Location</p>
+                            {data.lat && data.lng && (
+                                <div className="h-64 rounded-xl overflow-hidden border-2 border-slate-300 shadow-lg">
+                                    {/* MiniMap will dynamically load here */}
+                                    <MiniMap lat={data.lat} lng={data.lng} />
+                                </div>
+                            )}
+                            <a
+                                href={`http://googleusercontent.com/maps.google.com/3{data.lat},${data.lng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                                Open in Google Maps <MapPin size={14} />
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+            </motion.div>
         </div>
-      </div>
-    </div>
+    </CitizenDashboardLayout>
   );
 }

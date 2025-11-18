@@ -1,11 +1,11 @@
-// frontend/app/components/auth/LoginForm.tsx
-
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { login, fetchCurrentUserProfile } from "@/lib/api";
+import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -21,96 +21,130 @@ export default function LoginForm() {
 
     try {
       await login(email, password);
-      const profile = await fetchCurrentUserProfile();
+      const profile = await fetchCurrentUserProfile(); 
+      
       const hasAdminAccess = profile.roles.some(
         (role) => role === "ADMIN" || role === "SUPER_ADMIN"
       );
-      const isContractor = profile.roles.includes("CONTRACTOR");
+      const isContractor = profile.roles.includes("CONTRACTOR"); 
 
-      if (hasAdminAccess || isContractor) {
-        router.push("/dashboard/admin");
+      // FIX: Redirect Contractor to their dedicated route
+      if (isContractor) {
+        router.push("/dashboard/contractor"); // <-- NEW CONTRACTOR ROUTE
+      } else if (hasAdminAccess) {
+        router.push("/dashboard/admin"); // Admin Dashboard
       } else {
-        router.push("/dashboard/citizen");
+        router.push("/dashboard/citizen"); // Citizen Dashboard
       }
     } catch (err: unknown) {
       const message =
         err instanceof Error
           ? err.message
-          : "Login failed. Check your credentials.";
+          : "Login failed. Please check your credentials.";
       setError(message);
     } finally {
       setIsLoading(false);
     }
   };
-
+  
+  // (Rest of component code remains the same)
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-xl">
-      <h2 className="text-3xl font-bold text-center text-green-700 mb-6">
-        Login to Nagar Sewak
-      </h2>
-
-      {error && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-          role="alert"
-        >
-          <span className="block sm:inline">{error}</span>
+    <div className="w-full max-w-md">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-white rounded-2xl shadow-2xl p-8 border border-slate-100"
+      >
+        <div className="mb-8">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4">
+            <Lock className="text-white" size={24} />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h2>
+          <p className="text-slate-600">Sign in to your Nagar Sewak account</p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="email"
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3"
           >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-            placeholder="your.email@example.com"
-          />
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="password"
+            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+            <p className="text-red-700 text-sm">{error}</p>
+          </motion.div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="you@example.com"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 rounded border-slate-300" />
+              <span className="text-sm text-slate-600">Remember me</span>
+            </label>
+            <Link href="#" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-          />
+            {isLoading ? "Signing In..." : "Sign In"}
+            {!isLoading && <ArrowRight size={18} />}
+          </button>
+        </form>
+
+        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
+          <p className="text-slate-600 text-sm">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-blue-600 font-semibold hover:text-blue-700">
+              Create one now
+            </Link>
+          </p>
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-        >
-          {isLoading ? "Logging In..." : "Login"}
-        </button>
-      </form>
-
-      <p className="mt-4 text-center text-sm text-gray-600">
-        Don&apos;t have an account?{" "}
-        <Link
-          href="/register"
-          className="font-medium text-blue-600 hover:text-blue-500"
-        >
-          Register as a Citizen
-        </Link>
-      </p>
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <p className="text-xs text-slate-600">
+            **Demo credentials:** All users use 'password'
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 }

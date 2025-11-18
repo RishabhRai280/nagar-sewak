@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Token, fetchCurrentUserProfile, UserProfile } from '@/lib/api';
-import { Menu, X, User, LogOut, MapPin, LayoutDashboard } from 'lucide-react';
+import { Menu, X, User, LogOut, MapPin, LayoutDashboard, Bell } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,77 +37,82 @@ export default function Header() {
   };
 
   const isActive = (path: string) => pathname === path;
-
   const hasAdminAccess = user?.roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');
   const isContractor = user?.roles.includes('CONTRACTOR');
 
+  // Determine the correct dashboard path based on user roles
+  const dashboardPath = hasAdminAccess || isContractor ? '/dashboard/admin' : '/dashboard/citizen';
+
+  // Utility function to get user initials
+  const getUserInitials = (user: UserProfile) => {
+    const name = user.fullName || user.username || 'U';
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+      return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    }
+    return name.charAt(0).toUpperCase();
+  }
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50 border-b border-gray-200">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200/50 shadow-sm">
+      <nav className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="text-2xl font-bold text-green-700 tracking-wider group-hover:text-green-800 transition duration-150">
-              Nagar Sewak
+            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition">
+              NagarSewak
             </div>
-            <span className="text-xl">🇮🇳</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-8">
             <Link
               href="/map"
-              className={`font-medium transition ${
-                isActive('/map') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
+              className={`flex items-center gap-2 font-medium transition ${
+                isActive('/map')
+                  ? 'text-blue-600 font-semibold'
+                  : 'text-slate-600 hover:text-blue-600'
               }`}
             >
+              <MapPin size={18} />
               Live Map
             </Link>
 
             {user ? (
               <>
-                {hasAdminAccess || isContractor ? (
-                  <Link
-                    href="/dashboard/admin"
-                    className={`font-medium transition flex items-center gap-2 ${
-                      isActive('/dashboard/admin') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                    }`}
-                  >
-                    <LayoutDashboard size={18} />
-                    Admin Dashboard
-                  </Link>
-                ) : (
-                  <Link
-                    href="/dashboard/citizen"
-                    className={`font-medium transition flex items-center gap-2 ${
-                      isActive('/dashboard/citizen') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                    }`}
-                  >
-                    <LayoutDashboard size={18} />
-                    My Dashboard
-                  </Link>
-                )}
+                {/* FIX: Use specific dashboardPath for the main dashboard link */}
+                <Link
+                  href={dashboardPath}
+                  className={`flex items-center gap-2 font-medium transition ${
+                    pathname.startsWith('/dashboard')
+                      ? 'text-blue-600 font-semibold'
+                      : 'text-slate-600 hover:text-blue-600'
+                  }`}
+                >
+                  <LayoutDashboard size={18} />
+                  Dashboard
+                </Link>
+                
                 <Link
                   href="/report"
                   className={`font-medium transition ${
-                    isActive('/report') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
+                    isActive('/report')
+                      ? 'text-blue-600 font-semibold'
+                      : 'text-slate-600 hover:text-blue-600'
                   }`}
                 >
                   Report Issue
                 </Link>
-                <div className="flex items-center gap-3 pl-4 border-l border-gray-300">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                      <User className="text-white" size={18} />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">{user.fullName || user.username}</span>
+                <div className="flex items-center gap-4 pl-8 border-l border-slate-200">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold cursor-default transition">
+                    {getUserInitials(user)}
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="text-gray-600 hover:text-red-600 transition flex items-center gap-1"
+                    className="text-slate-600 hover:text-red-600 transition"
                     title="Logout"
                   >
-                    <LogOut size={18} />
+                    <LogOut size={20} />
                   </button>
                 </div>
               </>
@@ -115,14 +121,16 @@ export default function Header() {
                 <Link
                   href="/login"
                   className={`font-medium transition ${
-                    isActive('/login') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
+                    isActive('/login')
+                      ? 'text-blue-600 font-semibold'
+                      : 'text-slate-600 hover:text-blue-600'
                   }`}
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300 shadow-md hover:shadow-lg"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:shadow-lg transition transform hover:scale-[1.02]"
                 >
                   Register
                 </Link>
@@ -133,104 +141,94 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-gray-900"
-            aria-label="Toggle menu"
+            className="md:hidden text-slate-600 hover:text-slate-900 transition"
+            aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="flex flex-col gap-4">
-              <Link
-                href="/map"
-                onClick={() => setIsMenuOpen(false)}
-                className={`font-medium transition ${
-                  isActive('/map') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                }`}
-              >
-                <MapPin size={18} className="inline mr-2" />
-                Live Map
-              </Link>
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="md:hidden py-6 border-t border-slate-200"
+            >
+              <div className="flex flex-col gap-4">
+                <Link
+                  href="/map"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-2 font-medium text-slate-600 hover:text-blue-600"
+                >
+                  <MapPin size={18} />
+                  Live Map
+                </Link>
 
-              {user ? (
-                <>
-                  {hasAdminAccess || isContractor ? (
+                {user ? (
+                  <>
+                    {/* FIX: Use specific dashboardPath for the mobile dashboard link */}
                     <Link
-                      href="/dashboard/admin"
+                      href={dashboardPath}
                       onClick={() => setIsMenuOpen(false)}
-                      className={`font-medium transition ${
-                        isActive('/dashboard/admin') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                      }`}
+                      className="flex items-center gap-2 font-medium text-slate-600 hover:text-blue-600"
                     >
-                      <LayoutDashboard size={18} className="inline mr-2" />
-                      Admin Dashboard
+                      <LayoutDashboard size={18} />
+                      Dashboard
                     </Link>
-                  ) : (
+                    
                     <Link
-                      href="/dashboard/citizen"
+                      href="/report"
                       onClick={() => setIsMenuOpen(false)}
-                      className={`font-medium transition ${
-                        isActive('/dashboard/citizen') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                      }`}
+                      className="font-medium text-slate-600 hover:text-blue-600"
                     >
-                      <LayoutDashboard size={18} className="inline mr-2" />
-                      My Dashboard
+                      Report Issue
                     </Link>
-                  )}
-                  <Link
-                    href="/report"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`font-medium transition ${
-                      isActive('/report') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                    }`}
-                  >
-                    Report Issue
-                  </Link>
-                  <div className="pt-4 border-t border-gray-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                        <User className="text-white" size={18} />
+
+                    {/* Mobile User/Logout Info */}
+                    <div className="pt-4 mt-2 border-t border-slate-200 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          {getUserInitials(user)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{user.fullName || user.username}</p>
+                          <p className="text-xs text-slate-500">{user.email}</p>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{user.fullName || user.username}</div>
-                        <div className="text-xs text-gray-500">{user.email}</div>
-                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="text-left text-red-600 hover:text-red-700 font-medium flex items-center gap-2 w-full"
+                      >
+                        <LogOut size={18} />
+                        Logout
+                      </button>
                     </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left text-red-600 hover:text-red-700 transition flex items-center gap-2"
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="font-medium text-slate-600 hover:text-blue-600"
                     >
-                      <LogOut size={18} />
-                      Logout
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`font-medium transition ${
-                      isActive('/login') ? 'text-green-700 font-semibold' : 'text-gray-600 hover:text-green-700'
-                    }`}
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition text-center"
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium text-center"
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
     </header>
   );

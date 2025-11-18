@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle, MapPin, TrendingUp, Shield, Users, BarChart3, Zap, Globe, FileText, Star, Award } from "lucide-react";
+import { ArrowRight, CheckCircle, MapPin, TrendingUp, Shield, Users, BarChart3, Zap, Globe, FileText, Star, Award, MessageCircle, Bug, Clock, Scale, Database, FileEdit } from "lucide-react";
 
 export default function StunningLandingPage() {
   const features = [
@@ -10,43 +10,49 @@ export default function StunningLandingPage() {
       icon: MapPin,
       title: "Live Project Tracking",
       description: "Track all development works with budget transparency, contractor details, and geo-locations on an interactive map.",
-      image: "/api/placeholder/600/400",
       color: "blue",
+      // UPDATED PATH: Assumes file is at /public/live_project_tracking.png
+      image: "/live_project_tracking.png", 
     },
     {
-      icon: FileText,
+      icon: FileEdit, 
       title: "Smart Geo-Tagged Complaints",
       description: "Report issues instantly with GPS location, photos, and real-time resolution tracking. Get instant zone routing.",
-      image: "/api/placeholder/600/400",
       color: "red",
+      // UPDATED PATH: Assumes file is at /public/geo_tagged_complaints.png
+      image: "/geo_tagged_complaints.png",
     },
     {
       icon: Star,
       title: "Contractor Rating System",
       description: "Rate completed projects and hold contractors accountable. Automatic flagging for poor performers.",
-      image: "/api/placeholder/600/400",
-      color: "purple",
+      color: "indigo",
+      // UPDATED PATH: Assumes file is at /public/contractor_rating.png
+      image: "/contractor_rating.png",
     },
     {
       icon: BarChart3,
       title: "Admin Dashboard & Analytics",
       description: "Real-time insights into active projects, pending complaints, resolution times, and flagged contractors.",
-      image: "/api/placeholder/600/400",
-      color: "green",
+      color: "emerald",
+      // UPDATED PATH: Assumes file is at /public/admin_dashboard.png
+      image: "/admin_dashboard.png",
     },
     {
       icon: Shield,
       title: "Transparent Governance",
       description: "Full budget breakdowns, contractor identities, and project statuses visible to all citizens.",
-      image: "/api/placeholder/600/400",
-      color: "indigo",
+      color: "purple",
+      // UPDATED PATH: Assumes file is at /public/transparent_governance.png
+      image: "/transparent_governance.png",
     },
     {
       icon: Zap,
       title: "Real-Time Updates",
       description: "Get instant notifications on complaint status, project progress, and resolution updates.",
-      image: "/api/placeholder/600/400",
-      color: "yellow",
+      color: "orange",
+      // UPDATED PATH: Assumes file is at /public/real_time_updates.png
+      image: "/real_time_updates.png",
     },
   ];
 
@@ -73,45 +79,53 @@ export default function StunningLandingPage() {
     {
       name: "Amit Patel",
       role: "Administrator, Ahmedabad",
-      content: "The dashboard helps us track everything in real-time. It&apos;s a game-changer for municipal management.",
+      content: "The dashboard helps us track everything in real-time. It's a game-changer for municipal management.",
       rating: 5,
     },
   ];
 
-  return (
-    <div className="min-h-screen w-full bg-white text-gray-900 overflow-x-hidden">
-      {/* HERO SECTION */}
-      <section className="relative w-full pt-32 pb-40 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1520975918318-3a8c04f7e6b0?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-indigo-900/50"></div>
+  // Utility function for Tailwind class generation
+  const getFeatureClasses = (color: string) => {
+    return {
+      bg: `bg-${color}-50`,
+      text: `text-${color}-600`,
+      ring: `ring-${color}-500`,
+      shadow: `shadow-lg`,
+    };
+  };
 
+  return (
+    <div className="min-h-screen w-full bg-white text-slate-900 overflow-x-hidden">
+      {/* HERO SECTION */}
+      <section className="relative w-full pt-32 pb-40 bg-white overflow-hidden border-b border-slate-100">
         <div className="relative max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          {/* Left: Content */}
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur rounded-full text-sm font-semibold"
+              className="inline-block mb-4 px-4 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-sm font-semibold text-blue-700"
             >
-              🚀 Next-Gen Civic Technology Platform
+              🚀 Civic Technology for Smart Cities
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-6xl md:text-7xl font-extrabold leading-tight drop-shadow-xl mb-6"
+              className="text-6xl md:text-7xl font-extrabold leading-tight text-slate-900 mb-6"
             >
-              Transforming Cities with
-              <span className="text-yellow-300 block"> Transparent Governance</span>
+              Building
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent block"> Trust & Transparency</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="mt-6 text-xl md:text-2xl opacity-90 max-w-xl leading-relaxed"
+              className="mt-6 text-xl md:text-2xl text-slate-600 max-w-xl leading-relaxed"
             >
-              A comprehensive civic technology platform enabling citizens, administrators, and contractors to collaborate seamlessly for cleaner, safer, and more accountable cities.
+              A platform enabling citizens and administration to collaborate seamlessly for accountable and efficient local governance.
             </motion.p>
 
             <motion.div
@@ -122,16 +136,16 @@ export default function StunningLandingPage() {
             >
               <Link
                 href="/register"
-                className="bg-yellow-300 text-black px-8 py-4 rounded-xl text-lg font-bold shadow-2xl hover:bg-yellow-400 transition transform hover:scale-105 flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-xl hover:shadow-2xl transition transform hover:scale-105 flex items-center gap-2"
               >
                 Start Reporting <ArrowRight size={20} />
               </Link>
 
               <Link
-                href="#features"
-                className="bg-white/20 backdrop-blur px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white/30 transition border-2 border-white/30"
+                href="/map"
+                className="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-slate-50 transition border border-slate-200 shadow-md"
               >
-                Explore Features
+                View Live Map
               </Link>
             </motion.div>
 
@@ -139,49 +153,51 @@ export default function StunningLandingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="mt-12 flex flex-wrap gap-8 text-sm"
+              className="mt-12 flex flex-wrap gap-8 text-sm text-slate-600"
             >
               <div className="flex items-center gap-2">
-                <CheckCircle size={20} className="text-green-300" />
+                <CheckCircle size={20} className="text-emerald-500" />
                 <span>Free to Use</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle size={20} className="text-green-300" />
+                <CheckCircle size={20} className="text-emerald-500" />
                 <span>Real-Time Updates</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle size={20} className="text-green-300" />
-                <span>100% Transparent</span>
+                <CheckCircle size={20} className="text-emerald-500" />
+                <span>Geo-Tagging</span>
               </div>
             </motion.div>
           </div>
 
-          {/* Hero Image Placeholder */}
+          {/* Right: Illustration/Mockup Placeholder - ENHANCED */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="flex justify-center relative"
+            className="flex justify-center relative w-full max-w-lg"
           >
-            <div className="relative w-full max-w-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-3xl blur-3xl"></div>
-              <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border-4 border-white/20 p-8">
-                <div className="aspect-square bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Globe size={120} className="mx-auto mb-4 opacity-80" />
-                    <p className="text-lg font-semibold">City Governance</p>
-                    <p className="text-sm opacity-75">Platform Preview</p>
-                  </div>
+            <div className="relative w-full aspect-square bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl shadow-2xl p-8 overflow-hidden">
+                
+                {/* Background Pattern/Shadow Layer */}
+                <div className="absolute inset-0 bg-white/10 blur-3xl opacity-50" />
+                
+                {/* Central Focus: Layered Icons */}
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-white text-center space-y-4">
+                    <MapPin size={100} className="opacity-90 drop-shadow-lg" />
+                    <BarChart3 size={48} className="absolute top-10 right-10 opacity-30 rotate-12" />
+                    <Scale size={48} className="absolute bottom-10 left-10 opacity-30 -rotate-12" />
+                    
+                    <h3 className="text-3xl font-extrabold drop-shadow-md pt-6">Real-Time Data View</h3>
+                    <p className="text-lg opacity-85">Mapping Governance in Action</p>
                 </div>
-                <p className="text-center text-white/80 text-sm mt-4">Image placeholder - City governance dashboard visualization</p>
-              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* STATS SECTION */}
-      <section className="py-16 bg-gradient-to-r from-blue-50 to-indigo-50 border-y border-gray-200">
+      <section className="py-16 bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => {
@@ -193,13 +209,13 @@ export default function StunningLandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="text-center"
+                  className="text-center p-4 rounded-xl transition hover:bg-white"
                 >
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-                    <Icon className="text-white" size={32} />
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-full mb-4 border border-blue-200">
+                    <Icon className="text-blue-600" size={28} />
                   </div>
-                  <div className="text-4xl md:text-5xl font-extrabold text-blue-700 mb-2">{stat.number}</div>
-                  <div className="text-gray-600 font-medium">{stat.label}</div>
+                  <div className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-1">{stat.number}</div>
+                  <div className="text-slate-600 font-medium">{stat.label}</div>
                 </motion.div>
               );
             })}
@@ -208,7 +224,7 @@ export default function StunningLandingPage() {
       </section>
 
       {/* PROBLEMS WE SOLVE */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -216,9 +232,11 @@ export default function StunningLandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-bold mb-4 text-gray-800">Problems We Solve</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Addressing the core challenges in modern civic governance and citizen engagement
+            <h2 className="text-5xl font-bold mb-4 text-slate-900">
+              Solving <span className="text-blue-600">Core Governance Issues</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Addressing the challenges in modern civic governance and citizen engagement with technology.
             </p>
           </motion.div>
 
@@ -227,110 +245,114 @@ export default function StunningLandingPage() {
               {
                 title: "Lack of Transparency",
                 desc: "Citizens have no visibility into projects, funds, or contractor performance.",
-                icon: "🔍",
+                icon: Scale, // Replaced emoji with Scale icon
                 color: "red",
               },
               {
                 title: "Slow Grievance Handling",
                 desc: "Reporting and resolving local issues is slow, inefficient, and lacks tracking.",
-                icon: "⏱️",
+                icon: Clock, // Replaced emoji with Clock icon
                 color: "orange",
               },
               {
                 title: "Poor Accountability",
-                desc: "Contractors and officials lack performance tracking and rating systems.",
-                icon: "📊",
+                desc: "Contractors lack performance tracking and quality assurance is often minimal.",
+                icon: Bug, // Replaced emoji with Bug icon (represents issues/problems)
                 color: "blue",
               },
               {
-                title: "No Real-Time Insights",
-                desc: "Administrators rely on manual data instead of live analytics and dashboards.",
-                icon: "📈",
-                color: "green",
+                title: "Data Silos",
+                desc: "Administrators struggle with manual data instead of real-time analytics and unified dashboards.",
+                icon: Database, // Replaced emoji with Database icon
+                color: "purple",
               },
-            ].map((p, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-white p-8 rounded-2xl shadow-xl text-center border-t-4 border-blue-600 hover:shadow-2xl transition"
-              >
-                <div className="text-6xl mb-4">{p.icon}</div>
-                <h4 className="text-2xl font-bold mb-3 text-gray-800">{p.title}</h4>
-                <p className="text-gray-600 leading-relaxed">{p.desc}</p>
-              </motion.div>
-            ))}
+            ].map((p, i) => {
+              const ProblemIcon = p.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="bg-slate-50 p-8 rounded-2xl shadow-md text-center border-t-4 border-blue-600 hover:shadow-xl transition"
+                >
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-full mb-4 border border-blue-200">
+                    <ProblemIcon className="text-blue-600" size={28} /> {/* Render Lucide Icon */}
+                  </div>
+                  <h4 className="text-2xl font-bold mb-3 text-slate-900">{p.title}</h4>
+                  <p className="text-slate-600 leading-relaxed">{p.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* FEATURES SECTION */}
-      <section id="features" className="py-24 bg-white">
+      {/* FEATURES SECTION - Changed to bg-white */}
+      <section id="features" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-center mb-12" // mb-20 -> mb-12
           >
-            <h2 className="text-5xl font-bold text-blue-700 mb-4">Powerful Features</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need for transparent, efficient, and accountable civic governance
+            <h2 className="text-5xl font-bold text-slate-900 mb-4">
+              Powerful <span className="text-blue-600">Governance Features</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Everything you need for transparent, efficient, and accountable civic engagement.
             </p>
           </motion.div>
 
-          <div className="space-y-32">
+          <div className="space-y-10"> {/* space-y-12 -> space-y-10 */}
             {features.map((feature, index) => {
               const Icon = feature.icon;
               const isEven = index % 2 === 0;
+              const classes = getFeatureClasses(feature.color);
+              
               return (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.6 }}
-                  className={`grid grid-cols-1 md:grid-cols-2 gap-16 items-center ${!isEven ? "md:flex-row-reverse" : ""}`}
+                  className={`grid grid-cols-1 md:grid-cols-2 gap-8 items-center ${!isEven ? "md:flex-row-reverse" : ""}`}
                 >
                   <div className={isEven ? "" : "md:order-2"}>
-                    <div className="inline-flex items-center gap-3 mb-6">
-                      <div className={`p-3 rounded-xl bg-${feature.color}-100`}>
-                        <Icon className={`text-${feature.color}-600`} size={32} />
+                    <div className="inline-flex items-center gap-3 mb-3">
+                      <div className={`p-3 rounded-xl ${classes.bg}`}>
+                        <Icon className={`${classes.text}`} size={28} />
                       </div>
-                      <span className={`text-sm font-semibold text-${feature.color}-600 uppercase tracking-wide`}>
-                        Feature {index + 1}
+                      <span className={`text-sm font-semibold ${classes.text} uppercase tracking-wide`}>
+                        {feature.title}
                       </span>
                     </div>
-                    <h3 className="text-4xl font-extrabold text-gray-900 mb-6">{feature.title}</h3>
-                    <p className="text-lg text-gray-700 mb-6 leading-relaxed">{feature.description}</p>
+                    <h3 className={`text-4xl font-extrabold ${classes.text} mb-3`}>{feature.title}</h3>
+                    <p className="text-lg text-slate-700 mb-4 leading-relaxed">{feature.description}</p>
                     <ul className="space-y-3">
                       {[
-                        "Real-time updates and notifications",
-                        "Mobile-responsive design",
-                        "Secure authentication system",
-                        "Comprehensive analytics dashboard",
+                        "Real-time status tracking on Map",
+                        "User-friendly mobile interface",
+                        "Secured, audited data transactions",
                       ].map((item, i) => (
-                        <li key={i} className="flex items-center gap-3 text-gray-700">
-                          <CheckCircle className="text-green-500 flex-shrink-0" size={20} />
+                        <li key={i} className="flex items-center gap-3 text-slate-700">
+                          <CheckCircle className="text-emerald-500 flex-shrink-0" size={20} />
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
+                  {/* Right: IMAGE COLUMN - UNBOXED */}
                   <div className={isEven ? "" : "md:order-1"}>
-                    <div className="relative rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                      <div className="aspect-video flex items-center justify-center bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
-                        <div className="text-center text-white p-8">
-                          <Icon size={80} className="mx-auto mb-4 opacity-80" />
-                          <p className="text-xl font-semibold mb-2">{feature.title}</p>
-                          <p className="text-sm opacity-75">Feature visualization placeholder</p>
-                          <p className="text-xs opacity-50 mt-4">Image: {feature.image}</p>
-                        </div>
-                      </div>
-                    </div>
+                    <img
+                      src={feature.image}
+                      alt={feature.title + ' Illustration'}
+                      className="w-full h-auto" 
+                    />
                   </div>
                 </motion.div>
               );
@@ -340,7 +362,7 @@ export default function StunningLandingPage() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -348,8 +370,10 @@ export default function StunningLandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-bold mb-4 text-gray-800">What People Say</h2>
-            <p className="text-xl text-gray-600">Real feedback from our community</p>
+            <h2 className="text-5xl font-bold mb-4 text-slate-900">
+              Trusted by the <span className="text-blue-600">Community</span>
+            </h2>
+            <p className="text-xl text-slate-600">Real feedback from citizens and administrators</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -360,17 +384,20 @@ export default function StunningLandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100"
+                className="bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200"
               >
-                <div className="flex gap-1 mb-4">
+                <MessageCircle className="text-blue-500 mb-4" size={28} />
+                <p className="text-slate-700 mb-6 leading-relaxed italic">
+                  &quot;{testimonial.content}&quot;
+                </p>
+                <div className="flex gap-1 mb-3">
                   {[...Array(testimonial.rating)].map((_, j) => (
-                    <Star key={j} className="text-yellow-400 fill-yellow-400" size={20} />
+                    <Star key={j} className="text-amber-400 fill-amber-400" size={18} />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 leading-relaxed">&quot;{testimonial.content}&quot;</p>
                 <div>
-                  <div className="font-bold text-gray-900">{testimonial.name}</div>
-                  <div className="text-sm text-gray-500">{testimonial.role}</div>
+                  <div className="font-bold text-slate-900">{testimonial.name}</div>
+                  <div className="text-sm text-slate-500">{testimonial.role}</div>
                 </div>
               </motion.div>
             ))}
@@ -379,7 +406,7 @@ export default function StunningLandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -387,16 +414,16 @@ export default function StunningLandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-bold mb-4 text-gray-800">How It Works</h2>
-            <p className="text-xl text-gray-600">Simple steps to get started</p>
+            <h2 className="text-5xl font-bold mb-4 text-slate-900">Get Started in <span className="text-blue-600">4 Simple Steps</span></h2>
+            <p className="text-xl text-slate-600">Your journey to active civic engagement starts now.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: "1", title: "Register", desc: "Create your free account as a citizen" },
-              { step: "2", title: "Report", desc: "Submit geo-tagged complaints with photos" },
-              { step: "3", title: "Track", desc: "Monitor project progress and complaint status" },
-              { step: "4", title: "Rate", desc: "Rate completed projects and contractors" },
+              { step: "1", title: "Register", desc: "Create your free citizen account securely." },
+              { step: "2", title: "Report", desc: "Submit geo-tagged issues with photos instantly." },
+              { step: "3", title: "Track", desc: "Monitor complaint and project status in real-time." },
+              { step: "4", title: "Rate", desc: "Provide feedback by rating completed public works." },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -404,45 +431,44 @@ export default function StunningLandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="text-center"
+                className="text-center p-6 bg-white rounded-xl shadow-md border border-slate-200"
               >
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 text-white rounded-full text-3xl font-bold mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full text-3xl font-extrabold mb-6 shadow-xl">
                   {item.step}
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-800">{item.title}</h3>
-                <p className="text-gray-600">{item.desc}</p>
-              </motion.div>
+                <h3 className="text-2xl font-bold mb-3 text-slate-900">{item.title}</h3>
+                  <p className="text-slate-600">{item.desc}</p>
+                </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA SECTION */}
-      <section className="py-24 bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 text-white text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center opacity-10"></div>
+      <section className="py-24 bg-gradient-to-br from-blue-700 to-indigo-700 text-white text-center relative overflow-hidden">
         <div className="relative max-w-4xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Award size={64} className="mx-auto mb-6 opacity-80" />
-            <h2 className="text-5xl md:text-6xl font-extrabold mb-6">Join the Movement for Better Cities</h2>
+            <Award size={64} className="mx-auto mb-6 text-blue-200 opacity-80" />
+            <h2 className="text-5xl md:text-6xl font-extrabold mb-6">Start Making a Difference Today</h2>
             <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto mb-10 leading-relaxed">
-              Together, let&apos;s build a transparent, responsive, and citizen-driven governance system. Start making a difference today.
+              Join NagarSewak and contribute to building a more transparent and responsive local government.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/register"
-                className="bg-white text-indigo-700 px-10 py-4 rounded-full text-xl font-bold shadow-2xl hover:bg-gray-200 transition transform hover:scale-105 flex items-center gap-2"
+                className="bg-white text-blue-700 px-10 py-4 rounded-full text-xl font-bold shadow-2xl hover:bg-slate-200 transition transform hover:scale-105 flex items-center gap-2"
               >
-                Get Started Free <ArrowRight size={24} />
+                Create Account <ArrowRight size={24} />
               </Link>
               <Link
-                href="/map"
+                href="/report"
                 className="bg-white/20 backdrop-blur text-white px-10 py-4 rounded-full text-xl font-semibold hover:bg-white/30 transition border-2 border-white/30"
               >
-                Explore Live Map
+                Report an Issue
               </Link>
             </div>
           </motion.div>

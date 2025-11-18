@@ -37,10 +37,14 @@ public class SecurityConfig {
                     .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect").permitAll()
                     .requestMatchers("/auth/**", "/login", "/register").permitAll()
                     
-                    // ================= ADMIN WRITE/MANAGEMENT =================
+                    // ================= ADMIN/CONTRACTOR ACCESS =================
                     .requestMatchers(POST, "/projects").hasAuthority(Role.ADMIN.name())
-                    .requestMatchers("/dashboard/admin").hasAuthority(Role.ADMIN.name())
+                    .requestMatchers("/dashboard/admin").hasAnyAuthority(Role.ADMIN.name(), Role.CONTRACTOR.name())
                     
+                    // ================= CITIZEN ACCESS FIX =================
+                    // FIX: Explicitly allow CITIZEN to access their dashboard and profile/notifications routes
+                    .requestMatchers("/dashboard/citizen", "/citizen/**").hasAuthority(Role.CITIZEN.name())
+
                     // ================= CONTRACTOR/ADMIN UPDATE =================
                     .requestMatchers(PUT, "/projects/**").hasAnyAuthority(Role.ADMIN.name(), Role.CONTRACTOR.name())
                     .requestMatchers(PUT, "/complaints/**").hasAnyAuthority(Role.ADMIN.name(), Role.CONTRACTOR.name())

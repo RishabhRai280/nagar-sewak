@@ -31,6 +31,10 @@ public class Contractor {
     @Column(name = "avg_rating")
     private BigDecimal avgRating = new BigDecimal("5.00");
 
+    // FIX: ADDED MISSING FIELD to resolve compilation error in DataSeeder
+    @Column(name = "total_ratings")
+    private Integer totalRatings = 0; 
+
     @Column(name = "is_flagged")
     private Boolean isFlagged = false;
 

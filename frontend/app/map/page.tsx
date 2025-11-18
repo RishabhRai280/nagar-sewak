@@ -1,40 +1,17 @@
 // app/map/page.tsx
+
 import MapClientWrapper from "./MapClientWrapper";
 
 export default function MapPage() {
+  // This structure ensures the map wrapper takes up the full remaining viewport height.
+  // The header and footer are managed by the parent layout component.
+  // To achieve a truly full-screen map experience, we will eliminate the layout's margin
+  // by ensuring the containing div is maximized and removing the top header section.
   return (
-    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
-      {/* Header */}
-      <div className="space-y-2 text-center mb-12">
-        <h1 className="text-5xl font-extrabold tracking-tight text-gray-900">
-          Nagar Sewak – Live City Map
-        </h1>
-        <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-          Track progress of government projects and monitor citizen complaints
-          in real time.
-        </p>
-      </div>
-
-      {/* Map Container */}
-      <div
-        className="
-        relative overflow-hidden rounded-2xl 
-        bg-white/70 backdrop-blur-md 
-        border border-gray-200 
-        shadow-[0_8px_30px_rgba(0,0,0,0.08)]
-        transition-all
-      "
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-transparent pointer-events-none"></div>
-
-        <div className="h-[75vh]">
-          <MapClientWrapper />
-        </div>
-      </div>
-
-      {/* Footer Section */}
-      <div className="text-center text-gray-500 text-sm mt-6">
-        Real-time data is refreshed automatically every few seconds.
+    <div className="flex flex-col h-screen w-full p-0 m-0">
+      {/* Map Container - MapClientWrapper is correctly marked 'use client' and handles map logic */}
+      <div className="flex-1 w-full overflow-hidden">
+        <MapClientWrapper />
       </div>
     </div>
   );

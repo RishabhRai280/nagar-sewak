@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github, Heart } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,43 +26,66 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-900 text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white mt-auto">
+      {/* Newsletter Section */}
+      <div className="border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-2xl font-bold mb-2">Stay Updated</h3>
+              <p className="text-slate-400">Get the latest news about projects and community governance</p>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="flex-1 px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-[1.02]">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="text-2xl font-bold text-green-400">Nagar Sewak</div>
-              <span className="text-xl">🇮🇳</span>
+              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                NagarSewak
+              </div>
             </Link>
-            <p className="text-gray-400 mb-4 leading-relaxed">
-              Empowering citizens, improving governance. A comprehensive civic-technology platform for transparent local development and accountable governance.
+            <p className="text-slate-400 mb-6 leading-relaxed">
+              Empowering citizens and improving governance through transparent, real-time civic engagement and accountability.
             </p>
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition"
+                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
                 aria-label="Facebook"
               >
                 <Facebook size={18} />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition"
+                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
                 aria-label="Twitter"
               >
                 <Twitter size={18} />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition"
+                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={18} />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition"
+                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
                 aria-label="GitHub"
               >
                 <Github size={18} />
@@ -72,11 +95,11 @@ export default function Footer() {
 
           {/* Platform Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-green-400">Platform</h3>
-            <ul className="space-y-2">
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Platform</h3>
+            <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-green-400 transition text-sm">
+                  <Link href={link.href} className="text-slate-400 hover:text-blue-400 transition text-sm font-medium">
                     {link.name}
                   </Link>
                 </li>
@@ -86,11 +109,11 @@ export default function Footer() {
 
           {/* Resources Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-green-400">Resources</h3>
-            <ul className="space-y-2">
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Resources</h3>
+            <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-green-400 transition text-sm">
+                  <Link href={link.href} className="text-slate-400 hover:text-blue-400 transition text-sm font-medium">
                     {link.name}
                   </Link>
                 </li>
@@ -100,11 +123,11 @@ export default function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-green-400">Company</h3>
-            <ul className="space-y-2">
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Company</h3>
+            <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-green-400 transition text-sm">
+                  <Link href={link.href} className="text-slate-400 hover:text-blue-400 transition text-sm font-medium">
                     {link.name}
                   </Link>
                 </li>
@@ -114,28 +137,28 @@ export default function Footer() {
         </div>
 
         {/* Contact Info */}
-        <div className="border-t border-gray-800 pt-8 mb-6">
+        <div className="border-t border-slate-700 pt-8 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-            <div className="flex items-center gap-3 text-gray-400">
-              <Mail size={18} className="text-green-400" />
+            <div className="flex items-center gap-3 text-slate-400 hover:text-blue-400 transition">
+              <Mail size={18} className="text-blue-400 flex-shrink-0" />
               <span>support@nagarsewak.gov.in</span>
             </div>
-            <div className="flex items-center gap-3 text-gray-400">
-              <Phone size={18} className="text-green-400" />
-              <span>+91 1800-XXX-XXXX</span>
+            <div className="flex items-center gap-3 text-slate-400 hover:text-blue-400 transition">
+              <Phone size={18} className="text-blue-400 flex-shrink-0" />
+              <span>+91 1800-NAGAR-1</span>
             </div>
-            <div className="flex items-center gap-3 text-gray-400">
-              <MapPin size={18} className="text-green-400" />
-              <span>India</span>
+            <div className="flex items-center gap-3 text-slate-400 hover:text-blue-400 transition">
+              <MapPin size={18} className="text-blue-400 flex-shrink-0" />
+              <span>Across India</span>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-400">
+        <div className="border-t border-slate-700 pt-6 text-center text-sm text-slate-400">
           <p>&copy; {currentYear} Nagar Sewak. All rights reserved.</p>
-          <p className="mt-2 text-xs">
-            Built with ❤️ for transparent governance and citizen empowerment.
+          <p className="mt-2 text-xs flex items-center justify-center gap-1">
+            Built with <Heart size={14} className="text-red-500 fill-red-500" /> for transparent governance and citizen empowerment.
           </p>
         </div>
       </div>
