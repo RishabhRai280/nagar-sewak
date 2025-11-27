@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +23,10 @@ public class RatingController {
     public ResponseEntity<Rating> submitRating(
             @RequestBody RatingRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
         
         Rating savedRating = ratingService.submitAndProcessRating(request, userDetails.getUsername());
         

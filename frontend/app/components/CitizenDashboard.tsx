@@ -4,21 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from 'next/navigation';
 import Sidebar from "./Sidebar";
 import Link from "next/link";
-import { Token, fetchCurrentUserProfile, UserProfile } from "@/lib/api";
+import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle, Clock, Plus, Eye } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Plus, Eye, MapPin } from 'lucide-react';
 
-// Define an interface to ensure TypeScript recognizes the fields used in this component,
-// which are likely missing from the original 'ComplaintData' type from '@/lib/api'.
 interface DashboardComplaint {
   id: number;
   title: string;
   description?: string | null;
   severity: number;
   status?: string | null;
-  photoUrl?: string | null; // Added to fix Property 'photoUrl' does not exist error
-  rating?: number | null;   // Added to fix Property 'rating' does not exist error
-  // Assuming other required fields are present in the underlying data
+  photoUrl?: string | null; 
+  rating?: number | null;   
+  projectId?: number | null; 
 }
 
 export default function CitizenDashboardComponent() {
@@ -29,244 +27,130 @@ export default function CitizenDashboardComponent() {
 
   useEffect(() => {
     if (!Token.get()) {
-      // NOTE: Replacing alert() with push redirect as per instructions
       router.push("/login");
       return;
     }
-
     const loadProfile = async () => {
       try {
         const profile = await fetchCurrentUserProfile();
         setUserData(profile);
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Unable to load your profile.";
-        setError(message);
+      } catch (err: any) {
+        setError(err.message || "Unable to load your profile.");
       } finally {
         setLoading(false);
       }
     };
-
     loadProfile();
   }, [router]);
 
-  // Type assertion here to satisfy the compiler for accessing photoUrl/rating later
   const complaints: DashboardComplaint[] = (userData?.complaints ?? []) as DashboardComplaint[];
 
   const stats = useMemo(() => {
-    // Now using the correctly typed complaints array
-    const pending = complaints.filter(
-      (c) => c.status?.toLowerCase() === "pending"
-    ).length;
+    const pending = complaints.filter(c => c.status?.toLowerCase() === "pending").length;
     return {
       total: complaints.length,
       pending,
       resolved: complaints.length - pending,
     };
-  }, [complaints]); // Dependency changed to use the typed array
+  }, [complaints]);
 
-  // --- Loading State UI ---
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4 animate-spin" />
-          <p className="text-lg text-slate-700 font-medium">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-slate-50 text-slate-500 font-medium">Loading...</div>;
 
-  // --- Error State UI ---
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50">
-        <div className="text-center p-10 rounded-xl shadow-xl bg-white border border-red-200">
-          <AlertCircle className="text-red-600 mx-auto mb-4" size={48} />
-          <p className="text-xl text-red-700 font-medium">Dashboard Error</p>
-          <p className="text-sm text-red-500 mt-2">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!userData) {
-    return null;
-  }
+  if (!userData) return null;
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      {/* Sidebar - Note: The imported Sidebar component needs to be updated next for theme consistency */}
+    <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
+      
+      {/* --- GLOBAL PARALLAX BACKGROUND --- */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+         <motion.div animate={{ x: [0, 50, 0], y: [0, 30, 0] }} transition={{ duration: 20, repeat: Infinity }} className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-200 rounded-full blur-[120px] opacity-40" />
+         <motion.div animate={{ x: [0, -50, 0], y: [0, -50, 0] }} transition={{ duration: 25, repeat: Infinity }} className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200 rounded-full blur-[120px] opacity-40" />
+      </div>
+
       <Sidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 lg:p-12">
+      {/* Updated Padding: px-8 pb-12 pt-32 (Top padding increased) */}
+      <main className="flex-1 px-8 pb-12 pt-32 lg:px-12 lg:pb-12 lg:pt-36 relative z-10 overflow-y-auto">
         {/* Header */}
-        <div className="mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">
-              Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{userData.fullName || userData.username}</span>
+        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <h1 className="text-4xl font-extrabold text-slate-900 mb-1">
+              Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{userData.fullName || userData.username}</span>
             </h1>
-            <p className="text-slate-600">Manage your complaints and track progress</p>
+            <p className="text-slate-600 font-medium">Here is what's happening with your reports.</p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+            <Link href="/report">
+                <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300">
+                <Plus size={20} /> Report New Issue
+                </button>
+            </Link>
           </motion.div>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-600 font-medium">Total Complaints</h3>
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <AlertCircle className="text-blue-600" size={20} />
-              </div>
-            </div>
-            <p className="text-4xl font-bold text-slate-900">{stats.total}</p>
-            <p className="text-xs text-slate-500 mt-2">All-time submissions</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-600 font-medium">Pending</h3>
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Clock className="text-orange-600" size={20} />
-              </div>
-            </div>
-            <p className="text-4xl font-bold text-orange-600">{stats.pending}</p>
-            <p className="text-xs text-slate-500 mt-2">Awaiting resolution</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-600 font-medium">Resolved</h3>
-              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="text-emerald-600" size={20} />
-              </div>
-            </div>
-            <p className="text-4xl font-bold text-emerald-600">{stats.resolved}</p>
-            <p className="text-xs text-slate-500 mt-2">Successfully completed</p>
-          </motion.div>
+        {/* Stats Cards (Glass) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <StatCard label="Total Reports" value={stats.total} icon={AlertCircle} color="blue" delay={0.1} />
+          <StatCard label="Pending" value={stats.pending} icon={Clock} color="orange" delay={0.2} />
+          <StatCard label="Resolved" value={stats.resolved} icon={CheckCircle} color="emerald" delay={0.3} />
         </div>
 
-        {/* Action Button */}
+        {/* Complaints List (Glass) */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mb-10"
-        >
-          <Link href="/report">
-            <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-105">
-              <Plus size={20} />
-              Submit New Complaint
-            </button>
-          </Link>
-        </motion.div>
-
-        {/* Complaints List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white rounded-xl shadow-sm border border-slate-100 p-8"
+          transition={{ delay: 0.4 }}
+          className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8"
         >
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Complaint History</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+            <div className="h-8 w-1 bg-blue-600 rounded-full"/> Your History
+          </h2>
 
           {complaints.length === 0 ? (
-            <div className="text-center py-12">
-              <AlertCircle className="text-slate-300 mx-auto mb-4" size={48} />
-              <p className="text-slate-600 text-lg">No complaints yet</p>
-              <p className="text-slate-500 mt-2">Start by submitting your first complaint to help improve your community</p>
+            <div className="text-center py-16 bg-white/40 rounded-2xl border border-dashed border-slate-300">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <AlertCircle className="text-slate-400" size={32} />
+              </div>
+              <p className="text-slate-600 text-lg font-medium">No complaints submitted yet.</p>
+              <p className="text-slate-500 text-sm mt-1">Be the change your community needs.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {complaints.map((complaint) => (
+            <div className="grid grid-cols-1 gap-4">
+              {complaints.map((complaint, i) => (
                 <motion.div
                   key={complaint.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="border border-slate-200 rounded-lg p-5 hover:border-blue-300 hover:shadow-md transition"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group bg-white/50 hover:bg-white/80 border border-white/60 hover:border-blue-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300"
                 >
-                  <div className="flex justify-between items-start gap-6">
-                    <div className="flex gap-4 flex-1">
-                      {/* Placeholder Image URL handling */}
-                      {complaint.photoUrl && (
-                        <img
-                          src={`http://localhost:8080/uploads/${complaint.photoUrl}`}
-                          className="w-24 h-24 rounded-lg object-cover border border-slate-200"
-                          alt="complaint proof"
-                          // Fallback handling if image fails to load
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).onerror = null; 
-                            (e.target as HTMLImageElement).src = `https://placehold.co/96x96/e2e8f0/64748b?text=No+Image`; 
-                          }}
-                        />
-                      )}
-
-                      <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 text-lg mb-1">
-                          {complaint.title}
-                        </h3>
-                        <p className="text-sm text-slate-500 mb-2">
-                          Severity: <span className="font-semibold text-slate-700">{complaint.severity}/5</span>
-                        </p>
-                        {complaint.description && (
-                          <p className="text-sm text-slate-600 line-clamp-2">
-                            {complaint.description}
-                          </p>
+                  <div className="flex flex-col md:flex-row gap-6 items-start">
+                    {/* Thumbnail */}
+                    <div className="w-full md:w-24 h-24 flex-shrink-0 bg-slate-200 rounded-xl overflow-hidden shadow-inner">
+                        {complaint.photoUrl ? (
+                            <img src={buildAssetUrl(complaint.photoUrl) || ''} className="w-full h-full object-cover" alt="evidence" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100?text=No+Img'} />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400"><MapPin size={24}/></div>
                         )}
-                      </div>
                     </div>
 
-                    <span
-                      className={`px-4 py-2 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 ${
-                        complaint.status?.toLowerCase() === "resolved"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : complaint.status?.toLowerCase() === "in_progress"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
-                    >
-                      {complaint.status}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-6 mt-4 text-sm font-semibold">
-                    <Link
-                      href={`/dashboard/citizen/complaints/${complaint.id}`}
-                      className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition"
-                    >
-                      <Eye size={16} />
-                      View Details
-                    </Link>
-
-                    {complaint.status?.toLowerCase() === "resolved" &&
-                      !complaint.rating && (
-                        <Link
-                          href={`/rate/${complaint.id}`}
-                          className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 transition"
-                        >
-                          <CheckCircle size={16} />
-                          Rate Work
-                        </Link>
-                      )}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                            <h3 className="text-lg font-bold text-slate-900 truncate pr-4 group-hover:text-blue-700 transition-colors">{complaint.title}</h3>
+                            <StatusBadge status={complaint.status} />
+                        </div>
+                        <p className="text-slate-600 text-sm mt-1 line-clamp-2 leading-relaxed">{complaint.description}</p>
+                        
+                        <div className="flex items-center gap-4 mt-4 text-sm">
+                            <span className={`flex items-center gap-1.5 font-bold ${complaint.severity >= 4 ? 'text-red-600' : 'text-yellow-600'}`}>
+                                <AlertCircle size={16} /> Severity {complaint.severity}/5
+                            </span>
+                            <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="ml-auto flex items-center gap-1 text-blue-600 font-bold hover:underline">
+                                View Details <Eye size={16} />
+                            </Link>
+                        </div>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -276,4 +160,42 @@ export default function CitizenDashboardComponent() {
       </main>
     </div>
   );
+}
+
+function StatCard({ label, value, icon: Icon, color, delay }: any) {
+    const colorStyles = {
+        blue: "bg-blue-50 text-blue-600 border-blue-100",
+        orange: "bg-orange-50 text-orange-600 border-orange-100",
+        emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    }[color as string] || "bg-slate-50 text-slate-600";
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay }}
+            className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+        >
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wide">{label}</h3>
+                <div className={`p-2.5 rounded-xl ${colorStyles} border`}>
+                    <Icon size={20} />
+                </div>
+            </div>
+            <p className="text-4xl font-extrabold text-slate-900">{value}</p>
+        </motion.div>
+    )
+}
+
+function StatusBadge({ status }: { status?: string | null }) {
+    const s = status?.toLowerCase() || 'pending';
+    const styles = s === 'resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
+                   s === 'in_progress' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                   'bg-orange-100 text-orange-700 border-orange-200';
+    
+    return (
+        <span className={`px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${styles}`}>
+            {s.replace('_', ' ')}
+        </span>
+    )
 }

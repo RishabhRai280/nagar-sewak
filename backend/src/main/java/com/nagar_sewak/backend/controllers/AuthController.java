@@ -85,6 +85,8 @@ public class AuthController {
                 .username(savedUser.getUsername())
                 .fullName(savedUser.getFullName())
                 .email(savedUser.getEmail())
+                .userId(savedUser.getId())
+                .roles(savedUser.getRoles())
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -119,6 +121,8 @@ public class AuthController {
                     .username(user.getUsername())
                     .fullName(user.getFullName())
                     .email(user.getEmail())
+                    .userId(user.getId())
+                    .roles(user.getRoles())
                     .build();
 
             return ResponseEntity.ok(response);
@@ -141,17 +145,26 @@ public class AuthController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         var complaints = complaintRepo.findByUserUsername(user.getUsername()).stream()
-                .map(complaint -> ComplaintSummaryDTO.builder()
-                        .id(complaint.getId())
-                        .title(complaint.getTitle())
-                        .description(complaint.getDescription())
-                        .severity(complaint.getSeverity())
-                        .status(complaint.getStatus())
-                        .lat(complaint.getLat())
-                        .lng(complaint.getLng())
-                        .projectId(complaint.getProject() != null ? complaint.getProject().getId() : null)
-                        .build()
-                ).collect(Collectors.toList());
+                .map(complaint -> {
+                    String photo = complaint.getPhotoUrl();
+                    String publicPhotoUrl = photo == null ? null :
+                            photo.startsWith("http") ? photo : "/uploads/complaints/" + photo;
+
+                    return ComplaintSummaryDTO.builder()
+                            .id(complaint.getId())
+                            .title(complaint.getTitle())
+                            .description(complaint.getDescription())
+                            .severity(complaint.getSeverity())
+                            .status(complaint.getStatus())
+                            .lat(complaint.getLat())
+                            .lng(complaint.getLng())
+                            .projectId(complaint.getProject() != null ? complaint.getProject().getId() : null)
+                            .photoUrl(publicPhotoUrl)
+                            .createdAt(complaint.getCreatedAt())
+                            .resolvedAt(complaint.getResolvedAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         return UserProfileDTO.builder()
                 .id(user.getId())

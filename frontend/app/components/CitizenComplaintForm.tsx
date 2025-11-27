@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { submitComplaint, Token } from "@/lib/api";
-import { MapPin, Upload, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { MapPin, Upload, AlertCircle, Loader, CheckCircle, FileText, ShieldAlert, X, ChevronRight } from 'lucide-react';
 
 const MiniMap = dynamic(() => import("./MiniMap"), { ssr: false });
 
@@ -20,15 +20,10 @@ export default function CitizenComplaintForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [locationStatus, setLocationStatus] = useState<
-    "idle" | "fetching" | "success" | "error"
-  >("idle");
+  const [locationStatus, setLocationStatus] = useState<"idle" | "fetching" | "success" | "error">("idle");
 
   useEffect(() => {
-    if (!Token.get()) {
-      // NOTE: Replacing alert() with push redirect
-      router.push("/login");
-    }
+    if (!Token.get()) router.push("/login");
   }, [router]);
 
   const getLocation = () => {
@@ -37,7 +32,6 @@ export default function CitizenComplaintForm() {
       setLocationStatus("error");
       return;
     }
-
     setLocationStatus("fetching");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -56,29 +50,12 @@ export default function CitizenComplaintForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!latitude || !longitude) {
-      setError("Please tag your GPS location before submitting.");
-      return;
-    }
-
-    if (!selectedFile) {
-      setError("An image is required as proof.");
-      return;
-    }
+    if (!latitude || !longitude) return setError("Please tag your GPS location.");
+    if (!selectedFile) return setError("Photo evidence is required.");
 
     setLoading(true);
     try {
-      const payload = {
-        title,
-        description,
-        severity,
-        lat: latitude,
-        lng: longitude,
-      };
-      await submitComplaint(payload, selectedFile);
-
-      // NOTE: Replacing alert() with redirect and message appended to URL (if needed)
+      await submitComplaint({ title, description, severity, lat: latitude, lng: longitude }, selectedFile);
       router.push("/dashboard/citizen?submission=success");
     } catch (err: any) {
       setError(err?.message ?? "Failed to submit complaint.");
@@ -89,210 +66,201 @@ export default function CitizenComplaintForm() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="w-full max-w-3xl mx-auto"
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <div className="mb-6">
-        <h2 className="text-4xl font-bold text-center tracking-wide text-slate-900">
-          Report a Civic Issue
+      {/* Header Text */}
+      <div className="mb-8 text-center">
+        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-blue-900 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+          <ShieldAlert size={14} /> Civic Reporting
+        </span>
+        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-2">
+          Report an Issue
         </h2>
-        <p className="text-center text-slate-600 mt-2">
-          Help authorities identify and resolve public problems faster.
+        <p className="text-slate-600 text-lg font-medium">
+          Submit a geo-tagged report to your local administration.
         </p>
       </div>
       
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
-        <form onSubmit={handleSubmit} className="p-8 lg:p-10 space-y-8">
+      {/* ULTRA-GLASS CARD CONTAINER */}
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/60 backdrop-blur-2xl shadow-2xl">
+        
+        {/* Decor: Top Gradient Line */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-80" />
+
+        <form onSubmit={handleSubmit} className="p-8 md:p-12 relative z-10">
+          
+          {/* Error Banner */}
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3"
-            >
-              <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-              <p className="text-red-700 text-sm">{error}</p>
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mb-8 overflow-hidden">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex gap-3 items-center backdrop-blur-md">
+                    <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
+                    <div>
+                        <p className="text-red-800 font-bold text-sm">Submission Error</p>
+                        <p className="text-red-600 text-sm">{error}</p>
+                    </div>
+                </div>
             </motion.div>
           )}
 
-          {/* Title Input */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              Issue Title
-            </label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="e.g., Broken street light, Pothole in road"
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50"
-            />
-          </div>
-
-          {/* Description Input */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              Detailed Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              rows={4}
-              disabled={loading}
-              placeholder="Describe the issue in detail. Include what needs to be fixed and any relevant context..."
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50 resize-none"
-            />
-          </div>
-
-          {/* Severity Slider */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-4">
-              Severity Level: <span className="text-blue-600">{severity}/5</span>
-            </label>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="1"
-                max="5"
-                value={severity}
-                onChange={(e) => setSeverity(parseInt(e.target.value))}
-                disabled={loading}
-                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <div
-                    key={level}
-                    className={`w-2 h-8 rounded ${
-                      level <= severity
-                        ? level <= 2
-                          ? "bg-emerald-500"
-                          : level <= 3
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                        : "bg-slate-200"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              Current level: {severity <= 2 ? "Low Priority" : severity <= 3 ? "Medium Priority" : "High Priority"}
-            </p>
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              Upload Photo Evidence
-            </label>
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-                required
-                disabled={loading}
-                className="hidden"
-                id="image-input"
-              />
-              <label
-                htmlFor="image-input"
-                className="flex items-center justify-center gap-3 w-full px-4 py-6 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer group"
-              >
-                <Upload className="text-slate-400 group-hover:text-blue-600" size={24} />
-                <div className="text-center">
-                  <p className="font-medium text-slate-900">
-                    {selectedFile ? selectedFile.name : "Click to upload or drag and drop"}
-                  </p>
-                  <p className="text-xs text-slate-500">PNG, JPG up to 10MB</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+            
+            {/* LEFT SIDE: INPUTS */}
+            <div className="space-y-8">
+                
+                {/* Title */}
+                <div className="group">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Issue Title</label>
+                    <div className="relative transition-all duration-300 group-focus-within:scale-[1.01]">
+                        <FileText className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+                        <input
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                            disabled={loading}
+                            placeholder="e.g. Large Pothole on Main St."
+                            className="w-full pl-14 pr-6 py-5 bg-white/50 hover:bg-white/70 border border-white/60 focus:border-blue-400 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm font-medium text-lg"
+                        />
+                    </div>
                 </div>
-              </label>
+
+                {/* Description */}
+                <div className="group">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Description</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                        rows={5}
+                        disabled={loading}
+                        placeholder="Provide details about the issue..."
+                        className="w-full px-6 py-5 bg-white/50 hover:bg-white/70 border border-white/60 focus:border-blue-400 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm font-medium resize-none text-base"
+                    />
+                </div>
+
+                {/* Custom Severity Slider */}
+                <div className="p-6 rounded-2xl bg-white/40 border border-white/50 shadow-sm backdrop-blur-sm">
+                    <div className="flex justify-between items-center mb-4">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Urgency Level</span>
+                        <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white shadow-lg transition-colors duration-300 ${severity <= 2 ? "bg-emerald-500 shadow-emerald-500/30" : severity <= 3 ? "bg-orange-500 shadow-orange-500/30" : "bg-red-500 shadow-red-500/30"}`}>
+                            {severity === 1 ? "Low" : severity === 5 ? "Critical" : `Level ${severity}`}
+                        </span>
+                    </div>
+                    <input
+                        type="range"
+                        min="1"
+                        max="5"
+                        value={severity}
+                        onChange={(e) => setSeverity(parseInt(e.target.value))}
+                        disabled={loading}
+                        className="w-full h-3 bg-slate-200/50 rounded-full appearance-none cursor-pointer accent-blue-600 hover:accent-blue-500 transition-all"
+                    />
+                    <div className="flex justify-between mt-2 px-1">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                            <div key={n} className={`w-1 h-1 rounded-full ${n <= severity ? 'bg-blue-600 scale-125' : 'bg-slate-300'} transition-all duration-300`} />
+                        ))}
+                    </div>
+                </div>
             </div>
-            {selectedFile && (
-              <div className="mt-3 flex items-center gap-2 text-emerald-600 text-sm font-medium">
-                <CheckCircle size={16} />
-                Image selected: {selectedFile.name}
-              </div>
-            )}
+
+            {/* RIGHT SIDE: MEDIA & LOCATION */}
+            <div className="space-y-8 flex flex-col h-full">
+                
+                {/* Upload Box */}
+                <div className="flex-1">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Evidence</label>
+                    <div className="relative h-full min-h-[160px]">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+                            required
+                            disabled={loading}
+                            className="hidden"
+                            id="image-input"
+                        />
+                        <label
+                            htmlFor="image-input"
+                            className={`absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl cursor-pointer transition-all duration-300 overflow-hidden ${
+                                selectedFile 
+                                ? 'border-emerald-500/50 bg-emerald-50/40' 
+                                : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50/30 bg-white/30'
+                            }`}
+                        >
+                            {selectedFile ? (
+                                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center p-6">
+                                    <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-emerald-600 shadow-sm">
+                                        <CheckCircle size={28} />
+                                    </div>
+                                    <p className="font-bold text-emerald-800 truncate max-w-[200px]">{selectedFile.name}</p>
+                                    <p className="text-xs text-emerald-600 font-semibold mt-1">Click to replace</p>
+                                </motion.div>
+                            ) : (
+                                <div className="text-center p-6 group">
+                                    <div className="w-14 h-14 bg-white/60 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform text-slate-400 group-hover:text-blue-500">
+                                       <Upload size={24} />
+                                    </div>
+                                    <p className="font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Upload Photo</p>
+                                    <p className="text-xs text-slate-400 mt-1 font-medium">JPG, PNG (Max 10MB)</p>
+                                </div>
+                            )}
+                        </label>
+                    </div>
+                </div>
+
+                {/* Location Box */}
+                <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Location</label>
+                    <div className="p-2 bg-white/40 border border-white/50 rounded-3xl backdrop-blur-sm shadow-sm">
+                        <div className="rounded-2xl overflow-hidden border border-white/30 h-32 relative bg-slate-100/50">
+                            {latitude && longitude ? (
+                                <MiniMap lat={latitude} lng={longitude} />
+                            ) : (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                                    <MapPin size={24} className="mb-2 opacity-30" />
+                                    <span className="text-xs font-bold opacity-60">Map Preview</span>
+                                </div>
+                            )}
+                        </div>
+                        <motion.button
+                            type="button"
+                            onClick={getLocation}
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            className={`w-full mt-2 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 ${
+                                locationStatus === "success"
+                                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                                : "bg-white text-blue-600 shadow-md hover:shadow-lg border border-transparent"
+                            }`}
+                        >
+                            {locationStatus === "fetching" ? <Loader className="animate-spin" size={16} /> : locationStatus === "success" ? <CheckCircle size={16} /> : <MapPin size={16} />}
+                            {locationStatus === "fetching" ? "Locating..." : locationStatus === "success" ? "Location Tagged" : "Tag Current Location"}
+                        </motion.button>
+                    </div>
+                </div>
+
+            </div>
           </div>
 
-          {/* GPS Location */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
-              GPS Location
-            </label>
+          {/* Footer Submit */}
+          <div className="pt-8 mt-4 border-t border-white/30">
             <motion.button
-              type="button"
-              onClick={getLocation}
-              disabled={loading || locationStatus === "fetching"}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`w-full py-3 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
-                locationStatus === "success"
-                  ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
-                  : "bg-blue-600 text-white hover:bg-blue-700 border border-blue-700 disabled:opacity-50"
-              }`}
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-3 relative overflow-hidden group"
             >
-              {locationStatus === "fetching" ? (
-                <>
-                  <Loader className="animate-spin" size={20} />
-                  Fetching Location...
-                </>
-              ) : locationStatus === "success" ? (
-                <>
-                  <CheckCircle size={20} />
-                  Location Tagged ({latitude?.toFixed(4)}, {longitude?.toFixed(4)})
-                </>
-              ) : (
-                <>
-                  <MapPin size={20} />
-                  Get Current GPS Location
-                </>
-              )}
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                {loading ? (
+                    <> <Loader className="animate-spin" size={24} /> Processing... </>
+                ) : (
+                    <> Submit Report <ChevronRight size={24} /> </>
+                )}
             </motion.button>
           </div>
 
-          {/* Mini Map */}
-          {latitude && longitude && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="rounded-lg overflow-hidden border-2 border-slate-200 shadow-md"
-            >
-              <div className="h-64">
-                <MiniMap lat={latitude} lng={longitude} />
-              </div>
-            </motion.div>
-          )}
-
-          {/* Submit Button */}
-          <motion.button
-            type="submit"
-            disabled={loading || !latitude || !longitude || !selectedFile}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold text-lg hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader className="animate-spin" size={20} />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <AlertCircle size={20} />
-                Submit Complaint
-              </>
-            )}
-          </motion.button>
-
-          <p className="text-xs text-slate-500 text-center">
-            Your complaint will be reviewed and tracked in real-time. You'll receive updates via email and in your dashboard.
-          </p>
         </form>
       </div>
     </motion.div>

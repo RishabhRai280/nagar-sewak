@@ -30,6 +30,8 @@ public class Complaint {
 
     private Instant createdAt;
 
+    private Instant resolvedAt;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user; 

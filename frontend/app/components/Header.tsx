@@ -1,22 +1,53 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Token, fetchCurrentUserProfile, UserProfile } from '@/lib/api';
-import { Menu, X, User, LogOut, MapPin, LayoutDashboard, Bell } from 'lucide-react';
+import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from '@/lib/api';
+import { 
+  Menu, X, LogOut, MapPin, LayoutDashboard, 
+  ChevronDown, User as UserIcon, ShieldAlert 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  
   const router = useRouter();
   const pathname = usePathname();
+  const profileRef = useRef<HTMLDivElement>(null);
 
+  // Handle Scroll Effect for Glass Transition
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Load User Data
   useEffect(() => {
     const loadUser = async () => {
       const token = Token.get();
       if (token) {
+        const cached = UserStore.get();
+        if (cached) {
+          setUser(cached);
+          return;
+        }
         try {
           const profile = await fetchCurrentUserProfile();
           setUser(profile);
@@ -31,19 +62,24 @@ export default function Header() {
 
   const handleLogout = () => {
     Token.remove();
+    UserStore.remove();
     setUser(null);
     router.push('/');
     setIsMenuOpen(false);
+    setIsProfileOpen(false);
   };
 
-  const isActive = (path: string) => pathname === path;
+  // Role Logic
   const hasAdminAccess = user?.roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');
   const isContractor = user?.roles.includes('CONTRACTOR');
+  
+  const dashboardPath = hasAdminAccess
+    ? '/dashboard/admin'
+    : isContractor
+    ? '/dashboard/contractor'
+    : '/dashboard/citizen';
 
-  // Determine the correct dashboard path based on user roles
-  const dashboardPath = hasAdminAccess || isContractor ? '/dashboard/admin' : '/dashboard/citizen';
-
-  // Utility function to get user initials
+  // Initials Helper
   const getUserInitials = (user: UserProfile) => {
     const name = user.fullName || user.username || 'U';
     const parts = name.split(' ');
@@ -51,185 +87,237 @@ export default function Header() {
       return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
     return name.charAt(0).toUpperCase();
-  }
+  };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200/50 shadow-sm">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+        scrolled || isMenuOpen 
+          ? 'bg-white/70 backdrop-blur-xl border-b border-white/40 shadow-sm py-3' 
+          : 'bg-transparent py-5'
+      }`}
+    >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition">
-              NagarSewak
+        <div className="flex justify-between items-center">
+          
+          {/* --- LOGO --- */}
+          <Link href="/" className="flex items-center gap-2 group z-50">
+            <div className="text-2xl font-extrabold tracking-tight">
+              <span className="text-slate-900">Nagar</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:brightness-110 transition-all">Sewak</span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* --- DESKTOP NAVIGATION --- */}
           <div className="hidden md:flex items-center gap-8">
-            <Link
-              href="/map"
-              className={`flex items-center gap-2 font-medium transition ${
-                isActive('/map')
-                  ? 'text-blue-600 font-semibold'
-                  : 'text-slate-600 hover:text-blue-600'
-              }`}
-            >
-              <MapPin size={18} />
-              Live Map
-            </Link>
-
-            {user ? (
-              <>
-                {/* FIX: Use specific dashboardPath for the main dashboard link */}
-                <Link
-                  href={dashboardPath}
-                  className={`flex items-center gap-2 font-medium transition ${
-                    pathname.startsWith('/dashboard')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-slate-600 hover:text-blue-600'
-                  }`}
-                >
-                  <LayoutDashboard size={18} />
-                  Dashboard
-                </Link>
-                
-                <Link
-                  href="/report"
-                  className={`font-medium transition ${
-                    isActive('/report')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-slate-600 hover:text-blue-600'
-                  }`}
-                >
-                  Report Issue
-                </Link>
-                <div className="flex items-center gap-4 pl-8 border-l border-slate-200">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold cursor-default transition">
-                    {getUserInitials(user)}
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="text-slate-600 hover:text-red-600 transition"
-                    title="Logout"
+            {/* Nav Links - Glass Capsule */}
+            <div className="flex items-center gap-1 bg-white/40 p-1 rounded-full border border-white/40 backdrop-blur-md shadow-sm">
+              {[
+                { name: 'Home', path: '/' },
+                { name: 'Live Map', path: '/map' },
+                { name: 'Report Issue', path: '/report' }
+              ].map((link) => {
+                const active = pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    href={link.path}
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                      active 
+                        ? 'bg-white text-blue-600 shadow-sm font-semibold' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+                    }`}
                   >
-                    <LogOut size={20} />
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Auth Section */}
+            <div className="flex items-center gap-4">
+              {user ? (
+                <div className="relative" ref={profileRef}>
+                  <button 
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full hover:bg-white/50 transition border border-transparent hover:border-white/60 group"
+                  >
+                    <div className="text-right hidden lg:block">
+                      <p className="text-xs font-bold text-slate-700 leading-none">{user.username}</p>
+                      <p className="text-[10px] text-slate-500 leading-none mt-1 uppercase tracking-wider">
+                        {hasAdminAccess ? 'Admin' : isContractor ? 'Contractor' : 'Citizen'}
+                      </p>
+                    </div>
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold shadow-md group-hover:shadow-lg transition-all">
+                      {getUserInitials(user)}
+                    </div>
+                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                   </button>
+
+                  {/* Dropdown Menu - Glass Effect */}
+                  <AnimatePresence>
+                    {isProfileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 top-full mt-2 w-60 bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden py-2 ring-1 ring-black/5"
+                      >
+                        <div className="px-4 py-3 border-b border-slate-100/50 bg-white/30">
+                          <p className="text-sm font-bold text-slate-800 truncate">{user.fullName || user.username}</p>
+                          <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                        </div>
+                        
+                        <div className="py-2">
+                          <Link 
+                            href={dashboardPath}
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50/80 hover:text-blue-600 transition-colors"
+                          >
+                            <LayoutDashboard size={16} />
+                            Dashboard
+                          </Link>
+                          <Link 
+                            href="/profile"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50/80 hover:text-blue-600 transition-colors"
+                          >
+                            <UserIcon size={16} />
+                            Profile Settings
+                          </Link>
+                        </div>
+
+                        <div className="border-t border-slate-100/50 mt-1 pt-1">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/80 transition-colors"
+                          >
+                            <LogOut size={16} />
+                            Sign Out
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className={`font-medium transition ${
-                    isActive('/login')
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-slate-600 hover:text-blue-600'
-                  }`}
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:shadow-lg transition transform hover:scale-[1.02]"
-                >
-                  Register
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-sm font-bold text-slate-600 hover:text-blue-600 transition px-4"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* --- MOBILE MENU BUTTON --- */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-slate-600 hover:text-slate-900 transition"
+            className="md:hidden p-2 text-slate-600 hover:bg-white/50 rounded-full transition z-50"
             aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
+      </nav>
 
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="md:hidden py-6 border-t border-slate-200"
-            >
-              <div className="flex flex-col gap-4">
-                <Link
-                  href="/map"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-2 font-medium text-slate-600 hover:text-blue-600"
-                >
-                  <MapPin size={18} />
-                  Live Map
-                </Link>
+      {/* --- MOBILE NAVIGATION OVERLAY (Glass) --- */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white/90 backdrop-blur-xl border-b border-white/40 overflow-hidden shadow-xl"
+          >
+            <div className="px-6 pt-4 pb-8 space-y-6">
+              {/* Mobile Links */}
+              <div className="space-y-2">
+                {[
+                   { name: 'Home', path: '/', icon: null },
+                   { name: 'Live Map', path: '/map', icon: MapPin },
+                   { name: 'Report Issue', path: '/report', icon: ShieldAlert },
+                ].map((link) => (
+                  <Link
+                    key={link.path}
+                    href={link.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-3 p-3 rounded-xl font-medium transition-colors ${
+                      pathname === link.path 
+                      ? 'bg-blue-50/80 text-blue-600' 
+                      : 'text-slate-600 hover:bg-white/50'
+                    }`}
+                  >
+                    {link.icon && <link.icon size={20} />}
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
 
+              {/* Mobile Auth */}
+              <div className="pt-4 border-t border-slate-200/50">
                 {user ? (
-                  <>
-                    {/* FIX: Use specific dashboardPath for the mobile dashboard link */}
-                    <Link
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/60">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                        {getUserInitials(user)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900">{user.fullName || user.username}</p>
+                        <p className="text-xs text-slate-500">{user.email}</p>
+                      </div>
+                    </div>
+                    
+                    <Link 
                       href={dashboardPath}
                       onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-2 font-medium text-slate-600 hover:text-blue-600"
+                      className="flex items-center gap-3 p-3 rounded-xl font-medium text-slate-700 hover:bg-white/50"
                     >
-                      <LayoutDashboard size={18} />
+                      <LayoutDashboard size={20} className="text-blue-600" />
                       Dashboard
                     </Link>
-                    
-                    <Link
-                      href="/report"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="font-medium text-slate-600 hover:text-blue-600"
-                    >
-                      Report Issue
-                    </Link>
 
-                    {/* Mobile User/Logout Info */}
-                    <div className="pt-4 mt-2 border-t border-slate-200 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {getUserInitials(user)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">{user.fullName || user.username}</p>
-                          <p className="text-xs text-slate-500">{user.email}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="text-left text-red-600 hover:text-red-700 font-medium flex items-center gap-2 w-full"
-                      >
-                        <LogOut size={18} />
-                        Logout
-                      </button>
-                    </div>
-                  </>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl font-medium text-red-600 hover:bg-red-50/50"
+                    >
+                      <LogOut size={20} />
+                      Sign Out
+                    </button>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex flex-col gap-3">
                     <Link
                       href="/login"
                       onClick={() => setIsMenuOpen(false)}
-                      className="font-medium text-slate-600 hover:text-blue-600"
+                      className="w-full text-center p-3 rounded-xl font-semibold text-slate-600 hover:bg-white/50 border border-slate-200 transition"
                     >
-                      Login
+                      Log in
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setIsMenuOpen(false)}
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium text-center"
+                      className="w-full text-center p-3 rounded-xl font-semibold text-white bg-blue-600 shadow-lg hover:bg-blue-700 transition"
                     >
-                      Register
+                      Create Account
                     </Link>
-                  </>
+                  </div>
                 )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

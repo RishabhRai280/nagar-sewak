@@ -10,4 +10,6 @@ import java.util.List;
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     // Example custom method to support the accountability feature
     List<Rating> findByContractorId(Long contractorId);
+
+    List<Rating> findTop5ByContractorIdOrderByCreatedAtDesc(Long contractorId);
 }

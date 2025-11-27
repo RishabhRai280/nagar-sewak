@@ -43,11 +43,6 @@ export default function MiniMap({ lat, lng }: { lat: number; lng: number }) {
       doubleClickZoom={false}
       className="h-full w-full"
     >
-      <TileLayer 
-        attribution='&copy; OpenStreetMap contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
-      />
-      <Marker position={[lat, lng]} icon={CustomIcon} />
     </MapContainer>
   );
 }

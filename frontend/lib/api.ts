@@ -1,18 +1,58 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
+const STORAGE_KEYS = {
+  token: 'jwtToken',
+  user: 'ns:user',
+} as const;
+
 // ===================== TOKEN MANAGEMENT =====================
 export const Token = {
-  get: () => (typeof window !== 'undefined' ? localStorage.getItem('jwtToken') : null),
+  get: () => (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.token) : null),
   set: (token: string) => {
-    if (typeof window !== 'undefined') localStorage.setItem('jwtToken', token);
+    if (typeof window !== 'undefined') localStorage.setItem(STORAGE_KEYS.token, token);
   },
   remove: () => {
-    if (typeof window !== 'undefined') localStorage.removeItem('jwtToken');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.token);
+      localStorage.removeItem('token');
+    }
+  },
+};
+
+export const UserStore = {
+  get: (): UserProfile | null => {
+    if (typeof window === 'undefined') return null;
+    const raw = localStorage.getItem(STORAGE_KEYS.user) ?? localStorage.getItem('user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as UserProfile;
+    } catch {
+      return null;
+    }
+  },
+  set: (profile: UserProfile) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(profile));
+      localStorage.removeItem('user');
+    }
+  },
+  remove: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.user);
+      localStorage.removeItem('user');
+    }
   },
 };
 
 const buildUrl = (path: string) =>
   path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
+export function buildAssetUrl(path?: string | null) {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  const normalized = path.startsWith('/uploads') ? path : `/uploads/complaints/${path}`;
+  return `${API_BASE_URL}${normalized}`;
+}
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -76,6 +116,9 @@ export interface ComplaintData {
   lat: number;
   lng: number;
   projectId?: number;
+  photoUrl?: string | null;
+  createdAt?: string | null;
+  resolvedAt?: string | null;
 }
 
 export interface MapData {
@@ -92,15 +135,56 @@ export interface FlaggedContractor {
 }
 
 export interface AdminDashboardData {
+  totalProjects: number;
   activeProjectsCount: number;
   pendingComplaintsCount: number;
-  averageResolutionTime: number;
+  resolvedComplaintsCount: number;
+  averageResolutionTimeHours: number;
   totalSanctionedBudget: number;
   flaggedContractors: FlaggedContractor[];
+  recentComplaints: ComplaintAdminView[];
+  projectStatusBreakdown: ProjectStatusAggregate[];
+  wardComplaintHeatmap: WardHeatmapStat[];
+}
+
+export interface ProjectStatusAggregate {
+  status: string;
+  projectCount: number;
+  totalBudget: number;
+}
+
+export interface WardHeatmapStat {
+  wardName: string;
+  zone: string;
+  complaintCount: number;
+  projectCount: number;
+}
+
+export interface ComplaintAdminView {
+  id: number;
+  title: string;
+  status: string;
+  severity: number;
+  lat?: number;
+  lng?: number;
+  createdAt?: string;
+  wardLabel?: string;
+  photoUrl?: string | null;
+}
+
+export interface AuthResponsePayload {
+  token: string;
+  message: string;
+  username: string;
+  fullName: string;
+  email: string;
+  userId: number;
+  roles: string[];
 }
 
 export interface UserProfile {
   id: number;
+  userId?: number; // backwards compat with AuthResponse
   username: string;
   fullName: string;
   email: string;
@@ -122,6 +206,51 @@ export interface RatingSubmitData {
   score: number;
   comment: string;
 }
+
+export interface ContractorDashboardData {
+  profile: {
+    contractorId: number;
+    companyName: string;
+    licenseNo: string;
+    avgRating: number;
+    totalRatings: number;
+    flagged: boolean;
+    flaggedAt?: string | null;
+  };
+  metrics: {
+    activeProjects: number;
+    completedProjects: number;
+    pendingComplaints: number;
+    resolvedComplaints: number;
+    totalBudget: number;
+  };
+  assignedProjects: Array<{
+    id: number;
+    title: string;
+    status: string;
+    budget: number;
+    lat?: number | null;
+    lng?: number | null;
+    updatedAt?: string | null;
+  }>;
+  linkedComplaints: Array<{
+    id: number;
+    title: string;
+    description?: string | null;
+    status: string;
+    severity: number;
+    createdAt?: string | null;
+    photoUrl?: string | null;
+    projectId?: number | null;
+  }>;
+  recentRatings: Array<{
+    id: number;
+    score: number;
+    comment?: string | null;
+    createdAt?: string | null;
+    citizenName?: string | null;
+  }>;
+}
 export interface ComplaintDetail {
   id: number;
   title: string;
@@ -132,6 +261,7 @@ export interface ComplaintDetail {
   lng: number;
   photoUrl?: string | null;
   createdAt?: string | null;
+  resolvedAt?: string | null;
   userId?: number | null;
   userFullName?: string | null;
   projectId?: number | null;
@@ -142,8 +272,8 @@ export interface ComplaintDetail {
 
 // ===================== AUTH API =====================
 
-export async function login(email: string, password: string): Promise<string> {
-  const response = await request<{ token: string; message: string; username: string; fullName: string; email: string }>(
+export async function login(email: string, password: string): Promise<AuthResponsePayload> {
+  const response = await request<AuthResponsePayload>(
     '/auth/login',
     {
       method: 'POST',
@@ -152,11 +282,11 @@ export async function login(email: string, password: string): Promise<string> {
   );
 
   Token.set(response.token);
-  return response.token;
+  return response;
 }
 
-export async function register(data: { username: string; password: string; email: string; fullName: string }): Promise<string> {
-  const response = await request<{ token: string; message: string; username: string; fullName: string; email: string }>(
+export async function register(data: { username: string; password: string; email: string; fullName: string }): Promise<AuthResponsePayload> {
+  const response = await request<AuthResponsePayload>(
     '/auth/register',
     {
       method: 'POST',
@@ -165,11 +295,13 @@ export async function register(data: { username: string; password: string; email
   );
 
   Token.set(response.token);
-  return response.message;
+  return response;
 }
 
 export async function fetchCurrentUserProfile(): Promise<UserProfile> {
-  return request<UserProfile>('/auth/me', { method: 'GET' }, true);
+  const profile = await request<UserProfile>('/auth/me', { method: 'GET' }, true);
+  UserStore.set(profile);
+  return profile;
 }
 
 // ===================== PUBLIC DATA FETCHERS =====================
@@ -184,7 +316,13 @@ export async function fetchMapData(): Promise<MapData> {
     request<ComplaintData[]>('/complaints'),
   ]);
 
-  return { projects, complaints };
+  return {
+    projects,
+    complaints: complaints.map((complaint) => ({
+      ...complaint,
+      photoUrl: buildAssetUrl(complaint.photoUrl),
+    })),
+  };
 }
 
 export async function fetchProjectById(projectId: number): Promise<ProjectData> {
@@ -195,11 +333,16 @@ export async function fetchComplaintById(id: number): Promise<ComplaintDetail> {
   const token = Token.get();
   if (!token) throw new Error("Authentication required. Please log in.");
 
-  return request<ComplaintDetail>(
+  const data = await request<ComplaintDetail>(
     `/complaints/${id}`,
     { method: "GET" },
     true // means requireAuth = true → automatically adds Authorization header
   );
+
+  return {
+    ...data,
+    photoUrl: buildAssetUrl(data.photoUrl),
+  };
 }
 
 
@@ -240,23 +383,55 @@ export async function submitRating(data: RatingSubmitData): Promise<string> {
 
 export async function fetchAdminDashboard(): Promise<AdminDashboardData> {
   type AdminDashboardApiResponse = {
+    totalProjects: number | string;
     activeProjectsCount: number | string;
     pendingComplaintsCount: number | string;
-    averageResolutionTime: number | string;
+    resolvedComplaintsCount: number | string;
+    averageResolutionTimeHours: number | string;
     totalSanctionedBudget: number | string;
     flaggedContractors: Array<Omit<FlaggedContractor, 'avgRating'> & { avgRating: number | string }>;
+    recentComplaints: ComplaintAdminView[];
+    projectStatusBreakdown: Array<Omit<ProjectStatusAggregate, 'projectCount' | 'totalBudget'> & {
+      projectCount: number | string;
+      totalBudget: number | string;
+    }>;
+    wardComplaintHeatmap: WardHeatmapStat[];
   };
 
   const data = await request<AdminDashboardApiResponse>('/dashboard/admin', { method: 'GET' }, true);
 
   return {
+    totalProjects: Number(data.totalProjects ?? 0),
     activeProjectsCount: Number(data.activeProjectsCount ?? 0),
     pendingComplaintsCount: Number(data.pendingComplaintsCount ?? 0),
-    averageResolutionTime: Number(data.averageResolutionTime ?? 0),
+    resolvedComplaintsCount: Number(data.resolvedComplaintsCount ?? 0),
+    averageResolutionTimeHours: Number(data.averageResolutionTimeHours ?? 0),
     totalSanctionedBudget: Number(data.totalSanctionedBudget ?? 0),
     flaggedContractors: (data.flaggedContractors ?? []).map((contractor) => ({
       ...contractor,
       avgRating: Number(contractor.avgRating ?? 0),
+    })),
+    recentComplaints: (data.recentComplaints ?? []).map((complaint) => ({
+      ...complaint,
+      photoUrl: buildAssetUrl(complaint.photoUrl),
+    })),
+    projectStatusBreakdown: (data.projectStatusBreakdown ?? []).map((entry) => ({
+      status: entry.status,
+      projectCount: Number(entry.projectCount ?? 0),
+      totalBudget: Number(entry.totalBudget ?? 0),
+    })),
+    wardComplaintHeatmap: data.wardComplaintHeatmap ?? [],
+  };
+}
+
+export async function fetchContractorDashboard(): Promise<ContractorDashboardData> {
+  const data = await request<ContractorDashboardData>('/dashboard/contractor', { method: 'GET' }, true);
+
+  return {
+    ...data,
+    linkedComplaints: (data.linkedComplaints ?? []).map((complaint) => ({
+      ...complaint,
+      photoUrl: buildAssetUrl(complaint.photoUrl),
     })),
   };
 }

@@ -1,20 +1,15 @@
-// frontend/app/dashboard/citizen/complaints/[id]/page.tsx
-
 "use client";
-
+/* (Keep imports same as before) */
 import { useEffect, useState } from "react";
-import { fetchComplaintById, ComplaintDetail } from "@/lib/api";
+import { fetchComplaintById, ComplaintDetail, buildAssetUrl } from "@/lib/api";
 import { ArrowLeft, MapPin, AlertTriangle, Clock, Star, CheckCircle, Edit, Link2, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import CitizenDashboardLayout from "@/app/components/CitizenDashboardLayout"; 
 
-// Dynamically load MiniMap (prevents server-side Leaflet rendering)
 const MiniMap = dynamic(() => import("@/app/components/MiniMap"), { ssr: false });
 
-// Extend the ComplaintDetail type for fields used in the UI
-// These fields are returned by the backend's ComplaintResponse
 interface FullComplaintDetail extends ComplaintDetail {
     photoUrl?: string | null;
     projectId?: number | null;
@@ -24,211 +19,118 @@ interface FullComplaintDetail extends ComplaintDetail {
 }
 
 export default function CitizenComplaintDetails() {
+  /* (Keep logic/state same as before) */
   const [id, setId] = useState<number | null>(null);
   const [data, setData] = useState<FullComplaintDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Get ID from URL path (Client-side)
   useEffect(() => {
     const path = window.location.pathname;
     const parts = path.split("/");
-    // Find the last numeric part of the URL
     const parsed = parseInt(parts[parts.length - 1], 10); 
     if (!isNaN(parsed)) setId(parsed);
     else setError("Invalid complaint ID.");
   }, []);
 
-  // 2. Fetch data once ID is set
   useEffect(() => {
     if (id == null) return;
     setLoading(true);
-    fetchComplaintById(id)
-      .then((d) => {
-          // Type cast the fetched data to our extended type
-          setData(d as FullComplaintDetail);
-      })
-      .catch((e) => {
-          setError(e.message ?? "Failed to load complaint details.");
-      })
-      .finally(() => setLoading(false));
+    fetchComplaintById(id).then((d) => setData(d as FullComplaintDetail)).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [id]);
 
-  if (loading)
-    return (
-      <CitizenDashboardLayout>
-        <div className="flex items-center justify-center h-[50vh] text-xl text-slate-600">
-          <Clock className="animate-spin mr-3" /> Loading complaint...
-        </div>
-      </CitizenDashboardLayout>
-    );
+  if (loading) return <CitizenDashboardLayout><div className="p-12 text-center text-slate-500">Loading details...</div></CitizenDashboardLayout>;
+  if (error) return <CitizenDashboardLayout><div className="p-12 text-center text-red-500 font-bold">{error}</div></CitizenDashboardLayout>;
+  if (!data) return <CitizenDashboardLayout><div className="p-12 text-center text-slate-500">Not found.</div></CitizenDashboardLayout>;
 
-  if (error)
-    return (
-      <CitizenDashboardLayout>
-        <div className="p-10 text-center bg-red-50 border border-red-300 rounded-lg text-red-700">
-          <AlertCircle className="inline mr-2" /> Error: {error}
-        </div>
-      </CitizenDashboardLayout>
-    );
-      
-  if (!data) return <CitizenDashboardLayout><div className="p-10 text-center text-slate-500">Complaint not found.</div></CitizenDashboardLayout>;
-
-  // --- Helper Constants for UI ---
-  const severityColor = data.severity >= 4 ? 'bg-red-600' : data.severity === 3 ? 'bg-yellow-600' : 'bg-emerald-600';
-  const statusColor = data.status?.toLowerCase() === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 
-                      data.status?.toLowerCase() === 'in_progress' ? 'bg-blue-100 text-blue-700' : 
-                      'bg-orange-100 text-orange-700';
-  const isResolved = data.status?.toLowerCase() === 'resolved';
-  // Photo URL correction: The backend ComplaintResponse provides the full path starting with /uploads/complaints/filename.jpg
-  // Example: data.photoUrl = "/uploads/complaints/1763131283439_blueberry.jpg"
-  const fullPhotoUrl = data.photoUrl ? `http://localhost:8080${data.photoUrl}` : null; 
-
+  const severityColor = data.severity >= 4 ? 'bg-red-500' : data.severity === 3 ? 'bg-yellow-500' : 'bg-emerald-500';
+  const statusColor = data.status?.toLowerCase() === 'resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
+                      data.status?.toLowerCase() === 'in_progress' ? 'bg-blue-100 text-blue-700 border-blue-200' : 
+                      'bg-orange-100 text-orange-700 border-orange-200';
+  const fullPhotoUrl = buildAssetUrl(data.photoUrl);
 
   return (
     <CitizenDashboardLayout>
-        <div className="max-w-4xl mx-auto space-y-8">
-            {/* Back Button */}
+        <div className="max-w-5xl mx-auto space-y-6">
             <motion.button
                 onClick={() => window.history.back()}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition"
+                whileHover={{ x: -4 }}
+                className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold transition mb-2"
             >
-                <ArrowLeft size={18} />
-                Back to Dashboard
+                <ArrowLeft size={20} /> Back
             </motion.button>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white shadow-xl rounded-2xl border border-slate-100 overflow-hidden"
+                className="bg-white/60 backdrop-blur-xl rounded-3xl border border-white/60 shadow-2xl overflow-hidden"
             >
-                {/* Header Section */}
-                <div className="p-6 md:p-8 border-b border-slate-100">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{data.title}</h1>
-                            <p className="text-sm text-slate-500">
-                                Reported by <span className="font-semibold">{data.userFullName ?? "Citizen"}</span> on 
-                                {data.createdAt ? ` ${new Date(data.createdAt).toLocaleDateString()}` : " N/A"}
-                            </p>
-                        </div>
-                        
-                        <span className={`px-4 py-2 text-sm font-bold rounded-full whitespace-nowrap ${statusColor}`}>
-                            {data.status}
-                        </span>
+                {/* Header */}
+                <div className="p-8 border-b border-white/50 flex flex-col md:flex-row justify-between gap-4 items-start md:items-center bg-white/20">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-slate-900">{data.title}</h1>
+                        <p className="text-slate-500 font-medium mt-1">Report #{data.id} • {new Date(data.createdAt!).toLocaleDateString()}</p>
                     </div>
+                    <span className={`px-4 py-1.5 text-sm font-bold uppercase tracking-wide rounded-full border ${statusColor}`}>
+                        {data.status?.replace('_', ' ')}
+                    </span>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3">
-                    
-                    {/* Left Column: Details & Description (2/3 width) */}
-                    <div className="lg:col-span-2 p-6 md:p-8 space-y-6">
-                        
-                        <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-2">Issue Details</h2>
-
-                        <p className="text-slate-700 leading-relaxed text-[16px]">
-                            {data.description || "No detailed description provided."}
-                        </p>
-
-                        <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm font-medium">
-                            <div className="flex items-center gap-2">
-                                <Star size={16} className="text-slate-500" />
-                                <span className="text-slate-600">Severity:</span>
-                                <span className={`px-3 py-1 rounded-full text-white font-bold ${severityColor}`}>
-                                    {data.severity}/5
-                                </span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <MapPin size={16} className="text-slate-500" />
-                                <span className="text-slate-600">GPS:</span>
-                                <span className="text-blue-700">
-                                    {data.lat?.toFixed(5)}, {data.lng?.toFixed(5)}
-                                </span>
-                            </div>
+                    {/* Details */}
+                    <div className="lg:col-span-2 p-8 space-y-8">
+                        <div>
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</h3>
+                            <p className="text-slate-700 text-lg leading-relaxed">{data.description}</p>
                         </div>
                         
-                        {/* Project Link */}
-                        {data.projectId && (
-                            <Link href={`/projects/${data.projectId}`} className="text-blue-600 hover:text-blue-800 flex items-center gap-2 font-medium">
-                                <Link2 size={18} /> Linked Project: <span className="underline">{data.projectTitle || `Project ID ${data.projectId}`}</span>
-                            </Link>
-                        )}
-                        
-                        {/* Action Buttons */}
-                        <div className="pt-4 flex gap-4">
-                            {/* Rate Work Button */}
-                            {isResolved && !data.rating && (
-                                <Link href={`/rate/${data.id}`} className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition shadow-lg">
-                                    <Star size={20} /> Rate the Resolution
+                        <div className="flex gap-4">
+                            <div className="p-4 bg-white/50 rounded-2xl border border-white/60 flex-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Severity</span>
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-3 h-3 rounded-full ${severityColor}`} />
+                                    <span className="font-bold text-slate-800 text-lg">{data.severity}/5</span>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-white/50 rounded-2xl border border-white/60 flex-1">
+                                <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Location</span>
+                                <div className="flex items-center gap-2 text-blue-600 font-bold">
+                                    <MapPin size={18} />
+                                    <span>{data.lat?.toFixed(4)}, {data.lng?.toFixed(4)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                         {data.status?.toLowerCase() === 'resolved' && !data.rating && (
+                            <div className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
+                                <div>
+                                    <p className="font-bold text-emerald-800">Issue Resolved</p>
+                                    <p className="text-sm text-emerald-600">Please verify the work quality.</p>
+                                </div>
+                                <Link href={`/rate/${data.id}`} className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+                                    <Star size={18} /> Rate Now
                                 </Link>
-                            )}
-                            {/* Edit Complaint Button (only if status is pending) */}
-                            {data.status?.toLowerCase() === 'pending' && (
-                                <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-lg">
-                                    <Edit size={20} /> Edit Complaint
-                                </button>
-                            )}
-                            {/* Rating Display */}
-                            {data.rating && (
-                                <div className="flex items-center gap-2 text-indigo-600 font-bold">
-                                    <CheckCircle size={20} /> Rated {data.rating}/5
-                                </div>
-                            )}
-                        </div>
-
-                    </div>
-
-                    {/* Right Column: Image & Map (1/3 width) */}
-                    <div className="lg:col-span-1 border-t lg:border-t-0 lg:border-l border-slate-100 bg-slate-50 p-6 md:p-8 space-y-6">
-                        
-                        {/* Image Proof */}
-                        {fullPhotoUrl ? (
-                            <div className="space-y-3">
-                                <p className="text-lg font-bold text-slate-800">Photo Evidence</p>
-                                <img
-                                    src={fullPhotoUrl} 
-                                    alt="Complaint photo proof"
-                                    className="w-full h-48 object-cover rounded-xl shadow-md border border-slate-200"
-                                />
-                                <a
-                                    href={fullPhotoUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                                >
-                                    View Full Image <ExternalLink size={14} />
-                                </a>
-                            </div>
-                        ) : (
-                            <div className="p-4 bg-gray-100 text-slate-500 rounded-lg text-sm text-center">
-                                No Photo Proof Available.
                             </div>
                         )}
-
-                        {/* Location Map */}
-                        <div className="space-y-3">
-                            <p className="text-lg font-bold text-slate-800">Exact Location</p>
-                            {data.lat && data.lng && (
-                                <div className="h-64 rounded-xl overflow-hidden border-2 border-slate-300 shadow-lg">
-                                    {/* MiniMap will dynamically load here */}
-                                    <MiniMap lat={data.lat} lng={data.lng} />
-                                </div>
-                            )}
-                            <a
-                                href={`http://googleusercontent.com/maps.google.com/3{data.lat},${data.lng}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                            >
-                                Open in Google Maps <MapPin size={14} />
-                            </a>
-                        </div>
-
                     </div>
 
+                    {/* Sidebar (Image) */}
+                    <div className="lg:col-span-1 bg-white/30 border-t lg:border-t-0 lg:border-l border-white/50 p-8">
+                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Evidence</h3>
+                         <div className="rounded-2xl overflow-hidden shadow-lg border border-white/50 relative group bg-slate-100 aspect-square">
+                            {fullPhotoUrl ? (
+                                <img src={fullPhotoUrl} className="w-full h-full object-cover" alt="Proof" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-400">No Image</div>
+                            )}
+                         </div>
+                         {fullPhotoUrl && (
+                             <a href={fullPhotoUrl} target="_blank" className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-white/60 hover:bg-white border border-white/60 rounded-xl text-sm font-bold text-slate-600 transition">
+                                <ExternalLink size={16} /> View Full Size
+                             </a>
+                         )}
+                    </div>
                 </div>
             </motion.div>
         </div>

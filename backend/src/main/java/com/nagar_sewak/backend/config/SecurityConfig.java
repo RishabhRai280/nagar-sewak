@@ -34,12 +34,14 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                     // ================= PUBLIC READ ACCESS =================
-                    .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect").permitAll()
+                    // FIX: Added "/uploads/complaints/**" to allow public access to images
+                    .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect", "/uploads/complaints/**").permitAll() 
                     .requestMatchers("/auth/**", "/login", "/register").permitAll()
                     
                     // ================= ADMIN/CONTRACTOR ACCESS =================
                     .requestMatchers(POST, "/projects").hasAuthority(Role.ADMIN.name())
-                    .requestMatchers("/dashboard/admin").hasAnyAuthority(Role.ADMIN.name(), Role.CONTRACTOR.name())
+                    .requestMatchers("/dashboard/admin").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                    .requestMatchers("/dashboard/contractor").hasAuthority(Role.CONTRACTOR.name())
                     
                     // ================= CITIZEN ACCESS FIX =================
                     // FIX: Explicitly allow CITIZEN to access their dashboard and profile/notifications routes

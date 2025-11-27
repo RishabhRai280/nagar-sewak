@@ -1,5 +1,8 @@
+"use client";
+
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github, Heart } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github, Heart, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,140 +29,145 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white mt-auto">
-      {/* Newsletter Section */}
-      <div className="border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h3 className="text-2xl font-bold mb-2">Stay Updated</h3>
-              <p className="text-slate-400">Get the latest news about projects and community governance</p>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="flex-1 px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-[1.02]">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
+    <footer className="relative bg-slate-950 text-slate-300 overflow-hidden mt-auto border-t border-slate-800/50">
+      
+      {/* --- ANIMATED BACKGROUND BLOBS (Dark Mode) --- */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-24 -left-24 w-96 h-96 bg-blue-600 rounded-full blur-[100px] opacity-10" 
+        />
+        <motion.div 
+          animate={{ x: [0, 50, 0], opacity: [0.1, 0.15, 0.1] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600 rounded-full blur-[120px] opacity-10" 
+        />
+        <motion.div 
+          animate={{ y: [0, -30, 0], opacity: [0.05, 0.1, 0.05] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-900 rounded-full blur-[120px] opacity-5" 
+        />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
-          {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                NagarSewak
+      {/* --- GLASS OVERLAY --- */}
+      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl z-0" />
+
+      {/* --- CONTENT --- */}
+      <div className="relative z-10">
+        
+        {/* Newsletter Section */}
+        <div className="border-b border-white/10 bg-white/5 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold mb-2 text-white">Stay Updated</h3>
+                <p className="text-slate-400">Get the latest news about projects and community governance</p>
               </div>
-            </Link>
-            <p className="text-slate-400 mb-6 leading-relaxed">
-              Empowering citizens and improving governance through transparent, real-time civic engagement and accountability.
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="flex-1 px-5 py-3.5 rounded-xl bg-slate-800/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all backdrop-blur-md"
+                />
+                <button className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-600/20 transition transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                  Subscribe <ArrowRight size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-12">
+            
+            {/* Brand Section */}
+            <div className="lg:col-span-2 space-y-6">
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="text-3xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent group-hover:brightness-110 transition-all">
+                  NagarSewak
+                </div>
+              </Link>
+              <p className="text-slate-400 leading-relaxed max-w-sm">
+                Empowering citizens and improving governance through transparent, real-time civic engagement and accountability.
+              </p>
+              <div className="flex gap-4">
+                {[
+                  { icon: Facebook, label: "Facebook" },
+                  { icon: Twitter, label: "Twitter" },
+                  { icon: Linkedin, label: "LinkedIn" },
+                  { icon: Github, label: "GitHub" },
+                ].map((social, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-all duration-300 group"
+                    aria-label={social.label}
+                  >
+                    <social.icon size={18} className="text-slate-400 group-hover:text-white transition-colors" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Links Columns */}
+            {[
+              { title: "Platform", links: footerLinks.platform },
+              { title: "Resources", links: footerLinks.resources },
+              { title: "Company", links: footerLinks.company },
+            ].map((column, idx) => (
+              <div key={idx}>
+                <h3 className="text-lg font-bold mb-6 text-white">{column.title}</h3>
+                <ul className="space-y-4">
+                  {column.links.map((link) => (
+                    <li key={link.name}>
+                      <Link 
+                        href={link.href} 
+                        className="text-slate-400 hover:text-blue-400 transition-colors text-sm font-medium flex items-center gap-1 group"
+                      >
+                        <span className="w-0 group-hover:w-2 h-[1px] bg-blue-400 transition-all duration-300"></span>
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Contact Info */}
+          <div className="border-t border-white/10 pt-8 pb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+              <div className="flex items-center gap-3 text-slate-400 group cursor-default">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition">
+                  <Mail size={16} className="text-blue-400" />
+                </div>
+                <span>support@nagarsewak.gov.in</span>
+              </div>
+              <div className="flex items-center gap-3 text-slate-400 group cursor-default">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition">
+                  <Phone size={16} className="text-blue-400" />
+                </div>
+                <span>+91 1800-NAGAR-1</span>
+              </div>
+              <div className="flex items-center gap-3 text-slate-400 group cursor-default">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition">
+                  <MapPin size={16} className="text-blue-400" />
+                </div>
+                <span>Across India</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="border-t border-white/10 pt-8 text-center">
+            <p className="text-sm text-slate-500">
+              &copy; {currentYear} Nagar Sewak. All rights reserved.
             </p>
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
-                aria-label="Facebook"
-              >
-                <Facebook size={18} />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
-                aria-label="Twitter"
-              >
-                <Twitter size={18} />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={18} />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center hover:bg-blue-600 transition"
-                aria-label="GitHub"
-              >
-                <Github size={18} />
-              </a>
-            </div>
+            <p className="mt-3 text-xs text-slate-600 flex items-center justify-center gap-1.5">
+              Built with <Heart size={12} className="text-red-500 fill-red-500 animate-pulse" /> for transparent governance.
+            </p>
           </div>
-
-          {/* Platform Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Platform</h3>
-            <ul className="space-y-3">
-              {footerLinks.platform.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-slate-400 hover:text-blue-400 transition text-sm font-medium">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Resources</h3>
-            <ul className="space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-slate-400 hover:text-blue-400 transition text-sm font-medium">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Company</h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-slate-400 hover:text-blue-400 transition text-sm font-medium">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Contact Info */}
-        <div className="border-t border-slate-700 pt-8 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-            <div className="flex items-center gap-3 text-slate-400 hover:text-blue-400 transition">
-              <Mail size={18} className="text-blue-400 flex-shrink-0" />
-              <span>support@nagarsewak.gov.in</span>
-            </div>
-            <div className="flex items-center gap-3 text-slate-400 hover:text-blue-400 transition">
-              <Phone size={18} className="text-blue-400 flex-shrink-0" />
-              <span>+91 1800-NAGAR-1</span>
-            </div>
-            <div className="flex items-center gap-3 text-slate-400 hover:text-blue-400 transition">
-              <MapPin size={18} className="text-blue-400 flex-shrink-0" />
-              <span>Across India</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Copyright */}
-        <div className="border-t border-slate-700 pt-6 text-center text-sm text-slate-400">
-          <p>&copy; {currentYear} Nagar Sewak. All rights reserved.</p>
-          <p className="mt-2 text-xs flex items-center justify-center gap-1">
-            Built with <Heart size={14} className="text-red-500 fill-red-500" /> for transparent governance and citizen empowerment.
-          </p>
         </div>
       </div>
     </footer>

@@ -55,6 +55,7 @@ public class ComplaintController {
                 complaint.getLng(),
                 photoUrl,
                 complaint.getCreatedAt(),
+                complaint.getResolvedAt(),
                 complaint.getUser() != null ? complaint.getUser().getId() : null,
                 complaint.getUser() != null ? complaint.getUser().getFullName() : null,
                 complaint.getProject() != null ? complaint.getProject().getId() : null
@@ -134,8 +135,16 @@ public class ComplaintController {
         if (req.getSeverity() != null && req.getSeverity() >= 1 && req.getSeverity() <= 5)
             complaint.setSeverity(req.getSeverity());
 
-        if (req.getStatus() != null && !req.getStatus().trim().isEmpty())
-            complaint.setStatus(req.getStatus().trim());
+        if (req.getStatus() != null && !req.getStatus().trim().isEmpty()) {
+            String newStatus = req.getStatus().trim();
+            boolean isResolving = "resolved".equalsIgnoreCase(newStatus);
+            complaint.setStatus(newStatus);
+            if (isResolving && complaint.getResolvedAt() == null) {
+                complaint.setResolvedAt(Instant.now());
+            } else if (!isResolving) {
+                complaint.setResolvedAt(null);
+            }
+        }
 
         return ResponseEntity.ok(complaintRepo.save(complaint));
     }
@@ -150,12 +159,13 @@ public class ComplaintController {
         public final Double lng;
         public final String photoUrl;
         public final Instant createdAt;
+        public final Instant resolvedAt;
         public final Long userId;
         public final String userFullName;
         public final Long projectId;
 
         public ComplaintResponse(Long id, String title, String description, int severity, String status,
-                                 Double lat, Double lng, String photoUrl, Instant createdAt,
+                                 Double lat, Double lng, String photoUrl, Instant createdAt, Instant resolvedAt,
                                  Long userId, String userFullName, Long projectId) {
             this.id = id;
             this.title = title;
@@ -166,6 +176,7 @@ public class ComplaintController {
             this.lng = lng;
             this.photoUrl = photoUrl;
             this.createdAt = createdAt;
+            this.resolvedAt = resolvedAt;
             this.userId = userId;
             this.userFullName = userFullName;
             this.projectId = projectId;

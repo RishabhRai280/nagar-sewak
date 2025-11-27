@@ -2,7 +2,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Sidebar from '@/app/components/Sidebar'; 
 import ContractorDashboardComponent from '@/app/components/ContractorDashboard';
 
 // Load client-side only 
@@ -13,8 +12,8 @@ const DynamicContractorDashboardContent = dynamic(
 
 export default function ContractorDashboardPage() {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        <Sidebar />
+      <div className="flex min-h-screen bg-slate-50">
+        {/* Sidebar removed as requested */}
         <DynamicContractorDashboardContent />
       </div>
     );
