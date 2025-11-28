@@ -1,21 +1,25 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from '@/lib/api';
-import { 
-  Menu, X, LogOut, MapPin, LayoutDashboard, 
-  ChevronDown, User as UserIcon, ShieldAlert 
+import {
+  Menu, X, LogOut, MapPin, LayoutDashboard,
+  ChevronDown, User as UserIcon, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  
+
+  const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const pathname = usePathname();
   const profileRef = useRef<HTMLDivElement>(null);
@@ -72,12 +76,12 @@ export default function Header() {
   // Role Logic
   const hasAdminAccess = user?.roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');
   const isContractor = user?.roles.includes('CONTRACTOR');
-  
+
   const dashboardPath = hasAdminAccess
     ? '/dashboard/admin'
     : isContractor
-    ? '/dashboard/contractor'
-    : '/dashboard/citizen';
+      ? '/dashboard/contractor'
+      : '/dashboard/citizen';
 
   // Initials Helper
   const getUserInitials = (user: UserProfile) => {
@@ -90,16 +94,15 @@ export default function Header() {
   };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
-        scrolled || isMenuOpen 
-          ? 'bg-white/70 backdrop-blur-xl border-b border-white/40 shadow-sm py-3' 
-          : 'bg-transparent py-5'
-      }`}
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${scrolled || isMenuOpen
+        ? 'bg-white/70 backdrop-blur-xl border-b border-white/40 shadow-sm py-3'
+        : 'bg-transparent py-5'
+        }`}
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex justify-between items-center">
-          
+
           {/* --- LOGO --- */}
           <Link href="/" className="flex items-center gap-2 group z-50">
             <div className="text-2xl font-extrabold tracking-tight">
@@ -113,20 +116,19 @@ export default function Header() {
             {/* Nav Links - Glass Capsule */}
             <div className="flex items-center gap-1 bg-white/40 p-1 rounded-full border border-white/40 backdrop-blur-md shadow-sm">
               {[
-                { name: 'Home', path: '/' },
-                { name: 'Live Map', path: '/map' },
-                { name: 'Report Issue', path: '/report' }
+                { name: t('home'), path: '/' },
+                { name: t('map'), path: '/map' },
+                { name: t('report'), path: '/report' }
               ].map((link) => {
                 const active = pathname === link.path;
                 return (
                   <Link
                     key={link.path}
                     href={link.path}
-                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                      active 
-                        ? 'bg-white text-blue-600 shadow-sm font-semibold' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
-                    }`}
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${active
+                      ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+                      }`}
                   >
                     {link.name}
                   </Link>
@@ -135,10 +137,13 @@ export default function Header() {
             </div>
 
             {/* Auth Section */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+
               {user ? (
                 <div className="relative" ref={profileRef}>
-                  <button 
+                  <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full hover:bg-white/50 transition border border-transparent hover:border-white/60 group"
                   >
@@ -168,23 +173,23 @@ export default function Header() {
                           <p className="text-sm font-bold text-slate-800 truncate">{user.fullName || user.username}</p>
                           <p className="text-xs text-slate-500 truncate">{user.email}</p>
                         </div>
-                        
+
                         <div className="py-2">
-                          <Link 
+                          <Link
                             href={dashboardPath}
                             onClick={() => setIsProfileOpen(false)}
                             className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50/80 hover:text-blue-600 transition-colors"
                           >
                             <LayoutDashboard size={16} />
-                            Dashboard
+                            {t('dashboard')}
                           </Link>
-                          <Link 
+                          <Link
                             href="/profile"
                             onClick={() => setIsProfileOpen(false)}
                             className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50/80 hover:text-blue-600 transition-colors"
                           >
                             <UserIcon size={16} />
-                            Profile Settings
+                            {t('profile')}
                           </Link>
                         </div>
 
@@ -194,7 +199,7 @@ export default function Header() {
                             className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/80 transition-colors"
                           >
                             <LogOut size={16} />
-                            Sign Out
+                            {t('logout')}
                           </button>
                         </div>
                       </motion.div>
@@ -207,13 +212,13 @@ export default function Header() {
                     href="/login"
                     className="text-sm font-bold text-slate-600 hover:text-blue-600 transition px-4"
                   >
-                    Log in
+                    {t('login')}
                   </Link>
                   <Link
                     href="/register"
                     className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
                   >
-                    Register
+                    {t('register')}
                   </Link>
                 </>
               )}
@@ -244,24 +249,28 @@ export default function Header() {
               {/* Mobile Links */}
               <div className="space-y-2">
                 {[
-                   { name: 'Home', path: '/', icon: null },
-                   { name: 'Live Map', path: '/map', icon: MapPin },
-                   { name: 'Report Issue', path: '/report', icon: ShieldAlert },
+                  { name: t('home'), path: '/', icon: null },
+                  { name: t('map'), path: '/map', icon: MapPin },
+                  { name: t('report'), path: '/report', icon: ShieldAlert },
                 ].map((link) => (
                   <Link
                     key={link.path}
                     href={link.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center gap-3 p-3 rounded-xl font-medium transition-colors ${
-                      pathname === link.path 
-                      ? 'bg-blue-50/80 text-blue-600' 
+                    className={`flex items-center gap-3 p-3 rounded-xl font-medium transition-colors ${pathname === link.path
+                      ? 'bg-blue-50/80 text-blue-600'
                       : 'text-slate-600 hover:bg-white/50'
-                    }`}
+                      }`}
                   >
                     {link.icon && <link.icon size={20} />}
                     {link.name}
                   </Link>
                 ))}
+              </div>
+
+              {/* Language Switcher - Mobile */}
+              <div className="pt-4 border-t border-slate-200/50">
+                <LanguageSwitcher />
               </div>
 
               {/* Mobile Auth */}
@@ -277,14 +286,14 @@ export default function Header() {
                         <p className="text-xs text-slate-500">{user.email}</p>
                       </div>
                     </div>
-                    
-                    <Link 
+
+                    <Link
                       href={dashboardPath}
                       onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-3 p-3 rounded-xl font-medium text-slate-700 hover:bg-white/50"
                     >
                       <LayoutDashboard size={20} className="text-blue-600" />
-                      Dashboard
+                      {t('dashboard')}
                     </Link>
 
                     <button
@@ -292,7 +301,7 @@ export default function Header() {
                       className="w-full flex items-center gap-3 p-3 rounded-xl font-medium text-red-600 hover:bg-red-50/50"
                     >
                       <LogOut size={20} />
-                      Sign Out
+                      {t('logout')}
                     </button>
                   </div>
                 ) : (
@@ -302,14 +311,14 @@ export default function Header() {
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full text-center p-3 rounded-xl font-semibold text-slate-600 hover:bg-white/50 border border-slate-200 transition"
                     >
-                      Log in
+                      {t('login')}
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full text-center p-3 rounded-xl font-semibold text-white bg-blue-600 shadow-lg hover:bg-blue-700 transition"
                     >
-                      Create Account
+                      {t('register')}
                     </Link>
                   </div>
                 )}

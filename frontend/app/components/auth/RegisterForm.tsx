@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { register, fetchCurrentUserProfile, UserStore } from "@/lib/api";
 import { User, Mail, Lock, AlertCircle, ArrowRight, CheckCircle, Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function RegisterForm() {
   const [fullName, setFullName] = useState("");
@@ -15,18 +16,19 @@ export default function RegisterForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const t = useTranslations('auth.register');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t('passwordsDoNotMatch'));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t('passwordLength'));
       return;
     }
 
@@ -38,7 +40,7 @@ export default function RegisterForm() {
       UserStore.set(profile);
       router.push("/dashboard/citizen?welcome=new");
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      setError(err.message || t('registrationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -49,8 +51,8 @@ export default function RegisterForm() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900">Create Account</h2>
-        <p className="text-slate-600 mt-2">Join Nagar Sewak today.</p>
+        <h2 className="text-3xl font-bold text-slate-900">{t('title')}</h2>
+        <p className="text-slate-600 mt-2">{t('subtitle')}</p>
       </div>
 
       {error && (
@@ -63,7 +65,7 @@ export default function RegisterForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Full Name */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">Full Name</label>
+          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('fullName')}</label>
           <div className="relative group">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-600" size={18} />
             <input
@@ -79,7 +81,7 @@ export default function RegisterForm() {
 
         {/* Email */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">Email</label>
+          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('email')}</label>
           <div className="relative group">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-600" size={18} />
             <input
@@ -95,7 +97,7 @@ export default function RegisterForm() {
 
         {/* Username */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">Username</label>
+          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('username')}</label>
           <div className="relative group">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-600" size={18} />
             <input
@@ -112,7 +114,7 @@ export default function RegisterForm() {
         {/* Password Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">Password</label>
+            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('password')}</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-600" size={18} />
               <input
@@ -126,7 +128,7 @@ export default function RegisterForm() {
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">Confirm</label>
+            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('confirm')}</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-600" size={18} />
               <input
@@ -144,15 +146,15 @@ export default function RegisterForm() {
         {/* Strength Meter */}
         {password && (
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-             <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-600">Strength</span>
-                <span className={`text-xs font-bold ${passwordStrength < 40 ? 'text-red-500' : passwordStrength < 80 ? 'text-yellow-600' : 'text-emerald-600'}`}>
-                  {passwordStrength < 40 ? "Weak" : passwordStrength < 80 ? "Good" : "Strong"}
-                </span>
-             </div>
-             <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                <div className={`h-full transition-all duration-500 ${passwordStrength < 40 ? 'bg-red-500' : passwordStrength < 80 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${passwordStrength}%` }} />
-             </div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-semibold text-slate-600">{t('strength')}</span>
+              <span className={`text-xs font-bold ${passwordStrength < 40 ? 'text-red-500' : passwordStrength < 80 ? 'text-yellow-600' : 'text-emerald-600'}`}>
+                {passwordStrength < 40 ? t('weak') : passwordStrength < 80 ? t('good') : t('strong')}
+              </span>
+            </div>
+            <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full transition-all duration-500 ${passwordStrength < 40 ? 'bg-red-500' : passwordStrength < 80 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${passwordStrength}%` }} />
+            </div>
           </div>
         )}
 
@@ -162,7 +164,7 @@ export default function RegisterForm() {
             <Check size={14} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100" />
           </div>
           <span className="text-sm text-slate-600 select-none">
-            I agree to the <a href="#" className="text-emerald-600 font-bold hover:underline">Terms</a> and <a href="#" className="text-emerald-600 font-bold hover:underline">Privacy Policy</a>
+            {t('agreeTerms')} <a href="#" className="text-emerald-600 font-bold hover:underline">{t('terms')}</a> {t('and')} <a href="#" className="text-emerald-600 font-bold hover:underline">{t('privacyPolicy')}</a>
           </span>
         </label>
 
@@ -171,7 +173,7 @@ export default function RegisterForm() {
           disabled={isLoading}
           className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-lg shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
         >
-          {isLoading ? "Creating..." : <>Create Account <ArrowRight size={20} /></>}
+          {isLoading ? t('creating') : <>{t('createAccountButton')} <ArrowRight size={20} /></>}
         </button>
       </form>
     </div>

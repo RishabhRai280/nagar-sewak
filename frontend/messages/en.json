@@ -1,0 +1,352 @@
+{
+  "common": {
+    "appName": "Nagar Sewak",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "viewDetails": "View Details",
+    "backToHome": "Back to Home"
+  },
+  "nav": {
+    "home": "Home",
+    "map": "Map",
+    "report": "Report Issue",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "notifications": "Notifications"
+  },
+  "landing": {
+    "badge": "Civic Tech for Smart Cities",
+    "hero": {
+      "title": "Building",
+      "titleHighlight": "Trust & Transparency",
+      "subtitle": "A next-gen platform enabling citizens and administration to collaborate seamlessly for accountable, efficient governance.",
+      "startReporting": "Start Reporting",
+      "viewLiveMap": "View Live Map",
+      "freeToUse": "Free to Use",
+      "realTimeUpdates": "Real-Time Updates",
+      "geoTagging": "Geo-Tagging"
+    },
+    "stats": {
+      "activeUsers": "Active Users",
+      "projectsTracked": "Projects Tracked",
+      "issuesResolved": "Issues Resolved",
+      "satisfactionRate": "Satisfaction Rate"
+    },
+    "problems": {
+      "title": "Solving",
+      "titleHighlight": "Core Governance Issues",
+      "subtitle": "Addressing the challenges in modern civic governance with technology.",
+      "lackTransparency": {
+        "title": "Lack of Transparency",
+        "description": "Citizens have no visibility into projects, funds, or contractor performance."
+      },
+      "slowGrievance": {
+        "title": "Slow Grievance Handling",
+        "description": "Reporting and resolving local issues is slow, inefficient, and lacks tracking."
+      },
+      "poorAccountability": {
+        "title": "Poor Accountability",
+        "description": "Contractors lack performance tracking and quality assurance is often minimal."
+      },
+      "dataSilos": {
+        "title": "Data Silos",
+        "description": "Administrators struggle with manual data instead of real-time analytics."
+      }
+    },
+    "features": {
+      "title": "Powerful",
+      "titleHighlight": "Governance Features",
+      "subtitle": "Everything you need for transparent, efficient, and accountable civic engagement.",
+      "liveTracking": {
+        "title": "Live Project Tracking",
+        "description": "Track all development works with budget transparency, contractor details, and geo-locations on an interactive map."
+      },
+      "smartComplaints": {
+        "title": "Smart Geo-Tagged Complaints",
+        "description": "Report issues instantly with GPS location, photos, and real-time resolution tracking. Get instant zone routing."
+      },
+      "contractorRating": {
+        "title": "Contractor Rating System",
+        "description": "Rate completed projects and hold contractors accountable. Automatic flagging for poor performers."
+      },
+      "adminDashboard": {
+        "title": "Admin Dashboard & Analytics",
+        "description": "Real-time insights into active projects, pending complaints, resolution times, and flagged contractors."
+      },
+      "transparentGovernance": {
+        "title": "Transparent Governance",
+        "description": "Full budget breakdowns, contractor identities, and project statuses visible to all citizens."
+      },
+      "realTimeUpdates": {
+        "title": "Real-Time Updates",
+        "description": "Get instant notifications on complaint status, project progress, and resolution updates."
+      },
+      "checkItems": {
+        "realTimeTracking": "Real-time status tracking",
+        "userFriendly": "User-friendly interface",
+        "securedData": "Secured data transactions"
+      }
+    },
+    "testimonials": {
+      "title": "Trusted by the",
+      "titleHighlight": "Community",
+      "testimonial1": {
+        "name": "Rajesh Kumar",
+        "role": "Citizen, Mumbai",
+        "content": "Nagar Sewak has transformed how we report issues. My complaint about a pothole was resolved in just 3 days!"
+      },
+      "testimonial2": {
+        "name": "Priya Sharma",
+        "role": "Community Leader, Delhi",
+        "content": "The transparency in project budgets and contractor ratings gives us confidence in our local governance."
+      },
+      "testimonial3": {
+        "name": "Amit Patel",
+        "role": "Administrator, Ahmedabad",
+        "content": "The dashboard helps us track everything in real-time. It's a game-changer for municipal management."
+      }
+    },
+    "cta": {
+      "title": "Start Making a Difference Today",
+      "subtitle": "Join NagarSewak and contribute to building a more transparent and responsive local government.",
+      "createAccount": "Create Account",
+      "reportIssue": "Report an Issue"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Your Voice, Your City",
+      "subtitle": "Empowering citizens to report issues and track municipal projects in real-time",
+      "cta": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "How It Works",
+      "report": {
+        "title": "Report Issues",
+        "description": "Submit geo-tagged complaints with photo evidence"
+      },
+      "track": {
+        "title": "Track Progress",
+        "description": "Monitor resolution status in real-time"
+      },
+      "engage": {
+        "title": "Engage",
+        "description": "Rate projects and provide feedback"
+      }
+    }
+  },
+  "report": {
+    "title": "Report an Issue",
+    "subtitle": "Submit a geo-tagged report to your local administration",
+    "form": {
+      "title": "Issue Title",
+      "titlePlaceholder": "e.g. Large Pothole on Main St.",
+      "description": "Description",
+      "descriptionPlaceholder": "Provide details about the issue...",
+      "urgency": "Urgency Level",
+      "evidence": "Evidence",
+      "location": "Location",
+      "uploadPhoto": "Upload Photo",
+      "tagLocation": "Tag Current Location",
+      "locationTagged": "Location Tagged",
+      "locating": "Locating...",
+      "submitReport": "Submit Report",
+      "processing": "Processing..."
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "descriptionRequired": "Description is required",
+      "locationRequired": "Please tag your GPS location",
+      "photoRequired": "Photo evidence is required"
+    },
+    "success": "Report submitted successfully!",
+    "error": "Failed to submit report. Please try again."
+  },
+    "map": {
+      "title": "Interactive Map",
+      "searchLocation": "Search area, city, or state...",
+      "filterItems": "Filter visible items...",
+      "showComplaints": "Show Complaints",
+      "showProjects": "Show Projects",
+      "status": "Status",
+      "severity": "Severity",
+      "all": "All",
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "resolved": "Resolved",
+      "complaint": "Complaint",
+      "project": "Project",
+      "citizenComplaint": "Citizen Complaint",
+      "publicProject": "Public Project",
+      "budget": "Budget",
+      "description": "Description",
+      "noDescription": "No detailed description provided.",
+      "evidenceUploaded": "Evidence Uploaded",
+      "viewFullDetails": "View Full Details",
+      "rateWorkQuality": "Rate Work Quality",
+      "coordinates": "Coordinates",
+      "noItemsMatch": "No items match your filters.",
+      "adjustFilters": "Try adjusting your search or status filters.",
+      "completed": "Completed",
+      "civicData": "Civic Data",
+      "filterPlaceholder": "Filter visible items...",
+      "sortBySeverity": "Severity",
+      "sortByName": "Name (A-Z)",
+      "complaints": "Complaints",
+      "projects": "Projects",
+      "filters": "Filters",
+      "dataLayers": "Data Layers",
+      "refineComplaints": "Refine Complaints",
+      "allStatuses": "All Statuses",
+      "minSeverity": "Min Severity",
+      "applyChanges": "Apply Changes",
+      "resetDefaults": "Reset Defaults"
+    },
+  "dashboard": {
+    "citizen": {
+      "title": "My Dashboard",
+      "myComplaints": "My Complaints",
+      "statistics": "Statistics",
+      "recentActivity": "Recent Activity",
+      "noComplaints": "No complaints yet",
+      "submitFirst": "Submit your first complaint to get started"
+    },
+    "admin": {
+      "title": "Admin Dashboard",
+      "overview": "Overview",
+      "totalComplaints": "Total Complaints",
+      "resolved": "Resolved",
+      "pending": "Pending",
+      "avgResolutionTime": "Avg. Resolution Time",
+      "hours": "hours"
+    },
+    "contractor": {
+      "title": "Contractor Dashboard",
+      "assignedWork": "Assigned Work",
+      "completedProjects": "Completed Projects",
+      "inProgress": "In Progress"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Login to your account",
+      "brandTitle": "Building",
+      "brandHighlight": "Trust & Transparency",
+      "brandSubtitle": "Join the next generation of civic engagement. Monitor projects, report issues, and secure your city's future.",
+      "liveTracking": "Live Tracking",
+      "liveTrackingDesc": "Real-time project updates",
+      "secureData": "Secure Data",
+      "secureDataDesc": "Encrypted & Private",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "loginButton": "Login",
+      "noAccount": "Don't have an account?",
+      "newToPlatform": "New to the platform?",
+      "createAccount": "Create an account",
+      "signUp": "Sign Up",
+      "copyright": "© 2024 Nagar Sewak. All rights reserved.",
+      "pleaseSignIn": "Please sign in to continue.",
+      "forgot": "Forgot?",
+      "signIn": "Sign In",
+      "signingIn": "Signing In...",
+      "demoAccess": "Demo Access",
+      "demoPassword": "Password"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join Nagar Sewak today",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "role": "I am a",
+      "citizen": "Citizen",
+      "contractor": "Contractor",
+      "registerButton": "Register",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "username": "Username",
+      "confirm": "Confirm",
+      "strength": "Strength",
+      "weak": "Weak",
+      "good": "Good",
+      "strong": "Strong",
+      "agreeTerms": "I agree to the",
+      "terms": "Terms",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "creating": "Creating...",
+      "createAccountButton": "Create Account",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "passwordLength": "Password must be at least 8 characters",
+      "registrationFailed": "Registration failed. Please try again.",
+      "joinActiveCitizens": "Join 10,000+ active citizens",
+      "citizenPortal": "Citizen Portal",
+      "joinMovement": "Join the Citizen Movement",
+      "joinMovementHighlight": "Citizen Movement",
+      "joinMovementTitle": "Join the",
+      "becomeParticipant": "Become an active participant in your city's growth. Report issues, track progress, and ensure accountability.",
+      "geoTaggedReports": "Geo-Tagged Reports",
+      "pinpointIssues": "Pinpoint issues with precision",
+      "fullAccountability": "Full Accountability",
+      "rateQuality": "Rate quality of public works",
+      "transparentData": "Transparent Data",
+      "viewBudgets": "View budgets & timelines",
+      "loginHere": "Login here"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "address": "Address",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes"
+  },
+  "errors": {
+    "somethingWrong": "Something went wrong",
+    "tryAgain": "Please try refreshing the page",
+    "reloadPage": "Reload Page",
+    "returnHome": "Return to Home",
+    "networkError": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to access this resource.",
+    "notFound": "The requested resource was not found.",
+    "serverError": "Server error. Please try again later."
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2025 Nagar Sewak. All rights reserved.",
+    "documentation": "Documentation",
+    "apiGuide": "API Guide",
+    "helpCenter": "Help Center",
+    "community": "Community",
+    "features": "Features",
+    "stayUpdated": "Stay Updated",
+    "stayUpdatedDesc": "Get the latest news about projects and community governance",
+    "subscribe": "Subscribe",
+    "emailPlaceholder": "your@email.com",
+    "builtWith": "Built with",
+    "forGovernance": "for transparent governance.",
+    "description": "Empowering citizens and improving governance through transparent, real-time civic engagement and accountability."
+  }
+}
