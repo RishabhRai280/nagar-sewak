@@ -1,9 +1,9 @@
 package com.nagar_sewak.backend.services;
 
 import com.nagar_sewak.backend.dto.ContractorCreationDTO;
-import com.nagar_sewak.backend.models.Contractor;
-import com.nagar_sewak.backend.models.User;
-import com.nagar_sewak.backend.models.UserRole;
+import com.nagar_sewak.backend.entities.Contractor;
+import com.nagar_sewak.backend.entities.User;
+import com.nagar_sewak.backend.entities.Role;
 import com.nagar_sewak.backend.repositories.ContractorRepository;
 import com.nagar_sewak.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class ContractorCreationService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEmail(dto.getEmail());
         user.setFullName(dto.getFullName());
-        user.setRoles(Set.of(UserRole.CONTRACTOR));
+        user.setRoles(Set.of(Role.CONTRACTOR));
         
         User savedUser = userRepository.save(user);
 
@@ -46,9 +46,9 @@ public class ContractorCreationService {
         contractor.setUser(savedUser);
         contractor.setCompanyName(dto.getCompanyName());
         contractor.setLicenseNo(dto.getLicenseNo());
-        contractor.setAvgRating(0.0);
+        contractor.setAvgRating(java.math.BigDecimal.ZERO);
         contractor.setTotalRatings(0);
-        contractor.setFlagged(false);
+        contractor.setIsFlagged(false);
         
         Contractor savedContractor = contractorRepository.save(contractor);
 

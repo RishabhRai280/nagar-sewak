@@ -116,6 +116,7 @@ export interface ComplaintData {
   lat: number;
   lng: number;
   projectId?: number;
+  project?: ProjectData | null;
   photoUrl?: string | null;
   createdAt?: string | null;
   resolvedAt?: string | null;
@@ -329,6 +330,13 @@ export async function fetchProjectById(projectId: number): Promise<ProjectData> 
   const project = await request<ProjectData>(`/projects/${projectId}`);
   return project;
 }
+
+export async function updateProject(projectId: number, data: Partial<ProjectData>): Promise<ProjectData> {
+  return request<ProjectData>(`/projects/${projectId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }, true);
+}
 export async function fetchComplaintById(id: number): Promise<ComplaintDetail> {
   const token = Token.get();
   if (!token) throw new Error("Authentication required. Please log in.");
@@ -398,7 +406,7 @@ export async function fetchAdminDashboard(): Promise<AdminDashboardData> {
     wardComplaintHeatmap: WardHeatmapStat[];
   };
 
-  const data = await request<AdminDashboardApiResponse>('/dashboard/admin', { method: 'GET' }, true);
+  const data = await request<AdminDashboardApiResponse>('/admin/dashboard', { method: 'GET' }, true);
 
   return {
     totalProjects: Number(data.totalProjects ?? 0),
@@ -434,4 +442,50 @@ export async function fetchContractorDashboard(): Promise<ContractorDashboardDat
       photoUrl: buildAssetUrl(complaint.photoUrl),
     })),
   };
+}
+// ================= TENDER API =================
+
+export interface TenderData {
+  id: number;
+  complaintId: number;
+  complaintTitle: string;
+  contractorId: number;
+  contractorName: string;
+  quoteAmount: number;
+  estimatedDays: number;
+  description: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface TenderSubmitData {
+  quoteAmount: number;
+  estimatedDays: number;
+  description: string;
+}
+
+export async function fetchOpenComplaints(): Promise<ComplaintData[]> {
+  // Fetch all complaints and filter for Pending ones without a project
+  // In a real app, this should be a dedicated backend endpoint
+  const complaints = await request<ComplaintData[]>('/complaints');
+  return complaints.filter(c => c.status === 'Pending' && !c.projectId && !c.project);
+}
+
+export async function submitTender(complaintId: number, data: TenderSubmitData): Promise<TenderData> {
+  return request<TenderData>(`/tenders/complaints/${complaintId}/submit`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }, true);
+}
+
+export async function fetchMyTenders(): Promise<TenderData[]> {
+  return request<TenderData[]>('/tenders/my', { method: 'GET' }, true);
+}
+
+export async function fetchTendersForComplaint(complaintId: number): Promise<TenderData[]> {
+  return request<TenderData[]>(`/tenders/complaints/${complaintId}`, { method: 'GET' }, true);
+}
+
+export async function acceptTender(tenderId: number): Promise<void> {
+  await request(`/tenders/${tenderId}/accept`, { method: 'POST' }, true);
 }

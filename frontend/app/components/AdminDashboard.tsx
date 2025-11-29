@@ -12,13 +12,19 @@ export default function AdminDashboardComponent() {
   const [data, setData] = useState<AdminDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingComplaints, setPendingComplaints] = useState<any[]>([]);
+  const [selectedComplaintForTender, setSelectedComplaintForTender] = useState<any | null>(null);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchAdminDashboard();
+      const [res, pending] = await Promise.all([
+        fetchAdminDashboard(),
+        import('@/lib/api').then(mod => mod.fetchOpenComplaints())
+      ]);
       setData(res);
+      setPendingComplaints(pending);
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Error loading dashboard");
@@ -127,6 +133,32 @@ export default function AdminDashboardComponent() {
             </div>
           </GlassCard>
 
+          {/* Pending Tenders / Complaints */}
+          <GlassCard title="Tender Management" icon={FileText}>
+            <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+              {pendingComplaints.length > 0 ? (
+                pendingComplaints.map(c => (
+                  <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-white/40 border border-white/50 hover:bg-white/60 transition">
+                    <div className="flex-1 mr-2">
+                      <p className="font-bold text-slate-800 line-clamp-1">{c.title}</p>
+                      <p className="text-xs text-slate-500 font-semibold">Severity: {c.severity}/5</p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedComplaintForTender(c)}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Review Tenders
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-500 text-center py-8">No pending complaints requiring tenders.</p>
+              )}
+            </div>
+          </GlassCard>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
           {/* Ward Hotspots */}
           <GlassCard title="Ward Hotspots" icon={MapPin}>
             <div className="space-y-3">
@@ -145,38 +177,55 @@ export default function AdminDashboardComponent() {
               {!data?.wardComplaintHeatmap?.length && <p className="text-slate-500 text-center">No ward activity data.</p>}
             </div>
           </GlassCard>
+
+          {/* Flagged Contractors */}
+          <GlassCard title="Contractor Compliance" icon={AlertTriangle}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="text-xs text-slate-500 uppercase bg-white/40 border-b border-slate-200">
+                  <tr>
+                    <th className="px-4 py-3 rounded-tl-lg">Company</th>
+                    <th className="px-4 py-3">License</th>
+                    <th className="px-4 py-3">Rating</th>
+                    <th className="px-4 py-3 rounded-tr-lg">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {data?.flaggedContractors?.map((c, i) => (
+                    <tr key={i} className="hover:bg-white/40 transition">
+                      <td className="px-4 py-3 font-bold text-slate-900">{c.companyName}</td>
+                      <td className="px-4 py-3 font-mono text-slate-600">{c.licenseNo}</td>
+                      <td className="px-4 py-3 font-bold text-red-600 flex items-center gap-1">{c.avgRating.toFixed(1)} <span className="text-yellow-500 text-xs">★</span></td>
+                      <td className="px-4 py-3"><span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] uppercase font-bold border border-red-200">Flagged</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(!data?.flaggedContractors?.length) && <p className="p-8 text-center text-slate-500 italic">No contractors currently flagged.</p>}
+            </div>
+          </GlassCard>
         </div>
 
-        {/* Flagged Contractors */}
-        <GlassCard title="Contractor Compliance" icon={AlertTriangle} className="mb-10">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left border-collapse">
-              <thead className="text-xs text-slate-500 uppercase bg-white/40 border-b border-slate-200">
-                <tr>
-                  <th className="px-4 py-3 rounded-tl-lg">Company</th>
-                  <th className="px-4 py-3">License</th>
-                  <th className="px-4 py-3">Rating</th>
-                  <th className="px-4 py-3 rounded-tr-lg">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {data?.flaggedContractors?.map((c, i) => (
-                  <tr key={i} className="hover:bg-white/40 transition">
-                    <td className="px-4 py-3 font-bold text-slate-900">{c.companyName}</td>
-                    <td className="px-4 py-3 font-mono text-slate-600">{c.licenseNo}</td>
-                    <td className="px-4 py-3 font-bold text-red-600 flex items-center gap-1">{c.avgRating.toFixed(1)} <span className="text-yellow-500 text-xs">★</span></td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] uppercase font-bold border border-red-200">Flagged</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {(!data?.flaggedContractors?.length) && <p className="p-8 text-center text-slate-500 italic">No contractors currently flagged.</p>}
-          </div>
-        </GlassCard>
+        {selectedComplaintForTender && (
+          <TenderReviewModalWrapper
+            complaintId={selectedComplaintForTender.id}
+            complaintTitle={selectedComplaintForTender.title}
+            onClose={() => setSelectedComplaintForTender(null)}
+            onSuccess={() => {
+              loadData();
+              alert("Tender accepted successfully!");
+            }}
+          />
+        )}
+
       </main>
     </div>
   );
 }
+
+import dynamic from 'next/dynamic';
+import { FileText } from "lucide-react";
+const TenderReviewModalWrapper = dynamic(() => import('./TenderReviewModal'), { ssr: false });
 
 function KpiCard({ label, value, icon: Icon, color }: any) {
   const colors = {

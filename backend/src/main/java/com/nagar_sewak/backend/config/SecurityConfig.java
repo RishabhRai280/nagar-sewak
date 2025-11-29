@@ -40,7 +40,7 @@ public class SecurityConfig {
                     
                     // ================= ADMIN/CONTRACTOR ACCESS =================
                     .requestMatchers(POST, "/projects").hasAuthority(Role.ADMIN.name())
-                    .requestMatchers("/dashboard/admin").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                    .requestMatchers("/admin/**").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
                     .requestMatchers("/dashboard/contractor").hasAuthority(Role.CONTRACTOR.name())
                     
                     // ================= CITIZEN ACCESS FIX =================
@@ -50,6 +50,12 @@ public class SecurityConfig {
                     // ================= CONTRACTOR/ADMIN UPDATE =================
                     .requestMatchers(PUT, "/projects/**").hasAnyAuthority(Role.ADMIN.name(), Role.CONTRACTOR.name())
                     .requestMatchers(PUT, "/complaints/**").hasAnyAuthority(Role.ADMIN.name(), Role.CONTRACTOR.name())
+
+                    // ================= TENDER ACCESS =================
+                    .requestMatchers("/tenders/complaints/*/submit").hasAuthority(Role.CONTRACTOR.name())
+                    .requestMatchers("/tenders/my").hasAuthority(Role.CONTRACTOR.name())
+                    .requestMatchers("/tenders/*/accept").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
+                    .requestMatchers("/tenders/complaints/*").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.CONTRACTOR.name())
 
                     // ================= CITIZEN WRITE/REPORTING =================
                     .requestMatchers(POST, "/complaints").hasAuthority(Role.CITIZEN.name())
