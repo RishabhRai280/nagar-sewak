@@ -3,14 +3,14 @@
 import { Link } from '@/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from '@/lib/api';
+import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from '@/lib/api/api';
 import {
   Menu, X, LogOut, MapPin, LayoutDashboard,
   ChevronDown, User as UserIcon, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
-import NotificationWrapper from './NotificationWrapper';
+import NotificationWrapper from '../notifications/NotificationWrapper';
 import { useTranslations } from 'next-intl';
 
 export default function Header() {

@@ -12,7 +12,7 @@ import {
   GeoJSON,
 } from "react-leaflet";
 import L, { ZoomPanOptions } from "leaflet";
-import { ComplaintData, ProjectData, buildAssetUrl } from "@/lib/api";
+import { ComplaintData, ProjectData, buildAssetUrl } from "@/lib/api/api";
 import {
   AlertTriangle,
   CheckCircle,
@@ -87,7 +87,7 @@ import MapEnhancements from "./MapEnhancements";
 import MapLayerControl, { MapLayer, MapOverlay } from "./MapLayerControl";
 import MapLayerProvider from "./MapLayerProvider";
 import MapLegend from "./MapLegend";
-import { sampleWardBoundaries, samplePopulationData, sampleInfrastructureData } from "@/lib/sampleWardData";
+import { sampleWardBoundaries, samplePopulationData, sampleInfrastructureData } from "@/lib/data/sampleWardData";
 
 // --- Map Content Component ---
 

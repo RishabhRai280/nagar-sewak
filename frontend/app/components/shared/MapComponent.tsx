@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { fetchMapData, MapData } from '@/lib/api';
+import { fetchMapData, MapData } from '@/lib/api/api';
 
 // Fix for Leaflet default icon in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;

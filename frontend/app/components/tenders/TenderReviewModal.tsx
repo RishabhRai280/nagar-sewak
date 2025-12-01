@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Clock, DollarSign, User } from 'lucide-react';
-import { fetchTendersForComplaint, acceptTender, TenderData } from '@/lib/api';
+import { fetchTendersForComplaint, acceptTender, TenderData } from '@/lib/api/api';
 
 interface TenderReviewModalProps {
     complaintId: number;

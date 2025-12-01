@@ -1,4 +1,4 @@
-import CitizenDashboardLayout from "@/app/components/CitizenDashboardLayout";
+import CitizenDashboardLayout from "@/app/components/dashboards/CitizenDashboardLayout";
 import { Bell, Info, CheckCircle, AlertTriangle } from "lucide-react";
 
 export default function CitizenNotificationsPage() {

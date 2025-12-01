@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from 'next/navigation';
-import Sidebar from "./Sidebar";
+import Sidebar from "../shared/Sidebar";
 import Link from "next/link";
-import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api";
+import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api/api";
 import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle, Clock, Plus, Eye, MapPin } from 'lucide-react';
-import NotificationWrapper from "./NotificationWrapper";
+import NotificationWrapper from "../notifications/NotificationWrapper";
 
 interface DashboardComplaint {
   id: number;

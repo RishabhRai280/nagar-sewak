@@ -1,7 +1,7 @@
 // frontend/app/rate/[projectId]/page.tsx
 "use client";
 
-import RatingForm from '../../../components/RatingForm';
+import RatingForm from '../../../components/shared/RatingForm';
 import { motion } from 'framer-motion';
 
 export default function RateProjectPage({ params }: { params: { projectId: string } }) {

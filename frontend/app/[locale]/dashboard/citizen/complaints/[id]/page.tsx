@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import { Token, fetchComplaintById, ComplaintDetail } from "@/lib/api";
+import { Token, fetchComplaintById, ComplaintDetail } from "@/lib/api/api";
 import { ArrowLeft, MapPin, Calendar, User, AlertCircle, CheckCircle, Clock, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import ComplaintVoting from "@/app/components/ComplaintVoting";
-import EnhancedComplaintComments from "@/app/components/EnhancedComplaintComments";
+import ComplaintVoting from "@/app/components/complaints/ComplaintVoting";
+import EnhancedComplaintComments from "@/app/components/complaints/EnhancedComplaintComments";
 
-const MiniMap = dynamic(() => import("@/app/components/MiniMap"), { ssr: false });
+const MiniMap = dynamic(() => import("@/app/components/shared/MiniMap"), { ssr: false });
 
 export default function ComplaintDetailPage() {
   const router = useRouter();

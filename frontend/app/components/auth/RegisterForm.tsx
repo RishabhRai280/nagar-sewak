@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
-import { register, fetchCurrentUserProfile, UserStore } from "@/lib/api";
+import { register, fetchCurrentUserProfile, UserStore } from "@/lib/api/api";
 import { User, Mail, Lock, AlertCircle, ArrowRight, CheckCircle, Check } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

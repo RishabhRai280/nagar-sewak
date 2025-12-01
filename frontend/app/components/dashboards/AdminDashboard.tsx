@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from "framer-motion";
-import { fetchAdminDashboard, AdminDashboardData, Token, UserStore } from "@/lib/api";
+import { fetchAdminDashboard, AdminDashboardData, Token, UserStore } from "@/lib/api/api";
 import { LogOut, BarChart3, AlertTriangle, Clock, DollarSign, MapPin, Activity, RefreshCcw } from 'lucide-react';
-import ContractorManagement from './ContractorManagement';
+import ContractorManagement from '../contractors/ContractorManagement';
 
 export default function AdminDashboardComponent() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function AdminDashboardComponent() {
     try {
       const [res, pending] = await Promise.all([
         fetchAdminDashboard(),
-        import('@/lib/api').then(mod => mod.fetchOpenComplaints())
+        import('@/lib/api/api').then(mod => mod.fetchOpenComplaints())
       ]);
       setData(res);
       setPendingComplaints(pending);

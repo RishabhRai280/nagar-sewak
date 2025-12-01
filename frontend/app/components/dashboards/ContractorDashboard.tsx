@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Token, fetchContractorDashboard, ContractorDashboardData, UserStore } from "@/lib/api";
+import { Token, fetchContractorDashboard, ContractorDashboardData, UserStore } from "@/lib/api/api";
 import { Construction, AlertTriangle, CheckCircle, Star, Eye, RefreshCcw, LogOut } from 'lucide-react';
 import Link from "next/link";
 
@@ -27,8 +27,8 @@ export default function ContractorDashboardComponent() {
         try {
             const [fetchedData, openData, tendersData] = await Promise.all([
                 fetchContractorDashboard(),
-                import('@/lib/api').then(mod => mod.fetchOpenComplaints()),
-                import('@/lib/api').then(mod => mod.fetchMyTenders()).catch(() => [])
+                import('@/lib/api/api').then(mod => mod.fetchOpenComplaints()),
+                import('@/lib/api/api').then(mod => mod.fetchMyTenders()).catch(() => [])
             ]);
             setData(fetchedData);
             setOpenComplaints(openData);
@@ -489,7 +489,7 @@ export default function ContractorDashboardComponent() {
 
 // Helper wrapper to lazy load the modal
 import dynamic from 'next/dynamic';
-const TenderModalWrapper = dynamic(() => import('./TenderModal'), { ssr: false });
+const TenderModalWrapper = dynamic(() => import('../tenders/TenderModal'), { ssr: false });
 
 function StatCard({ label, value, icon: Icon, color, suffix = "" }: any) {
     const colors = {
@@ -551,7 +551,7 @@ function ProgressUpdateModal({ project, onClose, onSuccess }: any) {
             photos.forEach(photo => formData.append('photos', photo));
 
             // Call API to update project progress
-            await import('@/lib/api').then(mod => 
+            await import('@/lib/api/api').then(mod => 
                 mod.updateProjectProgress(project.id, formData)
             );
 

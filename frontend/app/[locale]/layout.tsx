@@ -6,8 +6,8 @@ import "../globals.css";
 // NOTE: Header and Footer imports moved to DynamicLayoutRenderer
 // import Header from '../components/Header'; 
 // import Footer from '../components/Footer'; 
-import DynamicLayoutRenderer from "../components/DynamicLayoutRenderer";
-import { ErrorBoundary } from "../components/ErrorBoundary";
+import DynamicLayoutRenderer from "../components/shared/DynamicLayoutRenderer";
+import { ErrorBoundary } from "../components/shared/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

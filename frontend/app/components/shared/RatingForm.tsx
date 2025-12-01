@@ -4,7 +4,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchProjectById, ProjectData, submitRating, Token } from '@/lib/api';
+import { fetchProjectById, ProjectData, submitRating, Token } from '@/lib/api/api';
 import { motion } from "framer-motion";
 import { Star, Loader, AlertCircle, CheckCircle } from 'lucide-react';
 

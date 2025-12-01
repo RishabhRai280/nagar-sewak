@@ -15,7 +15,7 @@ import {
   Users,
   BarChart3,
 } from "lucide-react";
-import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from "@/lib/api";
+import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from "@/lib/api/api";
 
 type SidebarRole = "citizen" | "admin" | "contractor";
 

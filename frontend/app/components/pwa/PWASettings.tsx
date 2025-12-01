@@ -12,7 +12,7 @@ import {
   getCacheSize,
   clearCache,
   syncOfflineData,
-} from '@/lib/pwa';
+} from '@/lib/utils/pwa';
 
 export default function PWASettings() {
   const [isInstalled, setIsInstalled] = useState(false);

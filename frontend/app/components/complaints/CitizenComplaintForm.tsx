@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { submitComplaint, Token } from "@/lib/api";
-import { validateComplaint, sanitizeInput } from "@/lib/validation";
+import { submitComplaint, Token } from "@/lib/api/api";
+import { validateComplaint, sanitizeInput } from "@/lib/utils/validation";
 import { MapPin, Upload, AlertCircle, Loader, CheckCircle, FileText, ShieldAlert, X, ChevronRight, Map as MapIcon, Navigation } from 'lucide-react';
 
-const MiniMap = dynamic(() => import("./MiniMap"), { ssr: false });
-const LocationPicker = dynamic(() => import("./LocationPicker"), { ssr: false });
+const MiniMap = dynamic(() => import("../shared/MiniMap"), { ssr: false });
+const LocationPicker = dynamic(() => import("../shared/LocationPicker"), { ssr: false });
 
 export default function CitizenComplaintForm() {
   const router = useRouter();

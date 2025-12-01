@@ -1,8 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Sidebar from '@/app/components/Sidebar'; // Import Sidebar
-import AdminDashboardComponent from '@/app/components/AdminDashboard'; // Import Dashboard component
+import Sidebar from '@/app/components/shared/Sidebar'; // Import Sidebar
+import AdminDashboardComponent from '@/app/components/dashboards/AdminDashboard'; // Import Dashboard component
 
 // Dynamic loading is preserved, but we wrap the content with the Sidebar here
 const DynamicAdminDashboardContent = dynamic(

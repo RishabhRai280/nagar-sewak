@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, DollarSign, Clock, FileText, Upload, File, Trash2 } from 'lucide-react';
-import { submitTender, TenderSubmitData } from '@/lib/api';
+import { submitTender, TenderSubmitData } from '@/lib/api/api';
 
 interface TenderModalProps {
     complaintId: number;
