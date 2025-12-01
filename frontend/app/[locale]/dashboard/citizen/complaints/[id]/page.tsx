@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { Token, fetchComplaintById, ComplaintDetail } from "@/lib/api";
 import { ArrowLeft, MapPin, Calendar, User, AlertCircle, CheckCircle, Clock, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import ComplaintVoting from "@/app/components/ComplaintVoting";
+import EnhancedComplaintComments from "@/app/components/EnhancedComplaintComments";
 
 const MiniMap = dynamic(() => import("@/app/components/MiniMap"), { ssr: false });
 
@@ -192,6 +194,26 @@ export default function ComplaintDetailPage() {
               <div className="mt-3 lg:mt-4 text-xs lg:text-sm text-slate-600 font-mono bg-slate-50 p-2.5 lg:p-3 rounded-lg lg:rounded-xl">
                 <span className="font-bold">Coordinates:</span> {complaint.lat?.toFixed(6)}, {complaint.lng?.toFixed(6)}
               </div>
+            </motion.div>
+
+            {/* Voting Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
+            >
+              <ComplaintVoting complaintId={complaint.id} />
+            </motion.div>
+
+            {/* Comments Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
+            >
+              <EnhancedComplaintComments complaintId={complaint.id} />
             </motion.div>
           </div>
 

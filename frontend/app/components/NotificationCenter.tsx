@@ -37,9 +37,9 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
   const fetchNotifications = async (pageNum: number) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwtToken");
       if (!token) {
-        console.log("No token found, skipping notification fetch");
+        // No token - user not logged in
         setLoading(false);
         return;
       }
@@ -60,10 +60,14 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
         setHasMore(!data.last);
         setPage(pageNum);
       } else {
-        console.error("Failed to fetch notifications, status:", response.status);
+        // Silently fail - notification service may not be fully configured
+        setNotifications([]);
+        setHasMore(false);
       }
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+      // Silently fail - notification service may not be fully configured
+      setNotifications([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -71,7 +75,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
 
   const markAsRead = async (id: number) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwtToken");
       if (!token) return;
 
       const response = await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
@@ -94,7 +98,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwtToken");
       if (!token) return;
 
       const response = await fetch("http://localhost:8080/api/notifications/read-all", {
@@ -115,7 +119,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
 
   const deleteNotification = async (id: number) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwtToken");
       if (!token) return;
 
       const response = await fetch(`http://localhost:8080/api/notifications/${id}`, {
@@ -204,39 +208,8 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
             </div>
 
             {/* Actions */}
-            <div className="p-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between gap-2">
-              <button
-                onClick={async () => {
-                  try {
-                    const token = localStorage.getItem("token");
-                    if (!token) {
-                      alert("Please login to create test notifications");
-                      return;
-                    }
-
-                    const response = await fetch("http://localhost:8080/api/notifications/test", {
-                      method: "POST",
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
-                    });
-                    
-                    if (response.ok) {
-                      fetchNotifications(0);
-                      onNotificationRead();
-                    } else {
-                      console.error("Failed to create test notification");
-                    }
-                  } catch (error) {
-                    console.error("Failed to create test notification:", error);
-                  }
-                }}
-                className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg font-medium transition"
-              >
-                + Test
-              </button>
-              
-              {notifications.some((n) => !n.isRead) && (
+            {notifications.some((n) => !n.isRead) && (
+              <div className="p-3 border-b border-gray-200 bg-gray-50 flex items-center justify-end">
                 <button
                   onClick={markAllAsRead}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
@@ -244,8 +217,8 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
                   <CheckCheck size={16} />
                   Mark all as read
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Notifications List */}
             <div className="flex-1 overflow-y-auto">

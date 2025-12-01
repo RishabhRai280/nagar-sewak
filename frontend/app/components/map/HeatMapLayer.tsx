@@ -22,7 +22,7 @@ interface HeatMapLayerProps {
 
 export default function HeatMapLayer({ points, options = {} }: HeatMapLayerProps) {
   const map = useMap();
-  const heatLayerRef = useRef<L.HeatLayer | null>(null);
+  const heatLayerRef = useRef<any>(null);
 
   useEffect(() => {
     if (!map) return;

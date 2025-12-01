@@ -61,6 +61,20 @@ public class SecurityConfig {
                     .requestMatchers(POST, "/complaints").hasAuthority(Role.CITIZEN.name())
                     .requestMatchers(POST, "/ratings").hasAuthority(Role.CITIZEN.name()) 
 
+                    // ================= VOTING & COMMENTS (ALL AUTHENTICATED USERS) =================
+                    .requestMatchers(GET, "/complaints/*/votes").authenticated()
+                    .requestMatchers(POST, "/complaints/*/vote").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/vote").authenticated()
+                    .requestMatchers(GET, "/complaints/*/comments").authenticated()
+                    .requestMatchers(POST, "/complaints/*/comments").authenticated()
+                    .requestMatchers(PUT, "/complaints/*/comments/*").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/comments/*").authenticated()
+                    .requestMatchers(POST, "/complaints/*/comments/*/reactions").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/comments/*/reactions").authenticated()
+                    .requestMatchers(GET, "/complaints/*/comments/*/reactions").authenticated()
+                    .requestMatchers(POST, "/complaints/*/comments/*/attachments").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/comments/*/attachments/*").authenticated()
+
                     // Default Fallback: all other requests MUST be authenticated
                     .anyRequest().authenticated()
             )

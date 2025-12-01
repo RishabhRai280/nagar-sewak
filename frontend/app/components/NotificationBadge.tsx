@@ -22,9 +22,9 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
 
   const fetchUnreadCount = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("jwtToken");
       if (!token) {
-        console.log("No token found, skipping notification fetch");
+        // No token - user not logged in
         return;
       }
 
@@ -47,10 +47,12 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
         
         setCount(newCount);
       } else {
-        console.error("Failed to fetch unread count, status:", response.status);
+        // Silently fail - notification service may not be fully configured
+        setCount(0);
       }
     } catch (error) {
-      console.error("Failed to fetch unread count:", error);
+      // Silently fail - notification service may not be fully configured
+      setCount(0);
     }
   };
 

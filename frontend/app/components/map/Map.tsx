@@ -84,6 +84,10 @@ import LocationSearch from "./LocationSearch";
 import MarkerClusterGroup from "./MarkerClusterGroup";
 import HeatMapLayer from "./HeatMapLayer";
 import MapEnhancements from "./MapEnhancements";
+import MapLayerControl, { MapLayer, MapOverlay } from "./MapLayerControl";
+import MapLayerProvider from "./MapLayerProvider";
+import MapLegend from "./MapLegend";
+import { sampleWardBoundaries, samplePopulationData, sampleInfrastructureData } from "@/lib/sampleWardData";
 
 // --- Map Content Component ---
 
@@ -102,11 +106,23 @@ function MapContent({
   const [boundaryData, setBoundaryData] = useState<any>(null);
   const [clusteringEnabled, setClusteringEnabled] = useState(true);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  
+  // Layer control states
+  const [currentLayer, setCurrentLayer] = useState<MapLayer>("osm");
+  const [activeOverlays, setActiveOverlays] = useState<MapOverlay[]>([]);
 
   const handleLocationSelect = (lat: number, lng: number, zoom: number = 13, geojson?: any) => {
     setTargetLocation({ lat, lng, zoom });
     setBoundaryData(geojson);
     setSelectedItem(null); // Clear item selection when searching for a place
+  };
+
+  const handleOverlayToggle = (overlay: MapOverlay) => {
+    setActiveOverlays(prev =>
+      prev.includes(overlay)
+        ? prev.filter(o => o !== overlay)
+        : [...prev, overlay]
+    );
   };
 
   const t = useTranslations('map');
@@ -125,9 +141,29 @@ function MapContent({
       >
         {/* Position zoom controls lower if needed, but usually topright is fine. Can add style if needed. */}
         <ZoomControl position="bottomright" />
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        
+        {/* Map Layer Provider - Handles base layers and overlays */}
+        <MapLayerProvider
+          layer={currentLayer}
+          activeOverlays={activeOverlays}
+          wardBoundaries={sampleWardBoundaries}
+          populationData={samplePopulationData}
+          infrastructureData={sampleInfrastructureData}
+          complaints={items
+            .filter(item => item.kind === 'complaint')
+            .map(item => ({
+              lat: (item as any).lat,
+              lng: (item as any).lng,
+              status: (item as any).status,
+              createdAt: (item as any).createdAt || new Date().toISOString(),
+            }))}
+          projects={items
+            .filter(item => item.kind === 'project')
+            .map(item => ({
+              lat: (item as any).lat,
+              lng: (item as any).lng,
+              status: (item as any).status,
+            }))}
         />
 
         {/* Render Boundary if available */}
@@ -272,8 +308,19 @@ function MapContent({
         onHeatmapToggle={setHeatmapEnabled}
       />
 
+      {/* Map Layer Control */}
+      <MapLayerControl
+        currentLayer={currentLayer}
+        onLayerChange={setCurrentLayer}
+        activeOverlays={activeOverlays}
+        onOverlayToggle={handleOverlayToggle}
+      />
+
       {/* Location Search Overlay */}
       <LocationSearch onLocationSelect={handleLocationSelect} />
+
+      {/* Map Legend */}
+      <MapLegend activeOverlays={activeOverlays} />
 
       {/* Map Overlay Gradient for better integration */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_10px_0_30px_rgba(0,0,0,0.1)] z-[400]"></div>

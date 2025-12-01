@@ -96,19 +96,23 @@ export default function Header() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 bg-white/20 backdrop-blur-md border-b border-slate-200/50 shadow-sm h-16"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-16 ${
+        scrolled 
+          ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-slate-200/80' 
+          : 'bg-white/80 backdrop-blur-lg border-b border-white/40 shadow-md'
+      }`}
     >
       <nav className="h-full max-w-full px-4 lg:px-6">
         <div className="flex justify-between items-center h-full">
 
           {/* --- LOGO --- */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <MapPin className="text-white" size={18} />
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40 transition-all">
+              <MapPin className="text-white" size={20} />
             </div>
             <div className="text-xl font-bold">
-              <span className="text-slate-900">Nagar</span>
-              <span className="text-blue-600">Sewak</span>
+              <span className="text-slate-900 drop-shadow-sm">Nagar</span>
+              <span className="text-blue-600 drop-shadow-sm">Sewak</span>
             </div>
           </Link>
 
@@ -126,12 +130,11 @@ export default function Header() {
           key={link.path}
           href={link.path}
           className={`
-            px-4 py-2 text-[13px] font-medium text-center rounded-[18px]
-            transition-all
-            backdrop-blur-md bg-white/20 border border-white/30
+            px-4 py-2 text-[13px] font-semibold text-center rounded-xl
+            transition-all duration-200
             ${active
-              ? 'text-blue-600 bg-white/40 shadow-sm'
-              : 'text-slate-600 hover:bg-white/30 hover:shadow-sm hover:text-blue-600'
+              ? 'text-white bg-blue-600 shadow-lg shadow-blue-500/30'
+              : 'text-slate-700 bg-white/60 hover:bg-white/80 hover:shadow-md hover:text-blue-600 border border-slate-200/50'
             }
           `}
         >
@@ -155,12 +158,12 @@ export default function Header() {
                 <div className="relative" ref={profileRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/60 transition-all border border-transparent hover:border-slate-200/50"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-md">
                       {getUserInitials(user)}
                     </div>
-                    <ChevronDown size={14} className={`text-slate-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={16} className={`text-slate-600 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown Menu */}
@@ -201,13 +204,13 @@ export default function Header() {
                 <>
                   <Link
                     href="/login"
-                    className="text-sm font-medium text-slate-600 hover:text-blue-600 px-3"
+                    className="text-sm font-semibold text-slate-700 hover:text-blue-600 px-4 py-2 rounded-lg hover:bg-white/60 transition-all"
                   >
                     {t('login')}
                   </Link>
                   <Link
                     href="/register"
-                    className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all"
                   >
                     {t('register')}
                   </Link>
