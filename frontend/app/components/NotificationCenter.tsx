@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Bell, Check, Trash2, CheckCheck } from "lucide-react";
+import { X, Bell, Trash2, CheckCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -37,48 +37,13 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
   const fetchNotifications = async (pageNum: number) => {
     setLoading(true);
     try {
-      // le_bhai_mock_hai - Mock data for now
-      const mockNotifications = [
-        {
-          id: 1,
-          type: "COMPLAINT_STATUS_CHANGED",
-          priority: "HIGH",
-          title: "Complaint Status Updated",
-          message: "Your complaint 'Broken Street Light' has been marked as In Progress",
-          actionUrl: "/dashboard/citizen/complaints/1",
-          isRead: false,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: 2,
-          type: "TENDER_BID_ACCEPTED",
-          priority: "HIGH",
-          title: "Tender Accepted!",
-          message: "Your bid of ₹50,000 has been accepted for the road repair project",
-          actionUrl: "/complaints/5/tenders",
-          isRead: false,
-          createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: 3,
-          type: "SYSTEM_ANNOUNCEMENT",
-          priority: "MEDIUM",
-          title: "Welcome to Notifications!",
-          message: "Stay updated with real-time notifications about your complaints and projects",
-          actionUrl: null,
-          isRead: false,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        },
-      ];
-
-      if (pageNum === 0) {
-        setNotifications(mockNotifications);
-      }
-      setHasMore(false);
-      setPage(pageNum);
-      
-      /* Real API call - uncomment when backend is ready
       const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("No token found, skipping notification fetch");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`http://localhost:8080/api/notifications?page=${pageNum}&size=20`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -94,8 +59,9 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
         }
         setHasMore(!data.last);
         setPage(pageNum);
+      } else {
+        console.error("Failed to fetch notifications, status:", response.status);
       }
-      */
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     } finally {
@@ -105,14 +71,9 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
 
   const markAsRead = async (id: number) => {
     try {
-      // le_bhai_mock_hai - Mock implementation
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      );
-      onNotificationRead();
-      
-      /* Real API call - uncomment when backend is ready
       const token = localStorage.getItem("token");
+      if (!token) return;
+
       const response = await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
         method: "PUT",
         headers: {
@@ -126,7 +87,6 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
         );
         onNotificationRead();
       }
-      */
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
@@ -134,12 +94,9 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
 
   const markAllAsRead = async () => {
     try {
-      // le_bhai_mock_hai - Mock implementation
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      onNotificationRead();
-      
-      /* Real API call - uncomment when backend is ready
       const token = localStorage.getItem("token");
+      if (!token) return;
+
       const response = await fetch("http://localhost:8080/api/notifications/read-all", {
         method: "PUT",
         headers: {
@@ -151,7 +108,6 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
         onNotificationRead();
       }
-      */
     } catch (error) {
       console.error("Failed to mark all as read:", error);
     }
@@ -159,12 +115,9 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
 
   const deleteNotification = async (id: number) => {
     try {
-      // le_bhai_mock_hai - Mock implementation
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-      onNotificationRead();
-      
-      /* Real API call - uncomment when backend is ready
       const token = localStorage.getItem("token");
+      if (!token) return;
+
       const response = await fetch(`http://localhost:8080/api/notifications/${id}`, {
         method: "DELETE",
         headers: {
@@ -176,7 +129,6 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
         setNotifications((prev) => prev.filter((n) => n.id !== id));
         onNotificationRead();
       }
-      */
     } catch (error) {
       console.error("Failed to delete notification:", error);
     }
@@ -256,33 +208,25 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
               <button
                 onClick={async () => {
                   try {
-                    // le_bhai_mock_hai - Add a new mock notification
-                    const newNotification = {
-                      id: Date.now(),
-                      type: "SYSTEM_ANNOUNCEMENT",
-                      priority: "MEDIUM",
-                      title: "Test Notification",
-                      message: "This is a test notification created at " + new Date().toLocaleTimeString(),
-                      actionUrl: null,
-                      isRead: false,
-                      createdAt: new Date().toISOString(),
-                    };
-                    setNotifications((prev) => [newNotification, ...prev]);
-                    onNotificationRead();
-                    
-                    /* Real API call - uncomment when backend is ready
                     const token = localStorage.getItem("token");
+                    if (!token) {
+                      alert("Please login to create test notifications");
+                      return;
+                    }
+
                     const response = await fetch("http://localhost:8080/api/notifications/test", {
                       method: "POST",
                       headers: {
                         Authorization: `Bearer ${token}`,
                       },
                     });
+                    
                     if (response.ok) {
                       fetchNotifications(0);
                       onNotificationRead();
+                    } else {
+                      console.error("Failed to create test notification");
                     }
-                    */
                   } catch (error) {
                     console.error("Failed to create test notification:", error);
                   }

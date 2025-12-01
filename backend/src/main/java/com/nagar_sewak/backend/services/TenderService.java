@@ -22,6 +22,7 @@ public class TenderService {
     private final ContractorRepository contractorRepo;
     private final ProjectRepository projectRepo;
     private final UserRepository userRepo;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     private final Path uploadBase = Paths.get("uploads/tenders");
 
@@ -94,6 +95,28 @@ public class TenderService {
     }
 
     @Transactional
+    public TenderDTO publishTenderOpportunity(Long complaintId, TenderDTO dto) {
+        Complaint complaint = complaintRepo.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
+        Tender tender = new Tender();
+        tender.setComplaint(complaint);
+        tender.setTitle(dto.getTitle() != null ? dto.getTitle() : "Tender for: " + complaint.getTitle());
+        tender.setDescription(dto.getDescription() != null ? dto.getDescription() : complaint.getDescription());
+        tender.setBudget(dto.getBudget());
+        tender.setStartDate(dto.getStartDate());
+        tender.setEndDate(dto.getEndDate());
+        tender.setStatus("OPEN");
+
+        Tender saved = tenderRepo.save(tender);
+        
+        // Publish event to notify all contractors
+        eventPublisher.publishEvent(new com.nagar_sewak.backend.events.TenderPublishedEvent(this, saved));
+        
+        return mapToDTO(saved);
+    }
+
+    @Transactional
     public void acceptTender(Long tenderId) {
         Tender tender = tenderRepo.findById(tenderId)
                 .orElseThrow(() -> new RuntimeException("Tender not found"));
@@ -103,8 +126,13 @@ public class TenderService {
         }
 
         // 1. Update this tender to ACCEPTED
+        String oldStatus = tender.getStatus();
         tender.setStatus("ACCEPTED");
         tenderRepo.save(tender);
+
+        // Publish event for tender acceptance
+        eventPublisher.publishEvent(new com.nagar_sewak.backend.events.TenderStatusChangedEvent(
+            this, tender, oldStatus, "ACCEPTED", null));
 
         // 2. Reject other tenders for this complaint
         List<Tender> others = tenderRepo.findByComplaintId(tender.getComplaint().getId());
@@ -139,11 +167,19 @@ public class TenderService {
         dto.setId(tender.getId());
         dto.setComplaintId(tender.getComplaint().getId());
         dto.setComplaintTitle(tender.getComplaint().getTitle());
-        dto.setContractorId(tender.getContractor().getId());
-        dto.setContractorName(tender.getContractor().getCompanyName());
-        dto.setContractorCompany(tender.getContractor().getCompanyName());
-        dto.setContractorLicense(tender.getContractor().getLicenseNo());
-        dto.setContractorAvgRating(tender.getContractor().getAvgRating() != null ? tender.getContractor().getAvgRating().doubleValue() : 0.0);
+        dto.setTitle(tender.getTitle());
+        dto.setBudget(tender.getBudget());
+        dto.setStartDate(tender.getStartDate());
+        dto.setEndDate(tender.getEndDate());
+        
+        if (tender.getContractor() != null) {
+            dto.setContractorId(tender.getContractor().getId());
+            dto.setContractorName(tender.getContractor().getCompanyName());
+            dto.setContractorCompany(tender.getContractor().getCompanyName());
+            dto.setContractorLicense(tender.getContractor().getLicenseNo());
+            dto.setContractorAvgRating(tender.getContractor().getAvgRating() != null ? tender.getContractor().getAvgRating().doubleValue() : 0.0);
+        }
+        
         dto.setQuoteAmount(tender.getQuoteAmount());
         dto.setEstimatedDays(tender.getEstimatedDays());
         dto.setDescription(tender.getDescription());

@@ -28,6 +28,7 @@ public class ProjectDetailDTO {
     private String progressPhotos;
     private ContractorInfo contractor;
     private List<ComplaintInfo> relatedComplaints;
+    private List<MilestoneInfo> milestones;
 
     @Data
     @Builder
@@ -51,5 +52,19 @@ public class ProjectDetailDTO {
         private String status;
         private String reportedBy;
         private LocalDateTime reportedAt;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MilestoneInfo {
+        private Long id;
+        private Integer percentage;
+        private String notes;
+        private List<String> photoUrls;
+        private String status;
+        private LocalDateTime completedAt;
+        private String updatedBy;
     }
 }

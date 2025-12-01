@@ -96,12 +96,12 @@ export default function Sidebar() {
 
   if (loading) {
     return (
-      <aside className="w-72 bg-white/50 border-r border-white/40 hidden lg:flex flex-col animate-pulse backdrop-blur-xl pt-28 h-screen sticky top-0">
-        <div className="p-8">
-          <div className="h-8 bg-slate-200/50 rounded w-32 mb-6" />
-          <div className="space-y-4">
-             <div className="h-12 bg-slate-200/50 rounded-xl" />
-             <div className="h-12 bg-slate-200/50 rounded-xl" />
+      <aside className="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col animate-pulse pt-6 min-h-screen sticky top-0">
+        <div className="p-4">
+          <div className="h-6 bg-slate-200 rounded w-24 mb-4" />
+          <div className="space-y-2">
+             <div className="h-10 bg-slate-200 rounded" />
+             <div className="h-10 bg-slate-200 rounded" />
           </div>
         </div>
       </aside>
@@ -109,70 +109,48 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className={`${collapsed ? 'w-20' : 'w-72'} bg-white/70 backdrop-blur-3xl border-r border-white/50 shadow-2xl sticky top-0 min-h-screen flex-col hidden lg:flex z-40 transition-all duration-500 ease-in-out`}>
-      {/* Collapse Toggle Arrow - At Top */}
-      <div className="px-4 py-6 mt-20 border-b border-white/40 flex items-center justify-between">
-        <div className={`flex items-center gap-2 transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">
-            {effectiveRole}
-          </span>
-        </div>
+    <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-white border-r border-slate-200 sticky top-0 min-h-screen flex-col hidden lg:flex transition-all duration-300`}>
+      {/* Header */}
+      <div className="px-4 py-3 mt-16 border-b border-slate-200 flex items-center justify-between">
+        <span className={`text-xs font-semibold text-slate-500 uppercase ${collapsed ? 'hidden' : 'block'}`}>
+          {effectiveRole}
+        </span>
         
-        {/* Arrow Toggle Button */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-2 hover:bg-white/50 rounded-lg transition-all duration-300 group"
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="p-1 hover:bg-slate-100 rounded"
+          title={collapsed ? "Expand" : "Collapse"}
         >
           <svg 
-            className={`w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-all duration-500 ${collapsed ? 'rotate-180' : 'rotate-0'}`} 
+            className={`w-4 h-4 text-slate-400 transition-transform ${collapsed ? 'rotate-180' : ''}`} 
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const targetPath = item.href.split("#")[0];
           const isMapLink = targetPath === '/map';
           const isActive = isMapLink ? pathname === targetPath : pathname.startsWith(targetPath);
 
           return (
-            <Link key={item.label} href={item.href} className="block group/link" title={collapsed ? item.label : undefined}>
+            <Link key={item.label} href={item.href} title={collapsed ? item.label : undefined}>
                 <div
-                  className={`flex items-center ${collapsed ? 'justify-center px-3' : 'gap-3 px-4'} py-3.5 rounded-xl cursor-pointer transition-all duration-500 ease-in-out group relative overflow-hidden ${
+                  className={`flex items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} py-2.5 rounded-lg transition ${
                     isActive
-                      ? "bg-white shadow-lg shadow-slate-200/50 text-blue-700"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <item.icon 
-                    size={20} 
-                    className={`transition-all duration-300 z-10 flex-shrink-0 ${
-                      isActive ? "text-blue-600" : "text-slate-400 group-hover:text-blue-500"
-                    } ${collapsed ? 'scale-110' : 'scale-100'}`} 
-                  />
-                  <span 
-                    className={`font-bold text-sm z-10 whitespace-nowrap transition-all duration-500 ${
-                      collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full" />}
-                  
-                  {/* Tooltip on hover when collapsed */}
-                  {collapsed && (
-                    <div className="absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg opacity-0 group-hover/link:opacity-100 pointer-events-none transition-opacity duration-300 whitespace-nowrap z-50 shadow-xl">
-                      {item.label}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
-                    </div>
+                  <item.icon size={18} className="flex-shrink-0" />
+                  {!collapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
                   )}
                 </div>
             </Link>
@@ -180,29 +158,15 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer Actions */}
-      <div className="p-4 border-t border-white/40 bg-white/30 backdrop-blur-md">
+      {/* Footer */}
+      <div className="p-3 border-t border-slate-200">
         <button
           onClick={handleLogout}
-          className={`flex items-center ${collapsed ? 'justify-center px-3' : 'gap-3 px-4'} py-3 w-full bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl border border-white/60 hover:border-red-100 transition-all duration-500 shadow-sm hover:shadow-md font-bold text-sm group relative`}
+          className={`flex items-center ${collapsed ? 'justify-center px-2' : 'gap-2 px-3'} py-2.5 w-full text-red-600 hover:bg-red-50 rounded-lg transition text-sm font-medium`}
           title={collapsed ? "Sign Out" : undefined}
         >
-          <LogOut size={18} className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
-          <span 
-            className={`whitespace-nowrap transition-all duration-500 ${
-              collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'
-            }`}
-          >
-            Sign Out
-          </span>
-          
-          {/* Tooltip when collapsed */}
-          {collapsed && (
-            <div className="absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 whitespace-nowrap z-50 shadow-xl">
-              Sign Out
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
-            </div>
-          )}
+          <LogOut size={18} />
+          {!collapsed && <span>Sign Out</span>}
         </button>
       </div>
     </aside>

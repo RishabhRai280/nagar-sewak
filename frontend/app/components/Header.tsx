@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
+import NotificationWrapper from './NotificationWrapper';
 import { useTranslations } from 'next-intl';
 
 export default function Header() {
@@ -95,113 +96,103 @@ export default function Header() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-md py-4 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 bg-white/20 backdrop-blur-md border-b border-slate-200/50 shadow-sm h-16"
     >
-      <nav className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="flex justify-between items-center">
+      <nav className="h-full max-w-full px-4 lg:px-6">
+        <div className="flex justify-between items-center h-full">
 
           {/* --- LOGO --- */}
-          <Link href="/" className="flex items-center gap-3 group z-50">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
-              <MapPin className="text-white" size={24} />
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              <MapPin className="text-white" size={18} />
             </div>
-            <div className="text-2xl font-extrabold tracking-tight">
+            <div className="text-xl font-bold">
               <span className="text-slate-900">Nagar</span>
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:brightness-110 transition-all">Sewak</span>
+              <span className="text-blue-600">Sewak</span>
             </div>
           </Link>
 
           {/* --- DESKTOP NAVIGATION --- */}
-          <div className="hidden md:flex items-center gap-8">
-            {/* Nav Links - Solid Style */}
-            <div className="flex items-center gap-2">
-              {[
-                { name: t('home'), path: '/' },
-                { name: t('map'), path: '/map' },
-                { name: t('report'), path: '/report' }
-              ].map((link) => {
-                const active = pathname === link.path;
-                return (
-                  <Link
-                    key={link.path}
-                    href={link.path}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${active
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-700 hover:text-blue-600 hover:bg-slate-100'
-                      }`}
-                  >
-                    {link.name}
-                  </Link>
-                );
-              })}
-            </div>
+<div className="hidden md:flex items-center">
+  <div className="grid grid-cols-3 gap-2">
+    {[
+      { name: t('home'), path: '/' },
+      { name: t('map'), path: '/map' },
+      { name: t('report'), path: '/report' }
+    ].map((link) => {
+      const active = pathname === link.path;
+      return (
+        <Link
+          key={link.path}
+          href={link.path}
+          className={`
+            px-4 py-2 text-[13px] font-medium text-center rounded-[18px]
+            transition-all
+            backdrop-blur-md bg-white/20 border border-white/30
+            ${active
+              ? 'text-blue-600 bg-white/40 shadow-sm'
+              : 'text-slate-600 hover:bg-white/30 hover:shadow-sm hover:text-blue-600'
+            }
+          `}
+        >
+          {link.name}
+        </Link>
+      );
+    })}
+  </div>
+
+
 
             {/* Auth Section */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Language Switcher */}
               <LanguageSwitcher />
+
+              {/* Notification Bell - Only show when logged in */}
+              {user && <NotificationWrapper />}
 
               {user ? (
                 <div className="relative" ref={profileRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center gap-3 pl-3 pr-2 py-2 rounded-lg hover:bg-slate-100 transition border border-slate-200 hover:border-slate-300 group"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition"
                   >
-                    <div className="text-right hidden lg:block">
-                      <p className="text-xs font-bold text-slate-800 leading-none">{user.username}</p>
-                      <p className="text-[10px] text-slate-600 leading-none mt-1 uppercase tracking-wider">
-                        {hasAdminAccess ? 'Admin' : isContractor ? 'Contractor' : 'Citizen'}
-                      </p>
-                    </div>
-                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold shadow-md group-hover:shadow-lg transition-all">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
                       {getUserInitials(user)}
                     </div>
-                    <ChevronDown size={16} className={`text-slate-500 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`text-slate-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* Dropdown Menu - Solid Style */}
+                  {/* Dropdown Menu */}
                   <AnimatePresence>
                     {isProfileOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden py-2"
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 5 }}
+                        className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1"
                       >
-                        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-                          <p className="text-sm font-bold text-slate-900 truncate">{user.fullName || user.username}</p>
-                          <p className="text-xs text-slate-600 truncate">{user.email}</p>
+                        <div className="px-3 py-2 border-b border-slate-100">
+                          <p className="text-sm font-semibold text-slate-900 truncate">{user.username}</p>
+                          <p className="text-xs text-slate-500 truncate">{user.email}</p>
                         </div>
 
-                        <div className="py-2">
-                          <Link
-                            href={dashboardPath}
-                            onClick={() => setIsProfileOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                          >
-                            <LayoutDashboard size={16} />
-                            {t('dashboard')}
-                          </Link>
-                          <Link
-                            href="/profile"
-                            onClick={() => setIsProfileOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                          >
-                            <UserIcon size={16} />
-                            {t('profile')}
-                          </Link>
-                        </div>
+                        <Link
+                          href={dashboardPath}
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                        >
+                          <LayoutDashboard size={16} />
+                          {t('dashboard')}
+                        </Link>
 
-                        <div className="border-t border-slate-200 mt-1 pt-1">
-                          <button
-                            onClick={handleLogout}
-                            className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <LogOut size={16} />
-                            {t('logout')}
-                          </button>
-                        </div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 border-t border-slate-100"
+                        >
+                          <LogOut size={16} />
+                          {t('logout')}
+                        </button>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -210,13 +201,13 @@ export default function Header() {
                 <>
                   <Link
                     href="/login"
-                    className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition px-4"
+                    className="text-sm font-medium text-slate-600 hover:text-blue-600 px-3"
                   >
                     {t('login')}
                   </Link>
                   <Link
                     href="/register"
-                    className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200"
+                    className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
                   >
                     {t('register')}
                   </Link>
@@ -228,10 +219,9 @@ export default function Header() {
           {/* --- MOBILE MENU BUTTON --- */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition z-50 border border-slate-200"
-            aria-label="Toggle navigation menu"
+            className="md:hidden p-2 text-slate-700 hover:bg-slate-50 rounded-md"
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>

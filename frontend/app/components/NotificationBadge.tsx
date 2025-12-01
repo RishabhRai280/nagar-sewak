@@ -22,19 +22,6 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
 
   const fetchUnreadCount = async () => {
     try {
-      // le_bhai_mock_hai - Mock data for now
-      const mockCount = 3;
-      
-      console.log("Unread count (mock):", mockCount);
-      
-      if (mockCount > count) {
-        setIsAnimating(true);
-        setTimeout(() => setIsAnimating(false), 500);
-      }
-      
-      setCount(mockCount);
-      
-      /* Real API call - uncomment when backend is ready
       const token = localStorage.getItem("token");
       if (!token) {
         console.log("No token found, skipping notification fetch");
@@ -49,7 +36,7 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
 
       if (response.ok) {
         const data = await response.json();
-        const newCount = data.count;
+        const newCount = data.count || 0;
         
         console.log("Unread count:", newCount);
         
@@ -62,7 +49,6 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
       } else {
         console.error("Failed to fetch unread count, status:", response.status);
       }
-      */
     } catch (error) {
       console.error("Failed to fetch unread count:", error);
     }

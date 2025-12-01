@@ -6,20 +6,18 @@ import Footer from './Footer';
 
 export default function DynamicLayoutRenderer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // Check if the current page is the full-screen map
   const isMapPage = pathname === '/map';
+  const isDashboardPage = pathname.includes('/dashboard');
 
   return (
     <>
-      {/* Header is always rendered */}
       <Header />
-
-      {/* Main content wrapper */}
-      <main className={`flex-grow ${isMapPage ? 'p-0 m-0' : ''}`}>
+      
+      {/* No padding for dashboard pages (they have their own layout with sidebar) */}
+      <main className={isDashboardPage ? '' : 'pt-16'}>
         {children}
       </main>
 
-      {/* Footer is conditionally rendered */}
       {!isMapPage && <Footer />}
     </>
   );

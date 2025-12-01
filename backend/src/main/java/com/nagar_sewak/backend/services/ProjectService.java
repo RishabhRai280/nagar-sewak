@@ -18,6 +18,8 @@ public class ProjectService {
 
     private final ProjectRepository projectRepo;
     private final ComplaintRepository complaintRepo;
+    public final com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo;
+    public final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     public ProjectDetailDTO getProjectDetail(Long projectId) {
         Project project = projectRepo.findById(projectId)
@@ -58,6 +60,27 @@ public class ProjectService {
                 })
                 .collect(Collectors.toList());
 
+        // Build milestone info list
+        List<com.nagar_sewak.backend.entities.ProjectMilestone> milestones = milestoneRepo.findByProjectIdOrderByPercentageAsc(projectId);
+        List<ProjectDetailDTO.MilestoneInfo> milestoneInfos = milestones.stream()
+                .map(m -> {
+                    List<String> photoList = new java.util.ArrayList<>();
+                    if (m.getPhotoUrls() != null && !m.getPhotoUrls().isEmpty()) {
+                        photoList = java.util.Arrays.asList(m.getPhotoUrls().split(","));
+                    }
+                    
+                    return ProjectDetailDTO.MilestoneInfo.builder()
+                            .id(m.getId())
+                            .percentage(m.getPercentage())
+                            .notes(m.getNotes())
+                            .photoUrls(photoList)
+                            .status(m.getStatus())
+                            .completedAt(m.getCompletedAt())
+                            .updatedBy(m.getUpdatedBy())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         return ProjectDetailDTO.builder()
                 .id(project.getId())
                 .title(project.getTitle())
@@ -73,6 +96,23 @@ public class ProjectService {
                 .progressPhotos(project.getProgressPhotos())
                 .contractor(contractorInfo)
                 .relatedComplaints(complaintInfos)
+                .milestones(milestoneInfos)
                 .build();
+    }
+
+    public void initializeMilestones(Long projectId) {
+        // Create default milestones for a new project
+        Integer[] milestonePercentages = {0, 25, 50, 75, 100};
+        
+        for (Integer percentage : milestonePercentages) {
+            com.nagar_sewak.backend.entities.ProjectMilestone milestone = com.nagar_sewak.backend.entities.ProjectMilestone.builder()
+                    .project(projectRepo.findById(projectId).orElseThrow())
+                    .percentage(percentage)
+                    .status(percentage == 0 ? "COMPLETED" : "PENDING")
+                    .notes(percentage == 0 ? "Project started" : "")
+                    .build();
+            
+            milestoneRepo.save(milestone);
+        }
     }
 }

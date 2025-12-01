@@ -54,4 +54,13 @@ public class TenderController {
         tenderService.acceptTender(tenderId);
         return ResponseEntity.ok(Map.of("message", "Tender accepted and project created"));
     }
+
+    // POST /tenders/publish/{complaintId} - Admin publishes tender opportunity
+    @PostMapping("/publish/{complaintId}")
+    public ResponseEntity<TenderDTO> publishTender(
+            @PathVariable Long complaintId,
+            @RequestBody TenderDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(tenderService.publishTenderOpportunity(complaintId, dto));
+    }
 }
