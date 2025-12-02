@@ -28,6 +28,9 @@ public class Complaint {
 
     private String photoUrl;
 
+    @Column(length = 2000)
+    private String photoUrls; // Comma-separated list of photo URLs
+
     private Instant createdAt;
 
     private Instant resolvedAt;

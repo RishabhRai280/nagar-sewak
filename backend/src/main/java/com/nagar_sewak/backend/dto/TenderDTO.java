@@ -11,9 +11,18 @@ public class TenderDTO {
     private String complaintTitle;
     private Long contractorId;
     private String contractorName;
+    private String contractorCompany;
+    private String contractorLicense;
+    private Double contractorAvgRating;
+    private String title;
+    private BigDecimal budget;
     private BigDecimal quoteAmount;
     private Integer estimatedDays;
     private String description;
+    private java.util.List<String> documentUrls;
     private String status;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

@@ -34,8 +34,8 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                     // ================= PUBLIC READ ACCESS =================
-                    // FIX: Added "/uploads/complaints/**" to allow public access to images
-                    .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect", "/uploads/complaints/**").permitAll() 
+                    // FIX: Added "/uploads/complaints/**" and "/uploads/projects/**" to allow public access to images
+                    .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect", "/uploads/complaints/**", "/uploads/projects/**").permitAll() 
                     .requestMatchers("/auth/**", "/login", "/register").permitAll()
                     
                     // ================= ADMIN/CONTRACTOR ACCESS =================
@@ -60,6 +60,20 @@ public class SecurityConfig {
                     // ================= CITIZEN WRITE/REPORTING =================
                     .requestMatchers(POST, "/complaints").hasAuthority(Role.CITIZEN.name())
                     .requestMatchers(POST, "/ratings").hasAuthority(Role.CITIZEN.name()) 
+
+                    // ================= VOTING & COMMENTS (ALL AUTHENTICATED USERS) =================
+                    .requestMatchers(GET, "/complaints/*/votes").authenticated()
+                    .requestMatchers(POST, "/complaints/*/vote").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/vote").authenticated()
+                    .requestMatchers(GET, "/complaints/*/comments").authenticated()
+                    .requestMatchers(POST, "/complaints/*/comments").authenticated()
+                    .requestMatchers(PUT, "/complaints/*/comments/*").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/comments/*").authenticated()
+                    .requestMatchers(POST, "/complaints/*/comments/*/reactions").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/comments/*/reactions").authenticated()
+                    .requestMatchers(GET, "/complaints/*/comments/*/reactions").authenticated()
+                    .requestMatchers(POST, "/complaints/*/comments/*/attachments").authenticated()
+                    .requestMatchers(DELETE, "/complaints/*/comments/*/attachments/*").authenticated()
 
                     // Default Fallback: all other requests MUST be authenticated
                     .anyRequest().authenticated()

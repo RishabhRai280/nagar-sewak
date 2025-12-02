@@ -50,6 +50,7 @@ public class ContractorDashboardDTO {
         private Double lat;
         private Double lng;
         private Instant updatedAt;
+        private Integer progressPercentage;
     }
 
     @Data

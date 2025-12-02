@@ -1,7 +1,7 @@
 // frontend/app/report/page.tsx
 "use client";
 
-import CitizenComplaintForm from '../../components/CitizenComplaintForm';
+import CitizenComplaintForm from '../../components/complaints/CitizenComplaintForm';
 import { motion } from 'framer-motion';
 
 export default function ReportPage() {

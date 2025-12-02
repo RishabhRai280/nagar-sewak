@@ -41,3 +41,28 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.4);
 }
+
+/* Stable Map Markers - Prevent Movement */
+.custom-marker-icon {
+  pointer-events: auto !important;
+}
+
+.marker-icon-stable {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transform-origin: center bottom;
+}
+
+.marker-icon-stable:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35) !important;
+  z-index: 1000;
+}
+
+/* Prevent Leaflet from moving markers */
+.leaflet-marker-icon {
+  transition: none !important;
+}
+
+.leaflet-marker-icon.custom-marker-icon {
+  will-change: auto;
+}

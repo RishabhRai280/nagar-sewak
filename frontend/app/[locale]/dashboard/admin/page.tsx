@@ -3,7 +3,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import AdminDashboardComponent from '@/app/components/AdminDashboard';
+import AdminDashboardComponent from '@/app/components/dashboards/AdminDashboard';
 
 const DynamicAdminDashboard = dynamic(
     () => Promise.resolve(AdminDashboardComponent),

@@ -16,6 +16,7 @@ public class ComplaintSummaryDTO {
     private Double lng;
     private Long projectId;
     private String photoUrl;
+    private java.util.List<String> photoUrls;
     private Instant createdAt;
     private Instant resolvedAt;
 }

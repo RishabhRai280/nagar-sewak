@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchProjectById, updateProject, ProjectData, Token, UserStore } from "@/lib/api";
+import { fetchProjectById, updateProject, ProjectDetail, Token, UserStore } from "@/lib/api";
 import { Construction, DollarSign, MapPin, CheckCircle, ArrowLeft, Clock, AlertTriangle, Edit2 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -13,7 +13,7 @@ const MiniMap = dynamic(() => import("@/app/components/map/Map"), { ssr: false }
 export default function ProjectDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const [project, setProject] = useState<ProjectData | null>(null);
+    const [project, setProject] = useState<ProjectDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
@@ -162,6 +162,74 @@ export default function ProjectDetailsPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Progress Section */}
+                        {(project.progressPercentage !== undefined && project.progressPercentage !== null) && (
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    📊 Project Progress
+                                </h2>
+                                
+                                {/* Progress Bar */}
+                                <div className="mb-6">
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="font-bold text-slate-700">Completion</span>
+                                        <span className="font-bold text-blue-600">{project.progressPercentage}%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
+                                        <div 
+                                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500"
+                                            style={{ width: `${project.progressPercentage}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Progress Notes */}
+                                {project.progressNotes && (
+                                    <div className="mb-6">
+                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Latest Update</h3>
+                                        <p className="text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl">
+                                            {project.progressNotes}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Progress Photos */}
+                                {project.progressPhotos && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-700 mb-3">Progress Photos</h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {project.progressPhotos.split(',').filter(p => p.trim()).map((photo, index) => (
+                                                <a 
+                                                    key={index}
+                                                    href={`http://localhost:8080${photo.trim()}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="group relative aspect-square rounded-xl overflow-hidden border-2 border-slate-200 hover:border-blue-500 transition"
+                                                >
+                                                    <img
+                                                        src={`http://localhost:8080${photo.trim()}`}
+                                                        alt={`Progress ${index + 1}`}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
+                                                        <span className="text-white opacity-0 group-hover:opacity-100 transition text-sm font-bold">
+                                                            View Full Size
+                                                        </span>
+                                                    </div>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {project.updatedAt && (
+                                    <p className="text-xs text-slate-500 mt-4 text-right">
+                                        Last updated: {new Date(project.updatedAt).toLocaleString()}
+                                    </p>
+                                )}
+                            </div>
+                        )}
 
                         {/* Actions for Contractor */}
                         {userRole === "CONTRACTOR" && project.status !== "Completed" && (

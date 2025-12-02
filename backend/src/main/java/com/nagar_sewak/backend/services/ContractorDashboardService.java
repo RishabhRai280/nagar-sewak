@@ -74,6 +74,7 @@ public class ContractorDashboardService {
                         .lat(project.getLat())
                         .lng(project.getLng())
                         .updatedAt(Instant.now())
+                        .progressPercentage(project.getProgressPercentage())
                         .build())
                 .toList();
 

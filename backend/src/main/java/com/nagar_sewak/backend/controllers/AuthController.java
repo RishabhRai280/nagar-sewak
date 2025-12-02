@@ -150,6 +150,17 @@ public class AuthController {
                     String publicPhotoUrl = photo == null ? null :
                             photo.startsWith("http") ? photo : "/uploads/complaints/" + photo;
 
+                    // Parse multiple photo URLs
+                    java.util.List<String> photoUrlsList = new java.util.ArrayList<>();
+                    if (complaint.getPhotoUrls() != null && !complaint.getPhotoUrls().trim().isEmpty()) {
+                        String[] photos = complaint.getPhotoUrls().split(",");
+                        for (String p : photos) {
+                            if (!p.trim().isEmpty()) {
+                                photoUrlsList.add("/uploads/complaints/" + p.trim());
+                            }
+                        }
+                    }
+
                     return ComplaintSummaryDTO.builder()
                             .id(complaint.getId())
                             .title(complaint.getTitle())
@@ -160,6 +171,7 @@ public class AuthController {
                             .lng(complaint.getLng())
                             .projectId(complaint.getProject() != null ? complaint.getProject().getId() : null)
                             .photoUrl(publicPhotoUrl)
+                            .photoUrls(photoUrlsList)
                             .createdAt(complaint.getCreatedAt())
                             .resolvedAt(complaint.getResolvedAt())
                             .build();

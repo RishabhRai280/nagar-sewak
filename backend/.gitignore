@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment ###
+.env
+.env.local
+.env.*.local
+
+### Uploads (user-generated content) ###
+# Uncomment if you don't want to track uploads
+# /uploads/**
+# !/uploads/.gitkeep

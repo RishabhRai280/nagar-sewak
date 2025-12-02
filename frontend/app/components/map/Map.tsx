@@ -12,7 +12,7 @@ import {
   GeoJSON,
 } from "react-leaflet";
 import L, { ZoomPanOptions } from "leaflet";
-import { ComplaintData, ProjectData, buildAssetUrl } from "@/lib/api";
+import { ComplaintData, ProjectData, buildAssetUrl } from "@/lib/api/api";
 import {
   AlertTriangle,
   CheckCircle,
@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import LoadingState from "./LoadingState";
 import { useTranslations } from 'next-intl';
+import "../../map-enhancements.css";
 
 // Define combined type for map markers
 type MarkerItem =
@@ -54,7 +55,7 @@ function createDivIcon(color: string, type: "project" | "complaint") {
 
   return L.divIcon({
     html: `
-      <div style="
+      <div class="marker-icon-stable" style="
         display: flex;
         align-items: center;
         justify-content: center;
@@ -64,13 +65,13 @@ function createDivIcon(color: string, type: "project" | "complaint") {
         background: ${color};
         box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         border: 3px solid white;
-        transform: translateZ(0);
-        transition: transform 0.2s;
+        cursor: pointer;
+        will-change: transform;
       ">
         ${iconHtml}
       </div>
     `,
-    className: "custom-div-icon hover:scale-110",
+    className: "custom-marker-icon",
     iconSize: [44, 44],
     iconAnchor: [22, 44],
     popupAnchor: [0, -44],
@@ -80,6 +81,13 @@ function createDivIcon(color: string, type: "project" | "complaint") {
 // --- Map Content Component ---
 
 import LocationSearch from "./LocationSearch";
+import MarkerClusterGroup from "./MarkerClusterGroup";
+import HeatMapLayer from "./HeatMapLayer";
+import MapEnhancements from "./MapEnhancements";
+import MapLayerControl, { MapLayer, MapOverlay } from "./MapLayerControl";
+import MapLayerProvider from "./MapLayerProvider";
+import MapLegend from "./MapLegend";
+import { sampleWardBoundaries, samplePopulationData, sampleInfrastructureData } from "@/lib/data/sampleWardData";
 
 // --- Map Content Component ---
 
@@ -96,6 +104,12 @@ function MapContent({
 }) {
   const [targetLocation, setTargetLocation] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
   const [boundaryData, setBoundaryData] = useState<any>(null);
+  const [clusteringEnabled, setClusteringEnabled] = useState(true);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  
+  // Layer control states
+  const [currentLayer, setCurrentLayer] = useState<MapLayer>("osm");
+  const [activeOverlays, setActiveOverlays] = useState<MapOverlay[]>([]);
 
   const handleLocationSelect = (lat: number, lng: number, zoom: number = 13, geojson?: any) => {
     setTargetLocation({ lat, lng, zoom });
@@ -103,7 +117,18 @@ function MapContent({
     setSelectedItem(null); // Clear item selection when searching for a place
   };
 
+  const handleOverlayToggle = (overlay: MapOverlay) => {
+    setActiveOverlays(prev =>
+      prev.includes(overlay)
+        ? prev.filter(o => o !== overlay)
+        : [...prev, overlay]
+    );
+  };
+
   const t = useTranslations('map');
+
+  // Memoize markers to prevent unnecessary re-renders
+  const markers = useMemo(() => items, [items]);
 
   return (
     <div className="relative w-full h-full z-0 rounded-none lg:rounded-l-3xl overflow-hidden shadow-2xl border-l border-white/20">
@@ -116,9 +141,29 @@ function MapContent({
       >
         {/* Position zoom controls lower if needed, but usually topright is fine. Can add style if needed. */}
         <ZoomControl position="bottomright" />
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        
+        {/* Map Layer Provider - Handles base layers and overlays */}
+        <MapLayerProvider
+          layer={currentLayer}
+          activeOverlays={activeOverlays}
+          wardBoundaries={sampleWardBoundaries}
+          populationData={samplePopulationData}
+          infrastructureData={sampleInfrastructureData}
+          complaints={items
+            .filter(item => item.kind === 'complaint')
+            .map(item => ({
+              lat: (item as any).lat,
+              lng: (item as any).lng,
+              status: (item as any).status,
+              createdAt: (item as any).createdAt || new Date().toISOString(),
+            }))}
+          projects={items
+            .filter(item => item.kind === 'project')
+            .map(item => ({
+              lat: (item as any).lat,
+              lng: (item as any).lng,
+              status: (item as any).status,
+            }))}
         />
 
         {/* Render Boundary if available */}
@@ -139,7 +184,39 @@ function MapContent({
         <RecenterAndView item={selectedItem} initialCenter={center} />
         <FlyToLocation target={targetLocation} />
 
-        {items.map((it) => {
+        {/* Clustering or Regular Markers */}
+        {clusteringEnabled ? (
+          <MarkerClusterGroup
+            markers={markers.map((it) => {
+              const lat = (it as any).lat;
+              const lng = (it as any).lng;
+              if (typeof lat !== "number" || typeof lng !== "number") return null;
+
+              let color = "#3b82f6";
+              if (it.kind === "project") {
+                color = (it as ProjectData).status?.toLowerCase() === "completed" ? "#10b981" : "#3b82f6";
+              } else {
+                const s = (it as ComplaintData).status?.toLowerCase();
+                if (s === "pending") color = "#ef4444";
+                else if (s === "resolved") color = "#10b981";
+                else color = "#f59e0b";
+              }
+
+              const icon = createDivIcon(color, it.kind === "project" ? "project" : "complaint");
+              const position: [number, number] = [lat, lng];
+
+              return {
+                position,
+                icon,
+                popup: `<div class="p-1"><strong class="text-sm block mb-1 font-bold text-slate-800">${it.kind === "complaint" ? "Complaint" : "Project"}</strong><span class="text-sm text-slate-600">${it.title}</span></div>`,
+                onClick: () => {
+                  setSelectedItem(it);
+                },
+              };
+            }).filter(Boolean) as any}
+          />
+        ) : (
+          markers.map((it) => {
           const lat = (it as any).lat;
           const lng = (it as any).lng;
           if (typeof lat !== "number" || typeof lng !== "number") return null;
@@ -162,18 +239,29 @@ function MapContent({
             it.kind === "project" ? "project" : "complaint"
           );
 
+          // Create stable position array to prevent re-renders
+          const position: [number, number] = [lat, lng];
+
           return (
             <Marker
               key={`${it.kind}-${it.id}`}
-              position={[lat, lng]}
+              position={position}
               icon={icon as any}
+              draggable={false}
+              autoPan={false}
+              bubblingMouseEvents={false}
               eventHandlers={{
-                click: () => {
+                click: (e) => {
+                  // Prevent default behavior and stop propagation
+                  if (e.originalEvent) {
+                    L.DomEvent.stopPropagation(e.originalEvent);
+                    L.DomEvent.preventDefault(e.originalEvent);
+                  }
                   setSelectedItem(it);
                 },
               }}
             >
-              <Popup className="glass-popup">
+              <Popup className="glass-popup" closeButton={false} autoClose={false}>
                 <div className="p-1">
                   <strong className="text-sm block mb-1 font-bold text-slate-800">
                     {it.kind === "complaint" ? t('complaint') : t('project')}
@@ -183,11 +271,56 @@ function MapContent({
               </Popup>
             </Marker>
           );
-        })}
+        }))}
+
+        {/* Heat Map Layer */}
+        {heatmapEnabled && (
+          <HeatMapLayer
+            points={markers
+              .filter((it) => it.kind === "complaint")
+              .map((it) => ({
+                lat: (it as any).lat,
+                lng: (it as any).lng,
+                intensity: (it as ComplaintData).severity / 5,
+              }))
+              .filter((p) => typeof p.lat === "number" && typeof p.lng === "number")}
+            options={{
+              radius: 30,
+              blur: 20,
+              maxZoom: 15,
+              gradient: {
+                0.0: "blue",
+                0.3: "cyan",
+                0.5: "lime",
+                0.7: "yellow",
+                1.0: "red",
+              },
+            }}
+          />
+        )}
       </MapContainer>
+
+      {/* Map Enhancement Controls */}
+      <MapEnhancements
+        clusteringEnabled={clusteringEnabled}
+        heatmapEnabled={heatmapEnabled}
+        onClusteringToggle={setClusteringEnabled}
+        onHeatmapToggle={setHeatmapEnabled}
+      />
+
+      {/* Map Layer Control */}
+      <MapLayerControl
+        currentLayer={currentLayer}
+        onLayerChange={setCurrentLayer}
+        activeOverlays={activeOverlays}
+        onOverlayToggle={handleOverlayToggle}
+      />
 
       {/* Location Search Overlay */}
       <LocationSearch onLocationSelect={handleLocationSelect} />
+
+      {/* Map Legend */}
+      <MapLegend activeOverlays={activeOverlays} />
 
       {/* Map Overlay Gradient for better integration */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_10px_0_30px_rgba(0,0,0,0.1)] z-[400]"></div>
@@ -195,21 +328,26 @@ function MapContent({
   );
 }
 
-// Custom hook to handle map centering
+// Custom hook to handle map centering - FIXED: Don't move map on marker click
 function RecenterAndView({ item, initialCenter }: { item: MarkerItem | null, initialCenter: [number, number] }) {
   const map = useMap();
 
   useEffect(() => {
+    // Only center map if item is selected AND map is not already showing that location
     if (item && typeof (item as any).lat === "number" && typeof (item as any).lng === "number") {
       const position: [number, number] = [(item as any).lat, (item as any).lng];
-      const options: ZoomPanOptions = {
-        animate: true,
-        duration: 0.8,
-      };
-      map.setView(position, map.getZoom() > 15 ? map.getZoom() : 15, options);
+      const currentCenter = map.getCenter();
+      const distance = map.distance(currentCenter, position);
+      
+      // Only move map if marker is far from current view (more than 500 meters)
+      if (distance > 500) {
+        const options: ZoomPanOptions = {
+          animate: true,
+          duration: 0.8,
+        };
+        map.flyTo(position, map.getZoom() > 13 ? map.getZoom() : 13, options);
+      }
     }
-    // Removed the else block that auto-resets to initialCenter on deselect, 
-    // as it might conflict with manual navigation or location search.
   }, [item, map]);
 
   return null;
@@ -301,24 +439,42 @@ function ItemDetails({ item, clearSelection }: { item: MarkerItem, clearSelectio
           </p>
         </div>
 
-        {/* Photo Evidence (Complaints Only) */}
-        {isComplaint && data.photoUrl && (
+        {/* Photo Evidence (Complaints Only) - Multiple Images */}
+        {isComplaint && (data.photoUrls?.length > 0 || data.photoUrl) && (
           <div className="space-y-3">
             <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <CheckCircle size={16} className="text-emerald-500" /> {t('evidenceUploaded')}
+              <CheckCircle size={16} className="text-emerald-500" /> {t('evidenceUploaded')} 
+              {data.photoUrls?.length > 0 && <span className="text-xs text-slate-500">({data.photoUrls.length} {data.photoUrls.length === 1 ? 'image' : 'images'})</span>}
             </p>
-            <div className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group">
-              <img
-                src={buildAssetUrl(data.photoUrl) ?? undefined}
-                alt="Complaint evidence"
-                className="w-full h-48 object-cover transition transform group-hover:scale-105 duration-500"
-                onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+Unavailable`; }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
-              <button className="absolute bottom-2 right-2 p-2 bg-white/90 rounded-lg text-slate-800 opacity-0 group-hover:opacity-100 transition shadow-lg">
-                <Maximize2 size={16} />
-              </button>
-            </div>
+            
+            {data.photoUrls && data.photoUrls.length > 0 ? (
+              <div className={`grid gap-2 ${data.photoUrls.length === 1 ? 'grid-cols-1' : data.photoUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
+                {data.photoUrls.map((url: string, index: number) => (
+                  <div key={index} className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group">
+                    <img
+                      src={url}
+                      alt={`Evidence ${index + 1}`}
+                      className="w-full h-32 object-cover transition transform group-hover:scale-105 duration-500"
+                      onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+${index + 1}`; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
+                    <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-bold">
+                      {index + 1}/{data.photoUrls.length}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : data.photoUrl && (
+              <div className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group">
+                <img
+                  src={buildAssetUrl(data.photoUrl) ?? undefined}
+                  alt="Complaint evidence"
+                  className="w-full h-48 object-cover transition transform group-hover:scale-105 duration-500"
+                  onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+Unavailable`; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
+              </div>
+            )}
           </div>
         )}
 
@@ -385,7 +541,8 @@ function ItemListing({ items, setSelectedItem }: { items: MarkerItem[], setSelec
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.9)" }}
             whileTap={{ scale: 0.98 }}
-            className="bg-white/60 p-4 rounded-xl border border-white/60 cursor-pointer shadow-sm hover:shadow-md transition-all backdrop-blur-sm group"
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="bg-white/60 p-4 rounded-xl border border-white/60 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm group"
             onClick={() => setSelectedItem(item)}
           >
             <div className="flex items-center justify-between mb-2">
@@ -470,10 +627,9 @@ export default function Map({
   };
 
 
-  // --- Sidebar Header with Glass Morphism ---
+  // --- Sidebar Header with Glass Morphism - STICKY ---
   const SidebarHeader = (
-    // UPDATED: Added 'pt-28' here to push search/filter controls below the header
-    <div className="p-6 pt-28 space-y-4 border-b border-white/40 flex-shrink-0 bg-white/40 backdrop-blur-md z-10 sticky top-0">
+    <div className="p-6 pt-28 space-y-4 border-b border-white/40 flex-shrink-0 bg-white/60 backdrop-blur-xl z-20 sticky top-0 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-500/30">
@@ -492,13 +648,13 @@ export default function Map({
       </div>
 
       <div className="relative group">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition" size={18} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition duration-300" size={18} />
         <input
           type="search"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setSelectedItem(null); }}
           placeholder={t('filterPlaceholder')}
-          className="w-full pl-10 pr-4 py-2.5 bg-white/60 border border-white/60 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition shadow-sm placeholder-slate-400 focus:bg-white"
+          className="w-full pl-10 pr-4 py-2.5 bg-white/60 border border-white/60 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 shadow-sm placeholder-slate-400 focus:bg-white"
         />
       </div>
 
@@ -508,7 +664,7 @@ export default function Map({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-transparent font-bold text-slate-600 focus:outline-none cursor-pointer hover:text-blue-600 transition"
+            className="bg-transparent font-bold text-slate-600 focus:outline-none cursor-pointer hover:text-blue-600 transition duration-300"
           >
             <option value="severity_desc">{t('sortBySeverity')}</option>
             <option value="title_asc">{t('sortByName')}</option>
@@ -517,13 +673,13 @@ export default function Map({
 
         <div className="flex gap-1.5">
           <button
-            className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all ${showComplaints ? 'bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white'}`}
+            className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showComplaints ? 'bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30 scale-105' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105'}`}
             onClick={() => { setShowComplaints(!showComplaints); setSelectedItem(null); }}
           >
             {t('complaints')}
           </button>
           <button
-            className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all ${showProjects ? 'bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white'}`}
+            className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showProjects ? 'bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105'}`}
             onClick={() => { setShowProjects(!showProjects); setSelectedItem(null); }}
           >
             {t('projects')}
@@ -552,8 +708,8 @@ export default function Map({
         />
       </div>
 
-      {/* Left Column (Sidebar) - Ultra Glass */}
-      <div className={`relative z-10 w-full lg:w-[26rem] xl:w-[28rem] bg-white/60 backdrop-blur-xl border-r border-white/40 flex-shrink-0 transition-all duration-300 flex flex-col shadow-2xl`}>
+      {/* Left Column (Sidebar) - Ultra Glass with Subtle Shadow */}
+      <div className={`relative z-10 w-full lg:w-[26rem] xl:w-[28rem] bg-white/60 backdrop-blur-xl border-r-2 border-white/50 flex-shrink-0 transition-all duration-300 flex flex-col shadow-[4px_0_24px_-4px_rgba(0,0,0,0.12)]`}>
         <AnimatePresence mode="wait">
           {selectedItem ? (
             <motion.div

@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import ContractorDashboardComponent from '@/app/components/ContractorDashboard';
+import ContractorDashboardComponent from '@/app/components/dashboards/ContractorDashboard';
 
 // Load client-side only 
 const DynamicContractorDashboardContent = dynamic(

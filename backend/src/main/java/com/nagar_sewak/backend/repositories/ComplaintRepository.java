@@ -13,4 +13,6 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByProjectContractorId(Long contractorId);
 
     List<Complaint> findTop6ByOrderByCreatedAtDesc();
+
+    List<Complaint> findByProjectId(Long projectId);
 }

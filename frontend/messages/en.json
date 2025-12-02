@@ -160,17 +160,28 @@
       "evidence": "Evidence",
       "location": "Location",
       "uploadPhoto": "Upload Photo",
+      "uploadPhotos": "Upload Photos",
+      "addMore": "Add More",
       "tagLocation": "Tag Current Location",
       "locationTagged": "Location Tagged",
       "locating": "Locating...",
+      "gps": "GPS",
+      "pickOnMap": "Pick on Map",
+      "pickLocationOnMap": "Pick Location on Map",
+      "clickAnywhere": "Click anywhere on the map to set the location",
+      "selectedLocation": "Selected:",
+      "confirmLocation": "Confirm Location",
+      "clickToSelect": "Click on the map to select a location",
       "submitReport": "Submit Report",
-      "processing": "Processing..."
+      "processing": "Processing...",
+      "maxImages": "Up to 5 images (JPG, PNG)"
     },
     "validation": {
       "titleRequired": "Title is required",
       "descriptionRequired": "Description is required",
       "locationRequired": "Please tag your GPS location",
-      "photoRequired": "Photo evidence is required"
+      "photoRequired": "Photo evidence is required",
+      "maxImagesExceeded": "Maximum 5 images allowed"
     },
     "success": "Report submitted successfully!",
     "error": "Failed to submit report. Please try again."

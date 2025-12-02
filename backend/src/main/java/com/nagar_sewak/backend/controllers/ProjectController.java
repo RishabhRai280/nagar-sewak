@@ -1,7 +1,9 @@
 package com.nagar_sewak.backend.controllers;
 
+import com.nagar_sewak.backend.dto.ProjectDetailDTO;
 import com.nagar_sewak.backend.entities.Project;
 import com.nagar_sewak.backend.repositories.ProjectRepository;
+import com.nagar_sewak.backend.services.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectRepository repo;
+    private final ProjectService projectService;
 
     @GetMapping
     public List<Project> all() {
@@ -26,10 +29,13 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> byId(@PathVariable Long id) {
-        return repo.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ProjectDetailDTO> byId(@PathVariable Long id) {
+        try {
+            ProjectDetailDTO projectDetail = projectService.getProjectDetail(id);
+            return ResponseEntity.ok(projectDetail);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
@@ -100,5 +106,194 @@ public class ProjectController {
 
         Project savedProject = repo.save(project);
         return ResponseEntity.ok(savedProject);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Project>> getProjectsByStatus(@PathVariable String status) {
+        // Normalize status parameter
+        String normalizedStatus = switch (status.toLowerCase()) {
+            case "in-progress" -> "In Progress";
+            case "completed" -> "Completed";
+            case "pending" -> "Pending";
+            case "issues" -> "Issues";
+            default -> status;
+        };
+        
+        List<Project> projects = repo.findByStatus(normalizedStatus);
+        return ResponseEntity.ok(projects);
+    }
+
+    @PostMapping(value = "/{id}/progress", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Project> updateProgress(
+            @PathVariable Long id,
+            @RequestParam("progress") Integer progress,
+            @RequestParam("status") String status,
+            @RequestParam("notes") String notes,
+            @RequestParam(value = "photos", required = false) List<org.springframework.web.multipart.MultipartFile> photos,
+            @AuthenticationPrincipal UserDetails userDetails) throws java.io.IOException {
+
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        Project project = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        // Update progress fields
+        project.setProgressPercentage(progress);
+        project.setStatus(status);
+        project.setProgressNotes(notes);
+
+        // Handle photo uploads
+        if (photos != null && !photos.isEmpty()) {
+            // Use absolute path from project root
+            String projectRoot = System.getProperty("user.dir");
+            java.nio.file.Path uploadDir = java.nio.file.Paths.get(projectRoot, "uploads", "projects");
+            
+            if (!java.nio.file.Files.exists(uploadDir)) {
+                java.nio.file.Files.createDirectories(uploadDir);
+            }
+
+            java.util.List<String> photoUrls = new java.util.ArrayList<>();
+            for (org.springframework.web.multipart.MultipartFile photo : photos) {
+                String filename = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
+                java.nio.file.Path filePath = uploadDir.resolve(filename);
+                photo.transferTo(filePath.toFile());
+                photoUrls.add("/uploads/projects/" + filename);
+            }
+
+            // Append to existing photos or create new list
+            String existingPhotos = project.getProgressPhotos();
+            if (existingPhotos != null && !existingPhotos.isEmpty()) {
+                photoUrls.add(0, existingPhotos);
+            }
+            project.setProgressPhotos(String.join(",", photoUrls));
+        }
+
+        Project savedProject = repo.save(project);
+        return ResponseEntity.ok(savedProject);
+    }
+
+    @PostMapping(value = "/{id}/milestones/{percentage}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateMilestone(
+            @PathVariable Long id,
+            @PathVariable Integer percentage,
+            @RequestParam("notes") String notes,
+            @RequestParam(value = "photos", required = false) List<org.springframework.web.multipart.MultipartFile> photos,
+            @AuthenticationPrincipal UserDetails userDetails) throws java.io.IOException {
+
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        // Validate percentage
+        if (!List.of(0, 25, 50, 75, 100).contains(percentage)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid milestone percentage. Must be 0, 25, 50, 75, or 100");
+        }
+
+        Project project = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        // Find or create milestone
+        com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
+            projectService.milestoneRepo;
+        
+        com.nagar_sewak.backend.entities.ProjectMilestone milestone = 
+            milestoneRepo.findByProjectIdAndPercentage(id, percentage)
+                .orElseGet(() -> {
+                    com.nagar_sewak.backend.entities.ProjectMilestone newMilestone = 
+                        com.nagar_sewak.backend.entities.ProjectMilestone.builder()
+                            .project(project)
+                            .percentage(percentage)
+                            .status("IN_PROGRESS")
+                            .build();
+                    return milestoneRepo.save(newMilestone);
+                });
+
+        // Update milestone
+        milestone.setNotes(notes);
+        milestone.setStatus("COMPLETED");
+        milestone.setCompletedAt(java.time.LocalDateTime.now());
+        milestone.setUpdatedBy(userDetails.getUsername());
+
+        // Handle photo uploads
+        if (photos != null && !photos.isEmpty()) {
+            String projectRoot = System.getProperty("user.dir");
+            java.nio.file.Path uploadDir = java.nio.file.Paths.get(projectRoot, "uploads", "projects");
+            
+            if (!java.nio.file.Files.exists(uploadDir)) {
+                java.nio.file.Files.createDirectories(uploadDir);
+            }
+
+            java.util.List<String> photoUrls = new java.util.ArrayList<>();
+            for (org.springframework.web.multipart.MultipartFile photo : photos) {
+                String filename = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
+                java.nio.file.Path filePath = uploadDir.resolve(filename);
+                photo.transferTo(filePath.toFile());
+                photoUrls.add(filename);
+                
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            
+            milestone.setPhotoUrls(String.join(",", photoUrls));
+        }
+
+        milestoneRepo.save(milestone);
+
+        // Update project progress
+        project.setProgressPercentage(percentage);
+        if (percentage == 100) {
+            project.setStatus("Completed");
+        } else if (percentage > 0) {
+            project.setStatus("In Progress");
+        }
+        repo.save(project);
+
+        // Trigger notification event
+        org.springframework.context.ApplicationEventPublisher eventPublisher = 
+            projectService.eventPublisher;
+        if (eventPublisher != null) {
+            eventPublisher.publishEvent(new com.nagar_sewak.backend.events.ProjectMilestoneCompletedEvent(
+                this, project, milestone));
+        }
+
+        return ResponseEntity.ok(java.util.Map.of(
+            "message", "Milestone updated successfully",
+            "milestone", milestone,
+            "project", project
+        ));
+    }
+
+    @GetMapping("/{id}/milestones")
+    public ResponseEntity<List<com.nagar_sewak.backend.entities.ProjectMilestone>> getMilestones(@PathVariable Long id) {
+        com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
+            projectService.milestoneRepo;
+        List<com.nagar_sewak.backend.entities.ProjectMilestone> milestones = 
+            milestoneRepo.findByProjectIdOrderByPercentageAsc(id);
+        return ResponseEntity.ok(milestones);
+    }
+
+    @GetMapping("/{id}/progress-report")
+    public ResponseEntity<byte[]> downloadProgressReport(@PathVariable Long id) {
+        Project project = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
+            projectService.milestoneRepo;
+        List<com.nagar_sewak.backend.entities.ProjectMilestone> milestones = 
+            milestoneRepo.findByProjectIdOrderByPercentageAsc(id);
+
+        com.nagar_sewak.backend.services.PdfGeneratorService pdfService = 
+            new com.nagar_sewak.backend.services.PdfGeneratorService();
+        byte[] pdfBytes = pdfService.generateProgressReportPdf(project, milestones);
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=Project_" + id + "_Progress_Report.pdf")
+                .body(pdfBytes);
     }
 }

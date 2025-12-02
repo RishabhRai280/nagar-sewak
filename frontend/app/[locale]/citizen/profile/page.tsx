@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import CitizenDashboardLayout from "@/app/components/CitizenDashboardLayout";
+import CitizenDashboardLayout from "@/app/components/dashboards/CitizenDashboardLayout";
 import { User, Mail, Phone, MapPin, Edit, Save, X, AlertCircle, CheckCircle, Shield } from "lucide-react";
-import { fetchCurrentUserProfile, UserProfile } from "@/lib/api";
+import { fetchCurrentUserProfile, UserProfile } from "@/lib/api/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FullUserProfile extends UserProfile {

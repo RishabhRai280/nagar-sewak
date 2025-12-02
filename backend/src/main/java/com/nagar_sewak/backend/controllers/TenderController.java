@@ -20,13 +20,20 @@ public class TenderController {
 
     private final TenderService tenderService;
 
-    // POST /tenders/complaints/{id}/submit - Contractor submits tender
-    @PostMapping("/complaints/{complaintId}/submit")
+    // POST /tenders/complaints/{id}/submit - Contractor submits tender with documents
+    @PostMapping(value = "/complaints/{complaintId}/submit", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TenderDTO> submitTender(
             @PathVariable Long complaintId,
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody TenderDTO dto) {
-        return ResponseEntity.ok(tenderService.submitTender(complaintId, userDetails.getUsername(), dto));
+            @RequestPart(value = "data") TenderDTO dto,
+            @RequestPart(value = "documents", required = false) List<org.springframework.web.multipart.MultipartFile> documents) throws java.io.IOException {
+        return ResponseEntity.ok(tenderService.submitTender(complaintId, userDetails.getUsername(), dto, documents));
+    }
+
+    // GET /tenders/{id} - Get tender details
+    @GetMapping("/{tenderId}")
+    public ResponseEntity<TenderDTO> getTenderById(@PathVariable Long tenderId) {
+        return ResponseEntity.ok(tenderService.getTenderById(tenderId));
     }
 
     // GET /tenders/my - Contractor views their tenders
@@ -46,5 +53,14 @@ public class TenderController {
     public ResponseEntity<?> acceptTender(@PathVariable Long tenderId) {
         tenderService.acceptTender(tenderId);
         return ResponseEntity.ok(Map.of("message", "Tender accepted and project created"));
+    }
+
+    // POST /tenders/publish/{complaintId} - Admin publishes tender opportunity
+    @PostMapping("/publish/{complaintId}")
+    public ResponseEntity<TenderDTO> publishTender(
+            @PathVariable Long complaintId,
+            @RequestBody TenderDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(tenderService.publishTenderOpportunity(complaintId, dto));
     }
 }

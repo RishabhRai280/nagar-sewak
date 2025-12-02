@@ -160,17 +160,28 @@
       "evidence": "साक्ष्य",
       "location": "स्थान",
       "uploadPhoto": "फोटो अपलोड करें",
+      "uploadPhotos": "फोटो अपलोड करें",
+      "addMore": "और जोड़ें",
       "tagLocation": "वर्तमान स्थान टैग करें",
       "locationTagged": "स्थान टैग किया गया",
       "locating": "स्थान निर्धारित कर रहे हैं...",
+      "gps": "GPS",
+      "pickOnMap": "मानचित्र पर चुनें",
+      "pickLocationOnMap": "मानचित्र पर स्थान चुनें",
+      "clickAnywhere": "स्थान सेट करने के लिए मानचित्र पर कहीं भी क्लिक करें",
+      "selectedLocation": "चयनित:",
+      "confirmLocation": "स्थान की पुष्टि करें",
+      "clickToSelect": "स्थान चुनने के लिए मानचित्र पर क्लिक करें",
       "submitReport": "रिपोर्ट जमा करें",
-      "processing": "प्रोसेस हो रहा है..."
+      "processing": "प्रोसेस हो रहा है...",
+      "maxImages": "अधिकतम 5 छवियां (JPG, PNG)"
     },
     "validation": {
       "titleRequired": "शीर्षक आवश्यक है",
       "descriptionRequired": "विवरण आवश्यक है",
       "locationRequired": "कृपया अपना GPS स्थान टैग करें",
-      "photoRequired": "फोटो साक्ष्य आवश्यक है"
+      "photoRequired": "फोटो साक्ष्य आवश्यक है",
+      "maxImagesExceeded": "अधिकतम 5 छवियों की अनुमति है"
     },
     "success": "रिपोर्ट सफलतापूर्वक जमा की गई!",
     "error": "रिपोर्ट जमा करने में विफल। कृपया पुनः प्रयास करें।"
