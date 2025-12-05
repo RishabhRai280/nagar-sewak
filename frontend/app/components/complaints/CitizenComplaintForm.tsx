@@ -61,8 +61,8 @@ export default function CitizenComplaintForm() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + selectedFiles.length > 5) {
-      setError("Maximum 5 images allowed");
+    if (files.length + selectedFiles.length > 6) {
+      setError("Maximum 6 media files allowed");
       return;
     }
     setSelectedFiles([...selectedFiles, ...files]);
@@ -99,7 +99,7 @@ export default function CitizenComplaintForm() {
     }
 
     if (selectedFiles.length === 0) {
-      setError("Please upload at least one image");
+      setError("Please upload at least one media file");
       return;
     }
 
@@ -241,18 +241,18 @@ export default function CitizenComplaintForm() {
             {/* RIGHT SIDE: MEDIA & LOCATION */}
             <div className="space-y-8 flex flex-col h-full">
 
-              {/* Upload Box - Multiple Images */}
+              {/* Upload Box - Photos / Video / 360 */}
               <div className="flex-1">
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">
-                  Evidence ({selectedFiles.length}/5 images)
+                  Evidence ({selectedFiles.length}/6 items)
                 </label>
                 <div className="relative h-full min-h-[200px]">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/mp4,video/webm"
                     onChange={handleFileChange}
                     multiple
-                    disabled={loading || selectedFiles.length >= 5}
+                    disabled={loading || selectedFiles.length >= 6}
                     className="hidden"
                     id="image-input"
                   />
@@ -266,14 +266,17 @@ export default function CitizenComplaintForm() {
                         <div className="w-14 h-14 bg-white/60 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform text-slate-400 group-hover:text-blue-500">
                           <Upload size={24} />
                         </div>
-                        <p className="font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Upload Photos</p>
-                        <p className="text-xs text-slate-400 mt-1 font-medium">Up to 5 images (JPG, PNG)</p>
+                        <p className="font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Upload Photos / Video</p>
+                        <p className="text-xs text-slate-400 mt-1 font-medium">Up to 6 items (JPG, PNG, MP4, WEBM)</p>
                       </div>
                     </label>
                   ) : (
                     <div className="absolute inset-0 p-3 bg-white/30 rounded-3xl border-2 border-emerald-500/50 overflow-y-auto">
                       <div className="grid grid-cols-2 gap-2 mb-2">
-                        {selectedFiles.map((file, index) => (
+                        {selectedFiles.map((file, index) => {
+                          const isVideo = file.type.startsWith("video/");
+                          const previewUrl = URL.createObjectURL(file);
+                          return (
                           <motion.div
                             key={index}
                             initial={{ scale: 0.8, opacity: 0 }}
@@ -281,11 +284,19 @@ export default function CitizenComplaintForm() {
                             className="relative group"
                           >
                             <div className="aspect-square bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
-                              <img
-                                src={URL.createObjectURL(file)}
-                                alt={`Preview ${index + 1}`}
-                                className="w-full h-full object-cover"
-                              />
+                              {isVideo ? (
+                                <video
+                                  src={previewUrl}
+                                  controls
+                                  className="w-full h-full object-cover bg-black"
+                                />
+                              ) : (
+                                <img
+                                  src={previewUrl}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
                             </div>
                             <button
                               type="button"
@@ -295,9 +306,10 @@ export default function CitizenComplaintForm() {
                               <X size={14} />
                             </button>
                           </motion.div>
-                        ))}
+                          );
+                        })}
                       </div>
-                      {selectedFiles.length < 5 && (
+                      {selectedFiles.length < 6 && (
                         <label
                           htmlFor="image-input"
                           className="block w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-center text-sm font-bold cursor-pointer transition-colors"

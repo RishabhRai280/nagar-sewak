@@ -3,17 +3,29 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
-import { login, fetchCurrentUserProfile, UserStore } from "@/lib/api/api";
-import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { login, fetchCurrentUserProfile, UserStore, loginWithGoogle } from "@/lib/api/api";
+import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2, Chrome } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { signInWithPopup } from "firebase/auth";
+import { getFirebaseAuth, googleProvider } from "@/lib/firebaseClient";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
   const t = useTranslations('auth.login');
+
+  const redirectByRole = (profile: Awaited<ReturnType<typeof fetchCurrentUserProfile>>) => {
+    const hasAdminAccess = profile.roles.some(role => ["ADMIN", "SUPER_ADMIN"].includes(role));
+    const isContractor = profile.roles.includes("CONTRACTOR");
+
+    if (isContractor) router.push("/dashboard/contractor");
+    else if (hasAdminAccess) router.push("/dashboard/admin");
+    else router.push("/dashboard/citizen");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,18 +36,30 @@ export default function LoginForm() {
       await login(email, password);
       const profile = await fetchCurrentUserProfile();
       UserStore.set(profile);
-
-      const hasAdminAccess = profile.roles.some(role => ["ADMIN", "SUPER_ADMIN"].includes(role));
-      const isContractor = profile.roles.includes("CONTRACTOR");
-
-      if (isContractor) router.push("/dashboard/contractor");
-      else if (hasAdminAccess) router.push("/dashboard/admin");
-      else router.push("/dashboard/citizen");
-
+      redirectByRole(profile);
     } catch (err: any) {
       setError(err.message || "Login failed.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setIsGoogleLoading(true);
+    try {
+      const auth = getFirebaseAuth();
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+
+      await loginWithGoogle(idToken, result.user.email ?? undefined, result.user.displayName ?? undefined);
+      const profile = await fetchCurrentUserProfile();
+      UserStore.set(profile);
+      redirectByRole(profile);
+    } catch (err: any) {
+      setError(err.message || "Google sign-in failed.");
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -96,6 +120,22 @@ export default function LoginForm() {
           {isLoading ? t('signingIn') : <>{t('signIn')} <ArrowRight size={20} /></>}
         </button>
       </form>
+
+      <div className="mt-6">
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={isGoogleLoading || isLoading}
+          className="w-full py-3 rounded-xl border border-slate-200 bg-white text-slate-800 font-semibold shadow-sm hover:shadow-md hover:border-slate-300 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+        >
+          {isGoogleLoading ? t('signingIn') : (
+            <>
+              <Chrome size={20} />
+              Continue with Google
+            </>
+          )}
+        </button>
+      </div>
 
       <div className="mt-8 p-4 rounded-xl bg-white/40 border border-white/60 flex items-start gap-3 shadow-sm">
         <CheckCircle2 className="text-emerald-600 mt-0.5 flex-shrink-0" size={18} />

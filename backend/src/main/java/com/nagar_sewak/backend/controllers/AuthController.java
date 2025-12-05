@@ -1,34 +1,39 @@
 package com.nagar_sewak.backend.controllers;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import com.nagar_sewak.backend.dto.AuthResponse;
+import com.nagar_sewak.backend.dto.ComplaintSummaryDTO;
+import com.nagar_sewak.backend.dto.FirebaseLoginRequest;
+import com.nagar_sewak.backend.dto.ForgotPasswordRequest;
 import com.nagar_sewak.backend.dto.LoginRequest;
 import com.nagar_sewak.backend.dto.RegisterRequest;
-import com.nagar_sewak.backend.dto.ForgotPasswordRequest;
 import com.nagar_sewak.backend.dto.ResetPasswordRequest;
-import com.nagar_sewak.backend.dto.ComplaintSummaryDTO;
 import com.nagar_sewak.backend.dto.UserProfileDTO;
 import com.nagar_sewak.backend.entities.*;
-import com.nagar_sewak.backend.repositories.UserRepository;
 import com.nagar_sewak.backend.repositories.ComplaintRepository;
+import com.nagar_sewak.backend.repositories.UserRepository;
 import com.nagar_sewak.backend.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Set;
-import java.util.UUID;
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
-
-import org.springframework.security.authentication.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -135,6 +140,78 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/firebase")
+    public ResponseEntity<AuthResponse> firebaseLogin(@RequestBody FirebaseLoginRequest req) {
+        if (req.getIdToken() == null || req.getIdToken().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Firebase idToken is required");
+        }
+
+        try {
+            // Check if Firebase is initialized
+            if (FirebaseApp.getApps().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, 
+                    "Google Sign-In is not configured on the server. Please contact the administrator.");
+            }
+
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(req.getIdToken());
+
+            String emailTemp = decodedToken.getEmail();
+            if (emailTemp == null || emailTemp.isBlank()) {
+                emailTemp = req.getEmail();
+            }
+            if (emailTemp == null || emailTemp.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required from Google sign-in");
+            }
+            final String email = emailTemp;
+
+            String nameTemp = decodedToken.getName();
+            if (nameTemp == null || nameTemp.isBlank()) {
+                nameTemp = req.getDisplayName();
+            }
+            final String name = nameTemp;
+
+            final String usernameBase = decodedToken.getUid() != null && !decodedToken.getUid().isBlank()
+                    ? decodedToken.getUid()
+                    : email.substring(0, email.indexOf('@'));
+
+            User user = userRepo.findByEmail(email).orElseGet(() -> {
+                User newUser = new User();
+                newUser.setEmail(email);
+                newUser.setFullName(name != null && !name.isBlank() ? name : email);
+                newUser.setUsername(buildUniqueUsername(usernameBase));
+                newUser.setPassword(encoder.encode(UUID.randomUUID().toString())); // random, not used for login
+                newUser.setRoles(Set.of(Role.CITIZEN));
+                return userRepo.save(newUser);
+            });
+
+            // Backfill missing display name if user existed without it
+            if ((user.getFullName() == null || user.getFullName().isBlank()) && name != null && !name.isBlank()) {
+                user.setFullName(name);
+                userRepo.save(user);
+            }
+
+            String token = jwtUtil.generateToken(user.getUsername());
+
+            AuthResponse response = AuthResponse.builder()
+                    .token(token)
+                    .message("Google sign-in successful")
+                    .username(user.getUsername())
+                    .fullName(user.getFullName())
+                    .email(user.getEmail())
+                    .userId(user.getId())
+                    .roles(user.getRoles())
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (FirebaseAuthException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Google sign-in token");
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Google login failed: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/me")
     public UserProfileDTO currentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -146,14 +223,14 @@ public class AuthController {
 
         var complaints = complaintRepo.findByUserUsername(user.getUsername()).stream()
                 .map(complaint -> {
-                    String photo = complaint.getPhotoUrl();
-                    String publicPhotoUrl = photo == null ? null :
+                    final String photo = complaint.getPhotoUrl();
+                    final String publicPhotoUrl = photo == null ? null :
                             photo.startsWith("http") ? photo : "/uploads/complaints/" + photo;
 
                     // Parse multiple photo URLs
-                    java.util.List<String> photoUrlsList = new java.util.ArrayList<>();
+                    final java.util.List<String> photoUrlsList = new java.util.ArrayList<>();
                     if (complaint.getPhotoUrls() != null && !complaint.getPhotoUrls().trim().isEmpty()) {
-                        String[] photos = complaint.getPhotoUrls().split(",");
+                        final String[] photos = complaint.getPhotoUrls().split(",");
                         for (String p : photos) {
                             if (!p.trim().isEmpty()) {
                                 photoUrlsList.add("/uploads/complaints/" + p.trim());
@@ -234,5 +311,20 @@ public class AuthController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Password has been reset successfully");
         return ResponseEntity.ok(response);
+    }
+
+    private String buildUniqueUsername(String base) {
+        String sanitized = base.replaceAll("[^A-Za-z0-9._-]", "");
+        if (sanitized.isBlank()) {
+            sanitized = "user";
+        }
+
+        String candidate = sanitized;
+        int counter = 1;
+        while (userRepo.existsByUsername(candidate)) {
+            candidate = sanitized + counter;
+            counter++;
+        }
+        return candidate;
     }
 }

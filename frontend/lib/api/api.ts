@@ -311,6 +311,19 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return response;
 }
 
+export async function loginWithGoogle(idToken: string, email?: string, displayName?: string): Promise<AuthResponsePayload> {
+  const response = await request<AuthResponsePayload>(
+    '/auth/firebase',
+    {
+      method: 'POST',
+      body: JSON.stringify({ idToken, email, displayName }),
+    },
+  );
+
+  Token.set(response.token);
+  return response;
+}
+
 export async function register(data: { username: string; password: string; email: string; fullName: string }): Promise<AuthResponsePayload> {
   const response = await request<AuthResponsePayload>(
     '/auth/register',
