@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, Calendar, User, AlertCircle, CheckCircle, Clock, Ext
 import Link from "next/link";
 import ComplaintVoting from "@/app/components/complaints/ComplaintVoting";
 import EnhancedComplaintComments from "@/app/components/complaints/EnhancedComplaintComments";
+import ShareBar from "@/app/components/shared/ShareBar";
 
 const MiniMap = dynamic(() => import("@/app/components/shared/MiniMap"), { ssr: false });
 
@@ -20,7 +21,7 @@ export default function ComplaintDetailPage() {
   const [complaint, setComplaint] = useState<ComplaintDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
   useEffect(() => {
     if (!Token.get()) {
@@ -76,7 +77,7 @@ export default function ComplaintDetailPage() {
       ? "bg-blue-100 text-blue-700 border-blue-200"
       : "bg-orange-100 text-orange-700 border-orange-200";
 
-  const images = complaint.photoUrls && complaint.photoUrls.length > 0 ? complaint.photoUrls : complaint.photoUrl ? [complaint.photoUrl] : [];
+  const mediaItems = complaint.photoUrls && complaint.photoUrls.length > 0 ? complaint.photoUrls : complaint.photoUrl ? [complaint.photoUrl] : [];
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
@@ -105,8 +106,8 @@ export default function ComplaintDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Left Column - Images & Map */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Images */}
-            {images.length > 0 && (
+            {/* Media */}
+            {mediaItems.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -114,49 +115,71 @@ export default function ComplaintDetailPage() {
               >
                 <h3 className="text-base lg:text-lg font-bold text-slate-900 mb-3 lg:mb-4 flex items-center gap-2">
                   <CheckCircle size={18} className="text-emerald-500" />
-                  Evidence Photos ({images.length})
+                  Evidence ({mediaItems.length})
                 </h3>
 
-                {/* Main Image */}
+                {/* Main Media */}
                 <div className="relative rounded-xl lg:rounded-2xl overflow-hidden shadow-lg mb-3 lg:mb-4 bg-slate-100">
-                  <img
-                    src={images[selectedImageIndex]}
-                    alt={`Evidence ${selectedImageIndex + 1}`}
-                    className="w-full h-64 lg:h-96 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://placehold.co/800x600/e2e8f0/64748b?text=Image+${selectedImageIndex + 1}`;
-                    }}
-                  />
-                  {images.length > 1 && (
+                  {(() => {
+                    const media = mediaItems[selectedMediaIndex];
+                    const isVideo = /\.(mp4|webm|ogg)$/i.test(media);
+                    if (isVideo) {
+                      return (
+                        <video
+                          src={media}
+                          controls
+                          className="w-full h-64 lg:h-96 bg-black object-contain"
+                        />
+                      );
+                    }
+                    return (
+                      <img
+                        src={media}
+                        alt={`Evidence ${selectedMediaIndex + 1}`}
+                        className="w-full h-64 lg:h-96 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://placehold.co/800x600/e2e8f0/64748b?text=Media+${selectedMediaIndex + 1}`;
+                        }}
+                      />
+                    );
+                  })()}
+                  {mediaItems.length > 1 && (
                     <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      {selectedImageIndex + 1} / {images.length}
+                      {selectedMediaIndex + 1} / {mediaItems.length}
                     </div>
                   )}
                 </div>
 
                 {/* Thumbnail Grid */}
-                {images.length > 1 && (
+                {mediaItems.length > 1 && (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 lg:gap-3">
-                    {images.map((img, index) => (
+                    {mediaItems.map((img, index) => {
+                      const isVideo = /\.(mp4|webm|ogg)$/i.test(img);
+                      return (
                       <button
                         key={index}
-                        onClick={() => setSelectedImageIndex(index)}
+                        onClick={() => setSelectedMediaIndex(index)}
                         className={`relative rounded-lg lg:rounded-xl overflow-hidden border-2 transition-all ${
-                          selectedImageIndex === index
+                          selectedMediaIndex === index
                             ? "border-blue-500 shadow-lg scale-105"
                             : "border-transparent hover:border-slate-300"
                         }`}
                       >
-                        <img
-                          src={img}
-                          alt={`Thumbnail ${index + 1}`}
-                          className="w-full h-16 lg:h-20 object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://placehold.co/200/e2e8f0/64748b?text=${index + 1}`;
-                          }}
-                        />
+                        {isVideo ? (
+                          <video src={img} className="w-full h-16 lg:h-20 object-cover bg-black" />
+                        ) : (
+                          <img
+                            src={img}
+                            alt={`Thumbnail ${index + 1}`}
+                            className="w-full h-16 lg:h-20 object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://placehold.co/200/e2e8f0/64748b?text=${index + 1}`;
+                            }}
+                          />
+                        )}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </motion.div>
@@ -219,6 +242,7 @@ export default function ComplaintDetailPage() {
 
           {/* Right Column - Details */}
           <div className="space-y-6">
+            <ShareBar title={`Complaint #${complaint.id}`} summary={complaint.title} />
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

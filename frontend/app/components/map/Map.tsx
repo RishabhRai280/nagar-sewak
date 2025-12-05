@@ -38,6 +38,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import LoadingState from "./LoadingState";
+import ShareBar from "../shared/ShareBar";
 import { useTranslations } from "next-intl";
 import "../../map-enhancements.css";
 
@@ -449,6 +450,8 @@ function ItemDetails({
   const isComplaint = item.kind === "complaint";
   const data = item as any;
   const t = useTranslations("map");
+  const mediaItems = (data.photoUrls && data.photoUrls.length ? data.photoUrls : data.photoUrl ? [data.photoUrl] : []) as string[];
+  const isVideo = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
 
   const statusClasses =
     data.status?.toLowerCase() === "resolved" ||
@@ -533,76 +536,59 @@ function ItemDetails({
           </p>
         </div>
 
-        {/* Photo Evidence (Complaints Only) - Multiple Images */}
-        {isComplaint && (data.photoUrls?.length > 0 || data.photoUrl) && (
+        {/* Media Evidence (photos / video / 360) */}
+        {mediaItems.length > 0 && (
           <div className="space-y-3">
             <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
               <CheckCircle size={16} className="text-emerald-500" />{" "}
               {t("evidenceUploaded")}
-              {data.photoUrls?.length > 0 && (
+              {mediaItems.length > 0 && (
                 <span className="text-xs text-slate-500">
-                  ({data.photoUrls.length}{" "}
-                  {data.photoUrls.length === 1 ? "image" : "images"})
+                  ({mediaItems.length} {mediaItems.length === 1 ? "item" : "items"})
                 </span>
               )}
             </p>
 
-            {data.photoUrls && data.photoUrls.length > 0 ? (
-              <div
-                className={`grid gap-2 ${
-                  data.photoUrls.length === 1
-                    ? "grid-cols-1"
-                    : data.photoUrls.length === 2
-                    ? "grid-cols-2"
-                    : "grid-cols-2"
-                }`}
-              >
-                {data.photoUrls.map((url: string, index: number) => (
+            <div className="grid gap-2 grid-cols-2">
+              {mediaItems.map((url: string, index: number) => {
+                const resolved = buildAssetUrl(url) ?? url;
+                const video = isVideo(url);
+                return (
                   <div
                     key={index}
-                    className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group"
+                    className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group bg-black"
                   >
-                    <img
-                      src={url}
-                      alt={`Evidence ${index + 1}`}
-                      className="w-full h-32 object-cover transition transform group-hover:scale-105 duration-500"
-                      onError={(e) => {
-                        (
-                          e.target as HTMLImageElement
-                        ).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+${
-                          index + 1
-                        }`;
-                      }}
-                    />
+                    {video ? (
+                      <video src={resolved} controls className="w-full h-32 object-cover bg-black" />
+                    ) : (
+                      <img
+                        src={resolved}
+                        alt={`Evidence ${index + 1}`}
+                        className="w-full h-32 object-cover transition transform group-hover:scale-105 duration-500"
+                        onError={(e) => {
+                          (
+                            e.target as HTMLImageElement
+                          ).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+${index + 1}`;
+                        }}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
                     <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-bold">
-                      {index + 1}/{data.photoUrls.length}
+                      {index + 1}/{mediaItems.length}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              data.photoUrl && (
-                <div className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group">
-                  <img
-                    src={buildAssetUrl(data.photoUrl) ?? undefined}
-                    alt="Complaint evidence"
-                    className="w-full h-48 object-cover transition transform group-hover:scale-105 duration-500"
-                    onError={(e) => {
-                      (
-                        e.target as HTMLImageElement
-                      ).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+Unavailable`;
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
-                </div>
-              )
-            )}
+                );
+              })}
+            </div>
           </div>
         )}
 
         {/* Action Links */}
         <div className="pt-2 space-y-3">
+          <ShareBar
+            title={isComplaint ? `Complaint #${data.id}` : data.title}
+            summary={data.description}
+          />
           <Link
             href={
               isComplaint
@@ -1316,3 +1302,4 @@ export default function Map({
     </div>
   );
 }
+

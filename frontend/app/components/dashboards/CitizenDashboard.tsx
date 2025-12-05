@@ -6,7 +6,7 @@ import Sidebar from "../shared/Sidebar";
 import Link from "next/link";
 import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api/api";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle, Clock, Plus, Eye, MapPin } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Plus, Eye, MapPin, Share2 } from 'lucide-react';
 import NotificationWrapper from "../notifications/NotificationWrapper";
 
 interface DashboardComplaint {
@@ -128,22 +128,46 @@ export default function CitizenDashboardComponent() {
                   className="group bg-white/50 hover:bg-white/80 border border-white/60 hover:border-blue-200 rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 items-start">
-                    {/* Thumbnail - Show first image or grid if multiple */}
+                    {/* Thumbnail - photo or video */}
                     <div className="w-full sm:w-20 lg:w-24 h-20 lg:h-24 flex-shrink-0 bg-slate-200 rounded-lg lg:rounded-xl overflow-hidden shadow-inner relative">
-                        {(complaint as any).photoUrls && (complaint as any).photoUrls.length > 0 ? (
-                            <>
-                                <img src={(complaint as any).photoUrls[0] || ''} className="w-full h-full object-cover" alt="evidence" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100?text=No+Img'} />
-                                {(complaint as any).photoUrls.length > 1 && (
-                                    <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded font-bold">
-                                        +{(complaint as any).photoUrls.length - 1}
-                                    </div>
-                                )}
-                            </>
-                        ) : complaint.photoUrl ? (
-                            <img src={buildAssetUrl(complaint.photoUrl) || ''} className="w-full h-full object-cover" alt="evidence" onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100?text=No+Img'} />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400"><MapPin size={24}/></div>
-                        )}
+                      {(() => {
+                        const urls =
+                          (complaint as any).photoUrls && (complaint as any).photoUrls.length > 0
+                            ? (complaint as any).photoUrls
+                            : complaint.photoUrl
+                            ? [buildAssetUrl(complaint.photoUrl) || ""]
+                            : [];
+                        if (urls.length === 0) {
+                          return (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                              <MapPin size={24} />
+                            </div>
+                          );
+                        }
+                        const first = urls[0];
+                        const isVideo = /\.(mp4|webm|ogg)$/i.test(first);
+                        return (
+                          <>
+                            {isVideo ? (
+                              <video src={first} className="w-full h-full object-cover bg-black" />
+                            ) : (
+                              <img
+                                src={first}
+                                className="w-full h-full object-cover"
+                                alt="evidence"
+                                onError={(e) =>
+                                  ((e.target as HTMLImageElement).src = "https://placehold.co/100?text=No+Media")
+                                }
+                              />
+                            )}
+                            {urls.length > 1 && (
+                              <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded font-bold">
+                                +{urls.length - 1}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -160,6 +184,22 @@ export default function CitizenDashboardComponent() {
                             <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="ml-auto flex items-center gap-1 text-blue-600 font-bold hover:underline">
                                 View Details <Eye size={14} />
                             </Link>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const shareUrl = `${window.location.origin}/dashboard/citizen/complaints/${complaint.id}`;
+                                if (navigator.share) {
+                                  navigator.share({ title: complaint.title, url: shareUrl }).catch(() => {});
+                                } else {
+                                  navigator.clipboard.writeText(shareUrl).catch(() => {});
+                                }
+                              }}
+                              className="text-slate-500 hover:text-blue-600"
+                              title="Share"
+                            >
+                              <Share2 size={14} />
+                            </button>
                         </div>
                     </div>
                   </div>

@@ -6,6 +6,8 @@ import { fetchProjectById, updateProject, ProjectDetail, Token, UserStore } from
 import { Construction, DollarSign, MapPin, CheckCircle, ArrowLeft, Clock, AlertTriangle, Edit2 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import ProjectProgressTimeline from "@/app/components/projects/ProjectProgressTimeline";
+import ShareBar from "@/app/components/shared/ShareBar";
 
 // Dynamically import Map component to avoid SSR issues
 const MiniMap = dynamic(() => import("@/app/components/map/Map"), { ssr: false });
@@ -115,11 +117,7 @@ export default function ProjectDetailsPage() {
                         </span>
                     </div>
                     <div className="flex items-center gap-3">
-                        {userRole === "ADMIN" && (
-                            <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-bold hover:bg-slate-200 transition text-sm">
-                                <Edit2 size={16} /> Edit
-                            </button>
-                        )}
+                        <ShareBar title={project.title} summary={project.description} />
                     </div>
                 </div>
             </div>
@@ -228,8 +226,14 @@ export default function ProjectDetailsPage() {
                                         Last updated: {new Date(project.updatedAt).toLocaleString()}
                                     </p>
                                 )}
+
+                                <div className="mt-6">
+                                    <ProjectProgressTimeline projectId={project.id} />
+                                </div>
                             </div>
                         )}
+
+                        {/* 360 removed per request */}
 
                         {/* Actions for Contractor */}
                         {userRole === "CONTRACTOR" && project.status !== "Completed" && (
