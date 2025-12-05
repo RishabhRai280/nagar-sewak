@@ -1,7 +1,7 @@
 // app/components/map/Map.tsx
 "use client";
 
-import { useEffect, useMemo, useState, Dispatch, SetStateAction } from "react";
+import { useEffect, useMemo, useState, useRef, Dispatch, SetStateAction } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -25,7 +25,8 @@ import {
   ArrowRight,
   Filter,
   MapPin,
-  Maximize2
+  Maximize2,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -80,7 +81,7 @@ function createDivIcon(color: string, type: "project" | "complaint") {
 
 // --- Map Content Component ---
 
-import LocationSearch from "./LocationSearch";
+// LocationSearch is now integrated into the sidebar
 import MarkerClusterGroup from "./MarkerClusterGroup";
 import HeatMapLayer from "./HeatMapLayer";
 import MapEnhancements from "./MapEnhancements";
@@ -96,20 +97,29 @@ function MapContent({
   selectedItem,
   setSelectedItem,
   center,
+  locationTarget,
 }: {
   items: MarkerItem[];
   selectedItem: MarkerItem | null;
   setSelectedItem: (item: MarkerItem | null) => void;
   center: [number, number];
+  locationTarget: { lat: number; lng: number; zoom: number } | null;
 }) {
   const [targetLocation, setTargetLocation] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
   const [boundaryData, setBoundaryData] = useState<any>(null);
   const [clusteringEnabled, setClusteringEnabled] = useState(true);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
-  
+
   // Layer control states
   const [currentLayer, setCurrentLayer] = useState<MapLayer>("osm");
   const [activeOverlays, setActiveOverlays] = useState<MapOverlay[]>([]);
+
+  // Update target location when locationTarget prop changes
+  useEffect(() => {
+    if (locationTarget) {
+      setTargetLocation(locationTarget);
+    }
+  }, [locationTarget]);
 
   const handleLocationSelect = (lat: number, lng: number, zoom: number = 13, geojson?: any) => {
     setTargetLocation({ lat, lng, zoom });
@@ -141,7 +151,7 @@ function MapContent({
       >
         {/* Position zoom controls lower if needed, but usually topright is fine. Can add style if needed. */}
         <ZoomControl position="bottomright" />
-        
+
         {/* Map Layer Provider - Handles base layers and overlays */}
         <MapLayerProvider
           layer={currentLayer}
@@ -217,61 +227,61 @@ function MapContent({
           />
         ) : (
           markers.map((it) => {
-          const lat = (it as any).lat;
-          const lng = (it as any).lng;
-          if (typeof lat !== "number" || typeof lng !== "number") return null;
+            const lat = (it as any).lat;
+            const lng = (it as any).lng;
+            if (typeof lat !== "number" || typeof lng !== "number") return null;
 
-          let color = "#3b82f6"; // Default blue
-          if (it.kind === "project") {
-            color =
-              (it as ProjectData).status?.toLowerCase() === "completed"
-                ? "#10b981" // Emerald
-                : "#3b82f6"; // Blue
-          } else {
-            const s = (it as ComplaintData).status?.toLowerCase();
-            if (s === "pending") color = "#ef4444"; // Red
-            else if (s === "resolved") color = "#10b981"; // Emerald
-            else color = "#f59e0b"; // Amber/Orange
-          }
+            let color = "#3b82f6"; // Default blue
+            if (it.kind === "project") {
+              color =
+                (it as ProjectData).status?.toLowerCase() === "completed"
+                  ? "#10b981" // Emerald
+                  : "#3b82f6"; // Blue
+            } else {
+              const s = (it as ComplaintData).status?.toLowerCase();
+              if (s === "pending") color = "#ef4444"; // Red
+              else if (s === "resolved") color = "#10b981"; // Emerald
+              else color = "#f59e0b"; // Amber/Orange
+            }
 
-          const icon = createDivIcon(
-            color,
-            it.kind === "project" ? "project" : "complaint"
-          );
+            const icon = createDivIcon(
+              color,
+              it.kind === "project" ? "project" : "complaint"
+            );
 
-          // Create stable position array to prevent re-renders
-          const position: [number, number] = [lat, lng];
+            // Create stable position array to prevent re-renders
+            const position: [number, number] = [lat, lng];
 
-          return (
-            <Marker
-              key={`${it.kind}-${it.id}`}
-              position={position}
-              icon={icon as any}
-              draggable={false}
-              autoPan={false}
-              bubblingMouseEvents={false}
-              eventHandlers={{
-                click: (e) => {
-                  // Prevent default behavior and stop propagation
-                  if (e.originalEvent) {
-                    L.DomEvent.stopPropagation(e.originalEvent);
-                    L.DomEvent.preventDefault(e.originalEvent);
-                  }
-                  setSelectedItem(it);
-                },
-              }}
-            >
-              <Popup className="glass-popup" closeButton={false} autoClose={false}>
-                <div className="p-1">
-                  <strong className="text-sm block mb-1 font-bold text-slate-800">
-                    {it.kind === "complaint" ? t('complaint') : t('project')}
-                  </strong>
-                  <span className="text-sm text-slate-600">{it.title}</span>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        }))}
+            return (
+              <Marker
+                key={`${it.kind}-${it.id}`}
+                position={position}
+                icon={icon as any}
+                draggable={false}
+                autoPan={false}
+                bubblingMouseEvents={false}
+                eventHandlers={{
+                  click: (e) => {
+                    // Prevent default behavior and stop propagation
+                    if (e.originalEvent) {
+                      L.DomEvent.stopPropagation(e.originalEvent);
+                      L.DomEvent.preventDefault(e.originalEvent);
+                    }
+                    setSelectedItem(it);
+                  },
+                }}
+              >
+                <Popup className="glass-popup" closeButton={false} autoClose={false}>
+                  <div className="p-1">
+                    <strong className="text-sm block mb-1 font-bold text-slate-800">
+                      {it.kind === "complaint" ? t('complaint') : t('project')}
+                    </strong>
+                    <span className="text-sm text-slate-600">{it.title}</span>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          }))}
 
         {/* Heat Map Layer */}
         {heatmapEnabled && (
@@ -316,8 +326,7 @@ function MapContent({
         onOverlayToggle={handleOverlayToggle}
       />
 
-      {/* Location Search Overlay */}
-      <LocationSearch onLocationSelect={handleLocationSelect} />
+      {/* Location Search is now integrated into the sidebar */}
 
       {/* Map Legend */}
       <MapLegend activeOverlays={activeOverlays} />
@@ -338,7 +347,7 @@ function RecenterAndView({ item, initialCenter }: { item: MarkerItem | null, ini
       const position: [number, number] = [(item as any).lat, (item as any).lng];
       const currentCenter = map.getCenter();
       const distance = map.distance(currentCenter, position);
-      
+
       // Only move map if marker is far from current view (more than 500 meters)
       if (distance > 500) {
         const options: ZoomPanOptions = {
@@ -443,10 +452,10 @@ function ItemDetails({ item, clearSelection }: { item: MarkerItem, clearSelectio
         {isComplaint && (data.photoUrls?.length > 0 || data.photoUrl) && (
           <div className="space-y-3">
             <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <CheckCircle size={16} className="text-emerald-500" /> {t('evidenceUploaded')} 
+              <CheckCircle size={16} className="text-emerald-500" /> {t('evidenceUploaded')}
               {data.photoUrls?.length > 0 && <span className="text-xs text-slate-500">({data.photoUrls.length} {data.photoUrls.length === 1 ? 'image' : 'images'})</span>}
             </p>
-            
+
             {data.photoUrls && data.photoUrls.length > 0 ? (
               <div className={`grid gap-2 ${data.photoUrls.length === 1 ? 'grid-cols-1' : data.photoUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
                 {data.photoUrls.map((url: string, index: number) => (
@@ -590,10 +599,85 @@ export default function Map({
   const [mobileStatusFilter, setMobileStatusFilter] = useState(statusFilter);
   const [mobileSeverityMin, setMobileSeverityMin] = useState(severityMin);
 
+  // Unified search states
+  const [searchMode, setSearchMode] = useState<'filter' | 'location'>('filter');
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationResults, setLocationResults] = useState<any[]>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [showLocationResults, setShowLocationResults] = useState(false);
+  const [locationTarget, setLocationTarget] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
   const applyMobileFilters = () => {
     setStatusFilter(mobileStatusFilter);
     setSeverityMin(mobileSeverityMin);
     setShowFilterPanel(false);
+    setSelectedItem(null);
+  };
+
+  // Location search logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchMode === 'location' && locationQuery.length > 2) {
+        searchLocation(locationQuery);
+      } else {
+        setLocationResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [locationQuery, searchMode]);
+
+  // Close location results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowLocationResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const searchLocation = async (q: string) => {
+    setLocationLoading(true);
+    try {
+      const response = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      setLocationResults(data);
+      setShowLocationResults(true);
+    } catch (error) {
+      console.error("Error searching location:", error);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  const handleLocationSelect = (result: any) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+
+    // Determine zoom level based on type
+    let zoom = 13;
+    if (result.type === "city" || result.type === "administrative") zoom = 12;
+    if (result.type === "state") zoom = 7;
+    if (result.type === "country") zoom = 5;
+
+    // Set location target to fly map to the selected location
+    setLocationTarget({ lat, lng, zoom });
+
+    setLocationQuery(result.display_name.split(",")[0]);
+    setShowLocationResults(false);
+    setLocationResults([]);
+
+    // Switch back to filter mode after a short delay
+    setTimeout(() => {
+      setSearchMode('filter');
+      setLocationQuery("");
+    }, 1000);
+
     setSelectedItem(null);
   };
 
@@ -647,45 +731,146 @@ export default function Map({
         </motion.button>
       </div>
 
-      <div className="relative group">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition duration-300" size={18} />
+      {/* Search Mode Toggle */}
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+        <button
+          onClick={() => {
+            setSearchMode('filter');
+            setLocationQuery("");
+            setShowLocationResults(false);
+          }}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${searchMode === 'filter'
+            ? 'bg-white text-blue-600 shadow-sm'
+            : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          <Search size={14} /> Filter Items
+        </button>
+        <button
+          onClick={() => {
+            setSearchMode('location');
+            setSearch("");
+          }}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${searchMode === 'location'
+            ? 'bg-white text-blue-600 shadow-sm'
+            : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          <MapPin size={14} /> Location
+        </button>
+      </div>
+
+      {/* Unified Search Input */}
+      <div ref={searchRef} className="relative group">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          {searchMode === 'location' && locationLoading ? (
+            <Loader2 className="animate-spin text-blue-500" size={18} />
+          ) : (
+            <Search className="text-slate-400 group-focus-within:text-blue-500 transition duration-300" size={18} />
+          )}
+        </div>
         <input
           type="search"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setSelectedItem(null); }}
-          placeholder={t('filterPlaceholder')}
-          className="w-full pl-10 pr-4 py-2.5 bg-white/60 border border-white/60 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 shadow-sm placeholder-slate-400 focus:bg-white"
+          value={searchMode === 'filter' ? search : locationQuery}
+          onChange={(e) => {
+            if (searchMode === 'filter') {
+              setSearch(e.target.value);
+              setSelectedItem(null);
+            } else {
+              setLocationQuery(e.target.value);
+              if (e.target.value.length > 0) setShowLocationResults(true);
+            }
+          }}
+          onFocus={() => {
+            if (searchMode === 'location' && locationResults.length > 0) {
+              setShowLocationResults(true);
+            }
+          }}
+          placeholder={searchMode === 'filter' ? t('filterPlaceholder') : 'Search area, city, or state...'}
+          className="w-full pl-10 pr-10 py-2.5 bg-white/60 border border-white/60 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 shadow-sm placeholder-slate-400 focus:bg-white"
         />
+        {((searchMode === 'filter' && search) || (searchMode === 'location' && locationQuery)) && (
+          <button
+            onClick={() => {
+              if (searchMode === 'filter') {
+                setSearch("");
+              } else {
+                setLocationQuery("");
+                setLocationResults([]);
+                setShowLocationResults(false);
+              }
+            }}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          >
+            <X size={16} />
+          </button>
+        )}
+
+        {/* Location Search Results Dropdown */}
+        <AnimatePresence>
+          {searchMode === 'location' && showLocationResults && locationResults.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-full mt-2 w-full bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/50 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar z-50"
+            >
+              <ul className="py-1">
+                {locationResults.map((result) => (
+                  <li key={result.place_id}>
+                    <button
+                      onClick={() => handleLocationSelect(result)}
+                      className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors flex items-start gap-3 group"
+                    >
+                      <MapPin className="mt-0.5 text-slate-400 group-hover:text-blue-500 flex-shrink-0" size={16} />
+                      <div>
+                        <span className="block text-sm font-medium text-slate-800 group-hover:text-blue-700">
+                          {result.display_name.split(",")[0]}
+                        </span>
+                        <span className="block text-xs text-slate-500 truncate max-w-[250px]">
+                          {result.display_name}
+                        </span>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="flex justify-between items-center pt-1">
-        <div className="flex items-center gap-2 text-xs">
-          <ArrowDownNarrowWide size={14} className="text-slate-400" />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-transparent font-bold text-slate-600 focus:outline-none cursor-pointer hover:text-blue-600 transition duration-300"
-          >
-            <option value="severity_desc">{t('sortBySeverity')}</option>
-            <option value="title_asc">{t('sortByName')}</option>
-          </select>
-        </div>
+      {/* Filter Mode Controls */}
+      {searchMode === 'filter' && (
+        <div className="flex justify-between items-center pt-1">
+          <div className="flex items-center gap-2 text-xs">
+            <ArrowDownNarrowWide size={14} className="text-slate-400" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent font-bold text-slate-600 focus:outline-none cursor-pointer hover:text-blue-600 transition duration-300"
+            >
+              <option value="severity_desc">{t('sortBySeverity')}</option>
+              <option value="title_asc">{t('sortByName')}</option>
+            </select>
+          </div>
 
-        <div className="flex gap-1.5">
-          <button
-            className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showComplaints ? 'bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30 scale-105' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105'}`}
-            onClick={() => { setShowComplaints(!showComplaints); setSelectedItem(null); }}
-          >
-            {t('complaints')}
-          </button>
-          <button
-            className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showProjects ? 'bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105'}`}
-            onClick={() => { setShowProjects(!showProjects); setSelectedItem(null); }}
-          >
-            {t('projects')}
-          </button>
+          <div className="flex gap-1.5">
+            <button
+              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showComplaints ? 'bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30 scale-105' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105'}`}
+              onClick={() => { setShowComplaints(!showComplaints); setSelectedItem(null); }}
+            >
+              {t('complaints')}
+            </button>
+            <button
+              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showProjects ? 'bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105' : 'bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105'}`}
+              onClick={() => { setShowProjects(!showProjects); setSelectedItem(null); }}
+            >
+              {t('projects')}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -750,6 +935,7 @@ export default function Map({
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}
           center={center}
+          locationTarget={locationTarget}
         />
       </div>
 

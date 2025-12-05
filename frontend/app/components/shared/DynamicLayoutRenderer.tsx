@@ -12,9 +12,9 @@ export default function DynamicLayoutRenderer({ children }: { children: React.Re
   return (
     <>
       <Header />
-      
-      {/* No padding for dashboard pages (they have their own layout with sidebar) */}
-      <main className={isDashboardPage ? '' : 'pt-16'}>
+
+      {/* No padding for dashboard pages (they have their own layout with sidebar) or map page (full-screen) */}
+      <main className={isDashboardPage || isMapPage ? '' : 'pt-16'}>
         {children}
       </main>
 

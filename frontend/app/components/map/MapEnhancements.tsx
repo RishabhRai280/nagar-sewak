@@ -18,17 +18,16 @@ export default function MapEnhancements({
   heatmapEnabled,
 }: MapEnhancementsProps) {
   return (
-    <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+    <div className="absolute top-20 right-4 z-[1000] flex flex-col gap-2">
       {/* Clustering Toggle */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onClusteringToggle(!clusteringEnabled)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-lg transition-all ${
-          clusteringEnabled
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-lg transition-all ${clusteringEnabled
             ? "bg-blue-600 text-white"
             : "bg-white text-gray-700 hover:bg-gray-50"
-        }`}
+          }`}
         title="Toggle marker clustering"
       >
         <Layers size={18} />
@@ -40,11 +39,10 @@ export default function MapEnhancements({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onHeatmapToggle(!heatmapEnabled)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-lg transition-all ${
-          heatmapEnabled
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-lg transition-all ${heatmapEnabled
             ? "bg-red-600 text-white"
             : "bg-white text-gray-700 hover:bg-gray-50"
-        }`}
+          }`}
         title="Toggle heat map"
       >
         <Flame size={18} />
