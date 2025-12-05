@@ -1,6 +1,6 @@
 # Root level gitignore for nagar-sewak project
 
-# OS files
+# OS Files
 .DS_Store
 .DS_Store?
 ._*
@@ -9,13 +9,18 @@
 ehthumbs.db
 Thumbs.db
 *~
+desktop.ini
 
-# IDE
+# IDE & Editors
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
 
 # Logs
 *.log
@@ -24,27 +29,64 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+logs/
 
-# Environment variables
+# Environment Variables (IMPORTANT - Never commit these!)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env*.local
+backend/.env
+frontend/.env.local
 
-# Temporary files
+# Firebase Credentials (IMPORTANT - Never commit these!)
+*firebase-credentials*.json
+*firebase-adminsdk*.json
+
+# Temporary Files
 *.tmp
 *.temp
+*.bak
 .cache/
+.temp/
 
-# Build outputs
+# Build Outputs
 dist/
 build/
 out/
+target/
 
-# Package manager locks (keep one, ignore others if using multiple)
-# Uncomment the ones you don't use:
+# Dependencies (optional - uncomment if you want to ignore)
+# node_modules/
+# backend/target/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (user-generated content)
+backend/uploads/**
+!backend/uploads/.gitkeep
+!backend/uploads/complaints/.gitkeep
+!backend/uploads/projects/.gitkeep
+!backend/uploads/tenders/.gitkeep
+!backend/uploads/comments/.gitkeep
+
+# Package Manager Locks (keep the one you use, ignore others)
+# Uncomment the ones you DON'T use:
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js.snap
+
+# Documentation
+docs/.vuepress/dist
+docs/.vuepress/.cache
+docs/.vuepress/.temp

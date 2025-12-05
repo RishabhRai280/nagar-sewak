@@ -32,12 +32,38 @@ build/
 ### VS Code ###
 .vscode/
 
-### Environment ###
+### Environment Variables ###
 .env
 .env.local
 .env.*.local
+application-local.properties
+
+### Firebase Credentials ###
+firebase-credentials.json
+firebase-admin-sdk.json
+*-firebase-adminsdk-*.json
 
 ### Uploads (user-generated content) ###
-# Uncomment if you don't want to track uploads
-# /uploads/**
-# !/uploads/.gitkeep
+uploads/**
+!uploads/.gitkeep
+!uploads/complaints/.gitkeep
+!uploads/projects/.gitkeep
+!uploads/tenders/.gitkeep
+!uploads/comments/.gitkeep
+
+### Logs ###
+*.log
+logs/
+spring.log
+
+### OS Files ###
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+### Temporary Files ###
+*.tmp
+*.bak
+*.swp
+*~.nib
