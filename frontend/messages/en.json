@@ -270,13 +270,16 @@
       "newToPlatform": "New to the platform?",
       "createAccount": "Create an account",
       "signUp": "Sign Up",
-      "copyright": "© 2024 Nagar Sewak. All rights reserved.",
+      "copyright": "© 2025 Nagar Sewak. All rights reserved.",
       "pleaseSignIn": "Please sign in to continue.",
       "forgot": "Forgot?",
       "signIn": "Sign In",
       "signingIn": "Signing In...",
-      "demoAccess": "Demo Access",
-      "demoPassword": "Password"
+      "demoAccess": "Demo Access Available",
+      "demoPassword": "password",
+      "communityDriven": "Community Driven",
+      "communityDrivenDesc": "Join thousands making a difference in their cities",
+      "orContinueWith": "Or continue with"
     },
     "register": {
       "title": "Create Account",

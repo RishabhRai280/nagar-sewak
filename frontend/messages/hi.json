@@ -270,13 +270,16 @@
       "newToPlatform": "प्लेटफ़ॉर्म पर नए हैं?",
       "createAccount": "एक खाता बनाएं",
       "signUp": "साइन अप करें",
-      "copyright": "© 2024 नगर सेवक। सर्वाधिकार सुरक्षित।",
+      "copyright": "© 2025 नगर सेवक। सर्वाधिकार सुरक्षित।",
       "pleaseSignIn": "कृपया जारी रखने के लिए साइन इन करें।",
       "forgot": "भूल गए?",
       "signIn": "साइन इन करें",
       "signingIn": "साइन इन हो रहा है...",
-      "demoAccess": "डेमो एक्सेस",
-      "demoPassword": "पासवर्ड"
+      "demoAccess": "डेमो एक्सेस उपलब्ध",
+      "demoPassword": "पासवर्ड",
+      "communityDriven": "समुदाय संचालित",
+      "communityDrivenDesc": "अपने शहरों में बदलाव लाने वाले हजारों लोगों में शामिल हों",
+      "orContinueWith": "या जारी रखें"
     },
     "register": {
       "title": "खाता बनाएं",

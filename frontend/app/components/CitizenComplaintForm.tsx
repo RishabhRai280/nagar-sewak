@@ -50,7 +50,7 @@ export default function CitizenComplaintForm() {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setValidationErrors([]);
@@ -85,7 +85,7 @@ export default function CitizenComplaintForm() {
           lat: latitude!,
           lng: longitude!
         },
-        selectedFile!
+        [selectedFile!] // <--- FIXED: Wrapped in array brackets
       );
       router.push("/dashboard/citizen?submission=success");
     } catch (err: any) {

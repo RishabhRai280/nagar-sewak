@@ -278,7 +278,7 @@ export default function ContractorManagement({ onContractorCreated }: Contractor
                                                     onChange={handleInputChange}
                                                     required
                                                     className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                                                    placeholder="LIC-2024-12345"
+                                                    placeholder="LIC-2025-12345"
                                                 />
                                             </div>
                                         </div>
