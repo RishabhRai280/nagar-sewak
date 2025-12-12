@@ -14,19 +14,22 @@ export default function DynamicLayoutRenderer({
   const isDashboardPage = pathname.includes("/dashboard");
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
-  // Hide header/footer on map, dashboard, and auth pages
-  const shouldHideHeaderFooter = isMapPage || isDashboardPage || isAuthPage;
+  // Hide header ONLY on dashboard pages
+  const shouldHideHeader = isDashboardPage;
+
+  // Hide footer on dashboard AND map pages
+  const shouldHideFooter = isDashboardPage || isMapPage;
 
   return (
     <>
-      {!shouldHideHeaderFooter && <Header />}
+      {!shouldHideHeader && <Header />}
 
       {/* No padding for dashboard pages (they have their own layout with sidebar), map page (full-screen), or auth pages (full-screen) */}
-      <main className={shouldHideHeaderFooter ? "" : ""}>
+      <main className="">
         {children}
       </main>
 
-      {!shouldHideHeaderFooter && <Footer />}
+      {!shouldHideFooter && <Footer />}
     </>
   );
 }

@@ -25,7 +25,7 @@ export default function AuthLayout({ children, title, subtitle, illustration, th
     const flexDirection = theme === 'green' ? 'lg:flex-row-reverse' : 'lg:flex-row';
 
     return (
-        <div className={`min-h-screen w-full flex flex-col ${flexDirection} bg-slate-50`}>
+        <div className={`min-h-[calc(100vh-110px)] w-full flex flex-col ${flexDirection} bg-slate-50`}>
 
             {/* Side Panel - Official Government Branding */}
             <div className={`hidden lg:flex w-1/2 ${bgColor} relative overflow-hidden flex-col justify-center items-center p-12 text-white transition-colors duration-500`}>
@@ -59,13 +59,7 @@ export default function AuthLayout({ children, title, subtitle, illustration, th
 
             {/* Right Panel - Auth Form */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 relative bg-white">
-                {/* Mobile Header (only visible on small screens) */}
-                <div className="lg:hidden absolute top-0 left-0 w-full p-4 flex justify-between items-center bg-white border-b border-slate-100 mb-8">
-                    <Link href="/" className="flex items-center gap-2">
-                        <Landmark size={24} className="text-[#1e3a8a]" />
-                        <span className="font-bold text-[#1e3a8a]">Nagar Sewak</span>
-                    </Link>
-                </div>
+                {/* Mobile Header Removed (Global Header used instead) */}
 
                 <div className="w-full max-w-md mx-auto pt-16 lg:pt-0">
                     <motion.div

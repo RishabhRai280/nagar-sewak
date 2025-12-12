@@ -52,49 +52,62 @@ const PROJECT_DETAILS_PATH = "/projects";
 
 // --- Marker Icon Utilities ---
 
-function createDivIcon(color: string, type: "project" | "complaint") {
-  // Use Gov Palette colors if generic colors are passed
-  const mapColor = (c: string) => {
-    if (c === "#3b82f6") return "#1e3a8a"; // Blue -> Ashoka Blue
-    if (c === "#10b981") return "#166534"; // Green -> India Green
-    if (c === "#f59e0b") return "#f97316"; // Orange -> Saffron
-    if (c === "#ef4444") return "#ef4444"; // Red (keep for alerts)
-    return c;
-  };
+function createDivIcon(color: string, type: "project" | "complaint", status: string) {
+  const isProject = type === "project";
+  const isResolved = status?.toLowerCase() === "resolved" || status?.toLowerCase() === "completed";
+  const isPending = status?.toLowerCase() === "pending";
 
-  const finalColor = mapColor(color);
+  // Official Government Colors
+  let borderColor = "#cbd5e1"; // Slate 300
+  let ringColor = "#f8fafc"; // White ring
+  let iconColor = "#475569"; // Slate 600
+  let bgColor = "white";
 
-  const iconHtml =
-    type === "project"
-      ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-         <path d="M12 2L20 6V18L12 22L4 18V6L12 2Z" />
-       </svg>`
-      : `<svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM12 11.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
-       </svg>`;
+  if (isProject) {
+     borderColor = "#2563eb"; // Blue border
+     iconColor = "#2563eb";
+     if (isResolved) { borderColor = "#059669"; iconColor = "#059669"; } // Green if completed
+  } else {
+     // Complaint
+     borderColor = "#dc2626"; // Red border
+     iconColor = "#dc2626";
+     if (isResolved) { borderColor = "#059669"; iconColor = "#059669"; } // Green if resolved
+     if (!isResolved && !isPending) { borderColor = "#d97706"; iconColor = "#d97706"; } // Amber if in progress
+  }
+
+  // Icons based on state
+  const iconSvg = isProject
+    ? isResolved 
+       ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+       : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>`
+    : isResolved
+       ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+       : isPending
+          ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line><circle cx="12" cy="12" r="10"></circle></svg>`
+          : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+
+  const markerHtml = `
+    <div class="relative group cursor-pointer" style="width: 40px; height: 40px;">
+        <!-- Pulsing Effect for Pending items -->
+        ${isPending ? `<div class="absolute inset-0 rounded-full bg-red-400 opacity-20 animate-ping"></div>` : ''}
+        
+        <!-- Main Circle Seal -->
+        <div class="absolute inset-0 rounded-full bg-white shadow-md flex items-center justify-center border-[3px]" style="border-color: ${borderColor};">
+            <!-- Inner Dot/Icon -->
+             ${iconSvg}
+        </div>
+        
+        <!-- Tiny Bottom Triangle to make it a 'pin' feel but subtle -->
+        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px]" style="border-t-color: ${borderColor};"></div>
+    </div>
+  `;
 
   return L.divIcon({
-    html: `
-      <div class="marker-icon-stable" style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: ${finalColor};
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        border: 3px solid white;
-        cursor: pointer;
-        will-change: transform;
-      ">
-        ${iconHtml}
-      </div>
-    `,
-    className: "custom-marker-icon",
-    iconSize: [44, 44],
-    iconAnchor: [22, 44],
-    popupAnchor: [0, -44],
+    html: markerHtml,
+    className: "custom-marker-wrapper",
+    iconSize: [40, 48],
+    iconAnchor: [20, 48],
+    popupAnchor: [0, -48],
   });
 }
 
@@ -177,7 +190,7 @@ function MapContent({
   const markers = useMemo(() => items, [items]);
 
   return (
-    <div className="relative w-full h-full z-0 rounded-none lg:rounded-l-3xl overflow-hidden shadow-2xl border-l border-white/20">
+    <div className="relative w-full h-full z-0 rounded-none lg:rounded-l-3xl overflow-hidden shadow-2xl border-l border-slate-200 bg-white">
       <MapContainer
         center={center}
         zoom={12}
@@ -185,10 +198,31 @@ function MapContent({
         zoomControl={false}
         className="z-0"
       >
-        {/* Position zoom controls lower if needed, but usually topright is fine. Can add style if needed. */}
-        <ZoomControl position="bottomright" />
+        {/* Floating Map Tools (Layers & Enhancements) */}
+        {/* Map Enhancement Controls - Top Left (Right of Sidebar) */}
+        <div className="absolute top-4 left-4 z-[900]">
+          <div className="bg-white rounded-lg shadow-xl border border-slate-200 p-1.5 flex flex-col gap-1">
+            <MapEnhancements
+              clusteringEnabled={clusteringEnabled}
+              heatmapEnabled={heatmapEnabled}
+              onClusteringToggle={setClusteringEnabled}
+              onHeatmapToggle={setHeatmapEnabled}
+              compact={true}
+            />
+          </div>
+        </div>
 
-        {/* Auto-center on selected item - handled via useEffect below */}
+        {/* Map Layer Control - Bottom Left (Right of Sidebar) */}
+        <div className="absolute bottom-6 left-4 z-[900]">
+          <div className="bg-white rounded-lg shadow-xl border border-slate-200 overflow-visible">
+            <MapLayerControl
+              currentLayer={currentLayer}
+              onLayerChange={setCurrentLayer}
+              activeOverlays={activeOverlays}
+              onOverlayToggle={handleOverlayToggle}
+            />
+          </div>
+        </div>
 
         {/* Map Layer Provider - Handles base layers and overlays */}
         <MapLayerProvider
@@ -258,7 +292,8 @@ function MapContent({
 
                   const icon = createDivIcon(
                     color,
-                    it.kind === "project" ? "project" : "complaint"
+                    it.kind === "project" ? "project" : "complaint",
+                    (it as any).status
                   );
                   const position: [number, number] = [lat, lng];
 
@@ -297,7 +332,8 @@ function MapContent({
 
             const icon = createDivIcon(
               color,
-              it.kind === "project" ? "project" : "complaint"
+              it.kind === "project" ? "project" : "complaint",
+              (it as any).status
             );
 
             // Create stable position array to prevent re-renders
@@ -323,7 +359,7 @@ function MapContent({
                 }}
               >
                 <Popup
-                  className="glass-popup"
+                  className="solid-popup"
                   closeButton={false}
                   autoClose={false}
                 >
@@ -368,21 +404,7 @@ function MapContent({
         )}
       </MapContainer>
 
-      {/* Map Enhancement Controls */}
-      <MapEnhancements
-        clusteringEnabled={clusteringEnabled}
-        heatmapEnabled={heatmapEnabled}
-        onClusteringToggle={setClusteringEnabled}
-        onHeatmapToggle={setHeatmapEnabled}
-      />
-
-      {/* Map Layer Control */}
-      <MapLayerControl
-        currentLayer={currentLayer}
-        onLayerChange={setCurrentLayer}
-        activeOverlays={activeOverlays}
-        onOverlayToggle={handleOverlayToggle}
-      />
+      {/* Map Enhancement Controls - Moved to Floating Dock (see above) */}
 
       {/* Map Legend */}
       <MapLegend activeOverlays={activeOverlays} />
@@ -449,7 +471,9 @@ function FlyToLocation({
 
 // --- Sidebar Display Components ---
 
-function ItemDetails({
+// --- Floating Bottom Right Panel ---
+
+function FloatingDetailsPanel({
   item,
   clearSelection,
 }: {
@@ -462,165 +486,126 @@ function ItemDetails({
   const mediaItems = (data.photoUrls && data.photoUrls.length ? data.photoUrls : data.photoUrl ? [data.photoUrl] : []) as string[];
   const isVideo = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
 
-  const statusClasses =
-    data.status?.toLowerCase() === "resolved" ||
-      data.status?.toLowerCase() === "completed"
-      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-      : data.status?.toLowerCase() === "pending"
-        ? "bg-red-100 text-red-700 border-red-200"
-        : "bg-amber-100 text-amber-700 border-amber-200";
+  // Determine date to show
+  const displayDate = data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Official Status Colors
+  const getStatusColor = (s: string) => {
+    const status = s?.toLowerCase();
+    if (status === 'resolved' || status === 'completed') return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+    if (status === 'pending') return 'text-red-700 bg-red-50 border-red-200';
+    if (status === 'in_progress') return 'text-amber-700 bg-amber-50 border-amber-200';
+    return 'text-slate-700 bg-slate-50 border-slate-200';
+  };
 
   return (
     <motion.div
       initial={{ x: 50, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 50, opacity: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="h-full p-6 pt-28 flex flex-col relative overflow-hidden"
+      transition={{ duration: 0.2 }}
+      className="absolute top-4 right-4 w-[26rem] bottom-6 flex flex-col bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-300 z-[1000] overflow-hidden font-sans"
     >
-      {/* Glass Background for Details Panel */}
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-xl z-[-1]" />
-      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534] z-10" />
-
-      <div className="flex justify-between items-start border-b border-slate-200/60 pb-4 mb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span
-              className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${isComplaint
-                ? "bg-red-50 text-red-600 border-red-100"
-                : "bg-blue-50 text-[#1e3a8a] border-blue-100"
-                }`}
-            >
-              {isComplaint ? t("citizenComplaint") : t("publicProject")}
-            </span>
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 leading-tight">
-            {data.title}
-          </h2>
-        </div>
-        <button
-          onClick={clearSelection}
-          className="p-2 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 transition rounded-full shadow-sm border border-slate-200"
-          title="Close Details"
-        >
-          <X size={20} />
-        </button>
-      </div>
-
-      <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-        <div className="flex flex-wrap gap-3 text-sm font-medium">
-          <span
-            className={`px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-1.5 ${statusClasses}`}
-          >
-            {data.status}
-          </span>
-
-          {isComplaint && data.severity && (
-            <span
-              className={`px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-1.5 ${data.severity >= 4
-                ? "bg-red-50 text-red-700 border-red-100"
-                : "bg-yellow-50 text-yellow-700 border-yellow-100"
-                }`}
-            >
-              <AlertTriangle size={14} /> {t("severity")}: {data.severity}/5
-            </span>
-          )}
-
-          {!isComplaint && data.budget && (
-            <span className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 shadow-sm flex items-center gap-1.5">
-              <DollarSign size={14} /> {t("budget")}: ₹
-              {data.budget.toLocaleString()}
-            </span>
-          )}
-        </div>
-
-        <div className="bg-white/50 p-4 rounded-xl border border-white/60 shadow-sm">
-          <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">
-            {t("description")}
-          </h4>
-          <p className="text-slate-700 leading-relaxed">
-            {data.description || t("noDescription")}
-          </p>
-        </div>
-
-        {/* Media Evidence (photos / video / 360) */}
-        {mediaItems.length > 0 && (
-          <div className="space-y-3">
-            <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <CheckCircle size={16} className="text-emerald-500" />{" "}
-              {t("evidenceUploaded")}
-              {mediaItems.length > 0 && (
-                <span className="text-xs text-slate-500">
-                  ({mediaItems.length} {mediaItems.length === 1 ? "item" : "items"})
-                </span>
-              )}
-            </p>
-
-            <div className="grid gap-2 grid-cols-2">
-              {mediaItems.map((url: string, index: number) => {
-                const resolved = buildAssetUrl(url) ?? url;
-                const video = isVideo(url);
-                return (
-                  <div
-                    key={index}
-                    className="relative rounded-xl overflow-hidden shadow-md border border-white/50 group bg-black"
-                  >
-                    {video ? (
-                      <video src={resolved} controls className="w-full h-32 object-cover bg-black" />
-                    ) : (
-                      <img
-                        src={resolved}
-                        alt={`Evidence ${index + 1}`}
-                        className="w-full h-32 object-cover transition transform group-hover:scale-105 duration-500"
-                        onError={(e) => {
-                          (
-                            e.target as HTMLImageElement
-                          ).src = `https://placehold.co/400x200/e2e8f0/64748b?text=Image+${index + 1}`;
-                        }}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
-                    <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-bold">
-                      {index + 1}/{mediaItems.length}
-                    </div>
-                  </div>
-                );
-              })}
+      {/* --- Official Case Header --- */}
+      <div className="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
+         <div>
+            <div className="flex items-center gap-2 mb-1">
+               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  {isComplaint ? "Case File #CMP-" : "Project File #PRJ-"}{data.id}
+               </span>
+               <span className={`px-2 py-0.5 text-[10px] font-bold uppercase border rounded-full ${getStatusColor(data.status)}`}>
+                  {data.status?.replace('_', ' ')}
+               </span>
             </div>
-          </div>
-        )}
-
-        {/* Action Links */}
-        <div className="pt-2 space-y-3">
-          <ShareBar
-            title={isComplaint ? `Complaint #${data.id}` : data.title}
-            summary={data.description}
-          />
-          <Link
-            href={
-              isComplaint
-                ? `/complaints/${data.id}` // Direct link to complaint details
-                : `${PROJECT_DETAILS_PATH}/${data.id}`
-            }
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-900/20 hover:scale-[1.02] transition-all duration-200"
-          >
-            {t("viewFullDetails")} <ArrowRight size={18} />
-          </Link>
-          {isComplaint && data.status?.toLowerCase() === "resolved" && (
-            <Link
-              href={`/rate/${data.id}`}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-white text-[#166534] border border-[#166534]/30 rounded-xl font-bold hover:bg-emerald-50 transition shadow-sm"
-            >
-              <Star size={18} /> {t("rateWorkQuality")}
-            </Link>
-          )}
-        </div>
-
-        <div className="text-xs text-slate-400 text-center pt-2 pb-6 flex items-center justify-center gap-1">
-          <MapPin size={12} /> {t("coordinates")}: {data.lat?.toFixed(5)},{" "}
-          {data.lng?.toFixed(5)}
-        </div>
+            <h2 className="text-lg font-bold text-slate-900 leading-snug">{data.title}</h2>
+         </div>
+         <button onClick={clearSelection} className="text-slate-400 hover:text-slate-700 transition">
+            <X size={20} />
+         </button>
       </div>
+
+      {/* --- Body --- */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-0 bg-white">
+      
+         {/* Media Viewer - If exists */}
+         {mediaItems.length > 0 && (
+          <div className="w-full h-56 bg-slate-100 flex items-center justify-center border-b border-slate-200 relative group">
+             {isVideo(mediaItems[0]) ? (
+                 <video src={buildAssetUrl(mediaItems[0]) ?? mediaItems[0]} className="w-full h-full object-contain" controls />
+             ) : (
+                 <img 
+                   src={buildAssetUrl(mediaItems[0]) ?? mediaItems[0]} 
+                   className="w-full h-full object-cover" 
+                   alt="Evidence" 
+                 />
+             )}
+             <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-medium">
+                Evidence Record
+             </div>
+          </div>
+         )}
+      
+         <div className="p-5 space-y-6">
+            
+            {/* Details Table */}
+            <div>
+               <h3 className="text-xs font-bold text-slate-900 uppercase border-b-2 border-slate-100 pb-2 mb-3">Case Particulars</h3>
+               <div className="space-y-0 text-sm">
+                  <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                     <span className="text-slate-500 font-medium">Date Filed</span>
+                     <span className="col-span-2 text-slate-900 font-semibold">{displayDate}</span>
+                  </div>
+                  {isComplaint && (
+                    <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                       <span className="text-slate-500 font-medium">Severity</span>
+                       <span className="col-span-2 text-slate-900 font-semibold flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${data.severity >= 4 ? 'bg-red-500' : 'bg-yellow-500'}`}></span>
+                          {data.severity}/5 (Official Assessment)
+                       </span>
+                    </div>
+                  )}
+                  {!isComplaint && data.budget && (
+                    <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                       <span className="text-slate-500 font-medium">Allocated Budget</span>
+                       <span className="col-span-2 text-slate-900 font-semibold">₹{(data.budget).toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                     <span className="text-slate-500 font-medium">Location</span>
+                     <span className="col-span-2 text-slate-900 font-mono text-xs pt-0.5">
+                        {data.lat?.toFixed(6)}, {data.lng?.toFixed(6)}
+                     </span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Description as 'Report' */}
+            <div>
+               <h3 className="text-xs font-bold text-slate-900 uppercase border-b-2 border-slate-100 pb-2 mb-3">Field Report</h3>
+               <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-3 rounded border border-slate-100 italic">
+                  "{data.description || t("noDescription")}"
+               </p>
+            </div>
+         </div>
+      </div>
+
+      {/* --- Footer / Actions --- */}
+      <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
+         <Link
+            href={isComplaint ? `/complaints/${data.id}` : `${PROJECT_DETAILS_PATH}/${data.id}`}
+            className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded shadow-sm text-center transition"
+         >
+            Access Full Record
+         </Link>
+         <button className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-bold rounded shadow-sm transition">
+            Print / Export
+         </button>
+      </div>
+
     </motion.div>
   );
 }
@@ -649,7 +634,7 @@ function ItemListing({
   }
 
   return (
-    <div className="space-y-3 p-6 pt-2 pb-24 lg:pb-6">
+    <div className="space-y-3 p-5 pt-2 pb-24 lg:pb-6">
       {items.map((item) => {
         const isComplaint = item.kind === "complaint";
         const data = item as any;
@@ -660,56 +645,39 @@ function ItemListing({
             ? "text-[#166534] bg-emerald-50 border-emerald-100"
             : data.status?.toLowerCase() === "pending"
               ? "text-red-600 bg-red-50 border-red-100"
-              : "text-[#f97316] bg-amber-50 border-amber-100";
+              : "text-amber-700 bg-amber-50 border-amber-100";
+
+        const borderColor = isComplaint ? "border-l-red-500" : "border-l-blue-500";
 
         return (
           <motion.div
             key={`${item.kind}-${item.id}`}
+            layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{
-              scale: 1.02,
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
-            }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-white/70 p-4 rounded-xl border border-white/60 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md group relative overflow-hidden"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
+            className={`bg-white p-4 rounded-xl border border-slate-200 border-l-4 ${borderColor} cursor-pointer shadow-sm hover:shadow-lg hover:border-slate-300 transition-all duration-300 group`}
             onClick={() => setSelectedItem(item)}
           >
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1e3a8a] to-[#f97316] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="flex items-center justify-between mb-2 pl-2">
+            <div className="flex items-center justify-between mb-2">
               <span
                 className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${statusColor}`}
               >
                 {data.status || (isComplaint ? t("pending") : t("inProgress"))}
               </span>
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
-                {isComplaint ? t("complaint") : t("project")}
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1">
+                {isComplaint ? <AlertTriangle size={10} /> : <ClipboardList size={10} />}
+                {isComplaint ? "Complaint" : "Project"}
               </span>
             </div>
-            <h4 className="font-bold text-slate-800 line-clamp-1 group-hover:text-[#1e3a8a] transition-colors pl-2">
+            <h4 className="font-bold text-slate-800 text-base leading-tight group-hover:text-blue-700 transition-colors">
               {data.title}
             </h4>
-            <p className="text-xs text-slate-500 line-clamp-2 mt-1.5 leading-relaxed pl-2">
-              {data.description || "No description available."}
-            </p>
-
-            {isComplaint && data.severity && (
-              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
-                <div className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
-                  {t("severity")}
-                </div>
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-1.5 h-1.5 rounded-full ${i < data.severity ? "bg-red-400" : "bg-slate-200"
-                        }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+            <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+              <MapPin size={12} className="text-slate-400" />
+              <span className="truncate">{data.description ? data.description.substring(0, 30) + (data.description.length > 30 ? "..." : "") : "Location details available"}</span>
+            </div>
           </motion.div>
         );
       })}
@@ -943,67 +911,69 @@ export default function Map({
     setMobileSeverityMin(1);
   };
 
-  // --- Sidebar Header with Glass Morphism - STICKY ---
+  // --- Sidebar Header - Solid STICKY & Enhanced ---
   const SidebarHeader = (
-    <div className="p-6 pt-28 space-y-4 border-b border-white/40 flex-shrink-0 bg-white/60 backdrop-blur-xl z-20 sticky top-0 shadow-sm">
+    <div className="p-5 space-y-5 border-b border-slate-200 flex-shrink-0 bg-white z-20 sticky top-0 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-500/30">
-            <ClipboardList size={20} />
-          </div>
-          <h3 className="text-xl font-extrabold text-slate-900">
+        <div>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight">
             {t("civicData")}
           </h3>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            {filtered.length} active items in current view
+          </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.8)" }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowFilterPanel(true)}
-          className="p-2 bg-white/50 text-slate-600 rounded-lg border border-white/60 shadow-sm transition"
-        >
-          <Filter size={18} />
-        </motion.button>
+
+        {/* Sort Dropdown - Minimalist */}
+        <div className="relative">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer hover:bg-slate-100 transition"
+          >
+            <option value="severity_desc">{t("sortBySeverity")}</option>
+            <option value="title_asc">{t("sortByName")}</option>
+          </select>
+          <ArrowDownNarrowWide size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
       </div>
 
-      {/* Search Mode Toggle */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+      {/* Segmented Control for Search Mode */}
+      <div className="bg-slate-100 p-1.5 rounded-xl flex gap-1">
         <button
           onClick={() => {
             setSearchMode("filter");
             setLocationQuery("");
             setShowLocationResults(false);
           }}
-          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${searchMode === "filter"
-            ? "bg-white text-blue-600 shadow-sm"
-            : "text-slate-600 hover:text-slate-900"
+          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${searchMode === "filter"
+            ? "bg-white text-blue-700 shadow-sm ring-1 ring-black/5"
+            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
             }`}
         >
-          <Search size={14} /> Filter Items
+          <Filter size={14} /> Filter Items
         </button>
         <button
           onClick={() => {
             setSearchMode("location");
             setSearch("");
           }}
-          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${searchMode === "location"
-            ? "bg-white text-blue-600 shadow-sm"
-            : "text-slate-600 hover:text-slate-900"
+          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${searchMode === "location"
+            ? "bg-white text-blue-700 shadow-sm ring-1 ring-black/5"
+            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
             }`}
         >
-          <MapPin size={14} /> Location
+          <MapPin size={14} /> Find Location
         </button>
       </div>
 
       {/* Unified Search Input */}
       <div ref={searchRef} className="relative group">
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
           {searchMode === "location" && locationLoading ? (
-            <Loader2 className="animate-spin text-blue-500" size={18} />
+            <Loader2 className="animate-spin" size={18} />
           ) : (
-            <Search
-              className="text-slate-400 group-focus-within:text-blue-500 transition duration-300"
-              size={18}
-            />
+            <Search size={18} />
           )}
         </div>
         <input
@@ -1025,12 +995,12 @@ export default function Map({
           }}
           placeholder={
             searchMode === "filter"
-              ? t("filterPlaceholder")
+              ? "Search complaints & projects..."
               : "Search area, city, or state..."
           }
-          className="w-full pl-10 pr-10 py-2.5 bg-white/60 border border-white/60 
-             rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 
-             focus:border-blue-500 transition-all duration-300 shadow-sm 
+          className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 
+             rounded-xl text-sm font-medium focus:ring-4 focus:ring-blue-500/10 
+             focus:border-blue-500 transition-all duration-200 
              placeholder-slate-400 focus:bg-white text-slate-900"
         />
         {((searchMode === "filter" && search) ||
@@ -1045,7 +1015,7 @@ export default function Map({
                   setShowLocationResults(false);
                 }
               }}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-red-500 p-1 transition-colors"
             >
               <X size={16} />
             </button>
@@ -1057,27 +1027,29 @@ export default function Map({
             showLocationResults &&
             locationResults.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full mt-2 w-full bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/50 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar z-50"
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                className="absolute top-full mt-3 w-full bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden max-h-72 overflow-y-auto custom-scrollbar z-50 ring-1 ring-black/5"
               >
+                <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                  Suggestions
+                </div>
                 <ul className="py-1">
                   {locationResults.map((result) => (
                     <li key={result.place_id}>
                       <button
                         onClick={() => handleLocationSelect(result)}
-                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors flex items-start gap-3 group"
+                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors flex items-start gap-3 group border-b border-slate-50 last:border-0"
                       >
-                        <MapPin
-                          className="mt-0.5 text-slate-400 group-hover:text-blue-500 flex-shrink-0"
-                          size={16}
-                        />
+                        <div className="mt-0.5 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                          <MapPin size={14} />
+                        </div>
                         <div>
-                          <span className="block text-sm font-medium text-slate-800 group-hover:text-blue-700">
+                          <span className="block text-sm font-bold text-slate-800 group-hover:text-blue-700">
                             {result.display_name.split(",")[0]}
                           </span>
-                          <span className="block text-xs text-slate-500 truncate max-w-[250px]">
+                          <span className="block text-xs text-slate-500 truncate max-w-[220px]">
                             {result.display_name}
                           </span>
                         </div>
@@ -1090,47 +1062,36 @@ export default function Map({
         </AnimatePresence>
       </div>
 
-      {/* Filter Mode Controls */}
+      {/* Filter Toggles - Segmented Style */}
       {searchMode === "filter" && (
-        <div className="flex justify-between items-center pt-1">
-          <div className="flex items-center gap-2 text-xs">
-            <ArrowDownNarrowWide size={14} className="text-slate-400" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent font-bold text-slate-600 focus:outline-none cursor-pointer hover:text-blue-600 transition duration-300"
-            >
-              <option value="severity_desc">{t("sortBySeverity")}</option>
-              <option value="title_asc">{t("sortByName")}</option>
-            </select>
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 group ${showComplaints
+              ? "bg-red-50 border-red-200 text-red-700 shadow-sm"
+              : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            onClick={() => {
+              setShowComplaints(!showComplaints);
+              setSelectedItem(null);
+            }}
+          >
+            <div className={`w-2 h-2 rounded-full ${showComplaints ? "bg-red-500" : "bg-slate-300"}`} />
+            <span className="text-xs font-bold uppercase tracking-wide">Complaints</span>
+          </button>
 
-          <div className="flex gap-1.5">
-            <button
-              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showComplaints
-                ? "bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30 scale-105"
-                : "bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105"
-                }`}
-              onClick={() => {
-                setShowComplaints(!showComplaints);
-                setSelectedItem(null);
-              }}
-            >
-              {t("complaints")}
-            </button>
-            <button
-              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showProjects
-                ? "bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105"
-                : "bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105"
-                }`}
-              onClick={() => {
-                setShowProjects(!showProjects);
-                setSelectedItem(null);
-              }}
-            >
-              {t("projects")}
-            </button>
-          </div>
+          <button
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 group ${showProjects
+              ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
+              : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            onClick={() => {
+              setShowProjects(!showProjects);
+              setSelectedItem(null);
+            }}
+          >
+            <div className={`w-2 h-2 rounded-full ${showProjects ? "bg-blue-500" : "bg-slate-300"}`} />
+            <span className="text-xs font-bold uppercase tracking-wide">Projects</span>
+          </button>
         </div>
       )}
     </div>
@@ -1153,56 +1114,26 @@ export default function Map({
         />
       </div>
 
-      {/* Left Column (Sidebar) - Ultra Glass with Subtle Shadow */}
+      {/* Left Column (Sidebar) - Solid White with Shadow */}
       <div
-        className={`relative z-10 w-full lg:w-[26rem] xl:w-[28rem] bg-white/60 backdrop-blur-xl border-r-2 border-white/50 flex-shrink-0 transition-all duration-300 flex flex-col shadow-[4px_0_24px_-4px_rgba(0,0,0,0.12)]`}
+        className={`relative z-10 w-full lg:w-[26rem] xl:w-[28rem] bg-white border-r border-slate-200 flex-shrink-0 transition-all duration-300 flex flex-col shadow-[4px_0_24px_-4px_rgba(0,0,0,0.12)]`}
       >
-        <AnimatePresence mode="wait">
-          {selectedItem ? (
-            <motion.div
-              key="details"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{
-                duration: 0.3,
-                type: "spring",
-                stiffness: 120,
-                damping: 20,
-              }}
-              className="h-full"
-            >
-              <ItemDetails
-                item={selectedItem}
-                clearSelection={() => setSelectedItem(null)}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="list"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="h-full flex flex-col"
-            >
-              {SidebarHeader}
-              <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-                {/* Content Gradient Fade */}
-                <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/40 to-transparent z-10 pointer-events-none" />
-                {error && (
-                  <p className="text-sm text-red-500 p-6 bg-red-50/50 m-4 rounded-xl border border-red-100">
-                    {error}
-                  </p>
-                )}
-                <ItemListing
-                  items={sortedItems}
-                  setSelectedItem={setSelectedItem}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="h-full flex flex-col">
+          {SidebarHeader}
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+            {/* Content Gradient Fade */}
+            <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/40 to-transparent z-10 pointer-events-none" />
+            {error && (
+              <p className="text-sm text-red-500 p-6 bg-red-50/50 m-4 rounded-xl border border-red-100">
+                {error}
+              </p>
+            )}
+            <ItemListing
+              items={sortedItems}
+              setSelectedItem={setSelectedItem}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Right Column (Map) */}
@@ -1218,6 +1149,16 @@ export default function Map({
           activeOverlays={activeOverlays}
           setActiveOverlays={setActiveOverlays}
         />
+
+        {/* Floating Details Panel - Popup from Bottom Right */}
+        <AnimatePresence>
+          {selectedItem && (
+            <FloatingDetailsPanel
+              item={selectedItem}
+              clearSelection={() => setSelectedItem(null)}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Mobile Filter Overlay (Glass) */}
@@ -1236,7 +1177,7 @@ export default function Map({
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-80 h-full bg-white/90 backdrop-blur-2xl p-6 shadow-2xl border-r border-white/50 overflow-y-auto pt-24"
+              className="w-80 h-full bg-white p-6 shadow-2xl border-r border-slate-200 overflow-y-auto pt-24"
             >
               <div className="flex justify-between items-center pb-6 mb-2">
                 <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">

@@ -339,7 +339,7 @@ export async function register(data: { username: string; password: string; email
 
 export async function fetchCurrentUserProfile(): Promise<UserProfile> {
   const profile = await request<UserProfile>('/auth/me', { method: 'GET' }, true);
-  
+
   // Process photoUrls for all complaints
   if (profile.complaints) {
     profile.complaints = profile.complaints.map(complaint => ({
@@ -348,7 +348,7 @@ export async function fetchCurrentUserProfile(): Promise<UserProfile> {
       photoUrls: complaint.photoUrls?.map(url => buildAssetUrl(url) || url).filter(Boolean) as string[] || [],
     }));
   }
-  
+
   UserStore.set(profile);
   return profile;
 }
@@ -383,6 +383,7 @@ export async function updateProject(projectId: number, data: Partial<ProjectData
     body: JSON.stringify(data),
   }, true);
 }
+export const fetchComplaintDetails = fetchComplaintById;
 export async function fetchComplaintById(id: number): Promise<ComplaintDetail> {
   const token = Token.get();
   if (!token) throw new Error("Authentication required. Please log in.");
@@ -556,10 +557,10 @@ export async function submitTender(complaintId: number, data: TenderSubmitData, 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', buildUrl(`/tenders/complaints/${complaintId}/submit`));
-    
+
     // Set only Authorization header - let browser handle Content-Type
     xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-    
+
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
@@ -578,7 +579,7 @@ export async function submitTender(complaintId: number, data: TenderSubmitData, 
         reject(new Error(errorMessage));
       }
     };
-    
+
     xhr.onerror = () => reject(new Error('Network error occurred'));
     xhr.send(formData);
   });
@@ -692,12 +693,12 @@ export async function createProject(data: ProjectCreateData, files?: { headerIma
   }, true);
 }
 
-export async function fetchAllProjects(params?: { 
-  search?: string; 
-  status?: string; 
-  category?: string; 
-  page?: number; 
-  limit?: number; 
+export async function fetchAllProjects(params?: {
+  search?: string;
+  status?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
 }): Promise<{ projects: ProjectData[]; total: number; page: number; totalPages: number }> {
   const searchParams = new URLSearchParams();
   if (params?.search) searchParams.append('search', params.search);
@@ -705,7 +706,7 @@ export async function fetchAllProjects(params?: {
   if (params?.category) searchParams.append('category', params.category);
   if (params?.page) searchParams.append('page', params.page.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
-  
+
   const url = `/projects${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
   return request<{ projects: ProjectData[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
 }
@@ -725,16 +726,16 @@ export interface TenderCreateData {
 
 export async function createTender(data: TenderCreateData): Promise<TenderData> {
   const formData = new FormData();
-  
+
   formData.append('complaintId', data.complaintId.toString());
   formData.append('description', data.description);
   formData.append('quoteAmount', data.quoteAmount.toString());
   formData.append('estimatedDays', data.estimatedDays.toString());
-  
+
   if (data.materials) formData.append('materials', data.materials);
   if (data.methodology) formData.append('methodology', data.methodology);
   if (data.timeline) formData.append('timeline', data.timeline);
-  
+
   if (data.documents) {
     data.documents.forEach((doc) => {
       formData.append('documents', doc);
@@ -755,18 +756,18 @@ export async function createTender(data: TenderCreateData): Promise<TenderData> 
   return parseResponse<TenderData>(response);
 }
 
-export async function fetchAllTenders(params?: { 
-  search?: string; 
-  status?: string; 
-  page?: number; 
-  limit?: number; 
+export async function fetchAllTenders(params?: {
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
 }): Promise<{ tenders: TenderData[]; total: number; page: number; totalPages: number }> {
   const searchParams = new URLSearchParams();
   if (params?.search) searchParams.append('search', params.search);
   if (params?.status) searchParams.append('status', params.status);
   if (params?.page) searchParams.append('page', params.page.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
-  
+
   const url = `/tenders${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
   return request<{ tenders: TenderData[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
 }
@@ -775,12 +776,12 @@ export async function fetchAllTenders(params?: {
 
 // ===================== CONTRACTOR MANAGEMENT =====================
 
-export async function fetchAllContractors(params?: { 
-  search?: string; 
-  status?: string; 
-  specialization?: string; 
-  page?: number; 
-  limit?: number; 
+export async function fetchAllContractors(params?: {
+  search?: string;
+  status?: string;
+  specialization?: string;
+  page?: number;
+  limit?: number;
 }): Promise<{ contractors: ContractorProfile[]; total: number; page: number; totalPages: number }> {
   const searchParams = new URLSearchParams();
   if (params?.search) searchParams.append('search', params.search);
@@ -788,7 +789,7 @@ export async function fetchAllContractors(params?: {
   if (params?.specialization) searchParams.append('specialization', params.specialization);
   if (params?.page) searchParams.append('page', params.page.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
-  
+
   const url = `/contractors${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
   return request<{ contractors: ContractorProfile[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
 }

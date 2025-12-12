@@ -68,17 +68,16 @@ export default function MapLegend({ activeOverlays }: MapLegendProps) {
   };
 
   return (
-    <div className="absolute bottom-4 left-4 z-[1000]">
+    <div className="absolute bottom-4 right-4 z-[1000]">
       {/* Toggle Button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg transition-all ${
-          isOpen
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg transition-all ${isOpen
             ? "bg-blue-600 text-white"
             : "bg-white text-gray-700 hover:bg-gray-50"
-        }`}
+          }`}
         title="Map Legend"
       >
         <Info size={18} />
@@ -93,7 +92,7 @@ export default function MapLegend({ activeOverlays }: MapLegendProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-full left-0 mb-3 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden max-h-96 overflow-y-auto"
+            className="absolute bottom-full right-0 mb-3 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden max-h-96 overflow-y-auto"
           >
             {/* Header */}
             <div className="sticky top-0 bg-white/95 backdrop-blur-xl border-b border-gray-200 p-4 flex justify-between items-center z-10">

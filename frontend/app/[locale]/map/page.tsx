@@ -8,9 +8,9 @@ export default function MapPage() {
   // To achieve a truly full-screen map experience, we will eliminate the layout's margin
   // by ensuring the containing div is maximized and removing the top header section.
   return (
-    <div className="flex flex-col h-screen w-full p-0 m-0">
+    <div className="flex flex-col w-full h-[calc(100vh-110px)] bg-slate-50 mt-0 pt-0">
       {/* Map Container - MapClientWrapper is correctly marked 'use client' and handles map logic */}
-      <div className="flex-1 w-full overflow-hidden">
+      <div className="flex-1 w-full overflow-hidden relative">
         <MapClientWrapper />
       </div>
     </div>

@@ -16,37 +16,42 @@ export default function MapEnhancements({
   onHeatmapToggle,
   clusteringEnabled,
   heatmapEnabled,
-}: MapEnhancementsProps) {
+  compact = false,
+}: MapEnhancementsProps & { compact?: boolean }) {
   return (
-    <div className="absolute top-20 right-4 z-[1000] flex flex-col gap-2">
+    <div className={`flex flex-col gap-1 ${compact ? "" : "absolute top-20 right-4 z-[1000]"}`}>
       {/* Clustering Toggle */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => onClusteringToggle(!clusteringEnabled)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-lg transition-all ${clusteringEnabled
-            ? "bg-blue-600 text-white"
-            : "bg-white text-gray-700 hover:bg-gray-50"
+        className={`flex items-center gap-2 px-3 py-2 rounded-md font-bold text-xs transition-all w-full justify-start ${clusteringEnabled
+          ? "bg-blue-100 text-blue-700"
+          : "bg-transparent text-slate-600 hover:bg-slate-50"
           }`}
         title="Toggle marker clustering"
       >
-        <Layers size={18} />
-        <span className="text-sm">Clustering</span>
+        <div className={`p-1 rounded-full ${clusteringEnabled ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-500"}`}>
+          <Layers size={14} />
+        </div>
+        <span>Clustering</span>
       </motion.button>
 
       {/* Heatmap Toggle */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => onHeatmapToggle(!heatmapEnabled)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-lg transition-all ${heatmapEnabled
-            ? "bg-red-600 text-white"
-            : "bg-white text-gray-700 hover:bg-gray-50"
+        className={`flex items-center gap-2 px-3 py-2 rounded-md font-bold text-xs transition-all w-full justify-start ${heatmapEnabled
+          ? "bg-red-100 text-red-700"
+          : "bg-transparent text-slate-600 hover:bg-slate-50"
           }`}
         title="Toggle heat map"
       >
-        <Flame size={18} />
-        <span className="text-sm">Heat Map</span>
+        <div className={`p-1 rounded-full ${heatmapEnabled ? "bg-red-600 text-white" : "bg-slate-200 text-slate-500"}`}>
+          <Flame size={14} />
+        </div>
+        <span>Heat Map</span>
       </motion.button>
     </div>
   );

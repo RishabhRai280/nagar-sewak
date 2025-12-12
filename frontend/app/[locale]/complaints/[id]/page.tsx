@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, AlertTriangle, MapPin, Calendar, User, Star, MessageCircle, ThumbsUp, ThumbsDown, Share2, Flag, CheckCircle, Clock, FileText } from "lucide-react";
+import { fetchComplaintDetails } from "@/lib/api/api";
 
 interface Complaint {
   id: number;
@@ -15,8 +16,8 @@ interface Complaint {
   lat?: number;
   lng?: number;
   photoUrls?: string[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Made optional to match API
+  updatedAt?: string; // Made optional to match API
   citizenName: string;
   wardLabel?: string;
   category: string;
@@ -58,58 +59,33 @@ export default function ComplaintDetailPage() {
   const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
-    // Mock data - replace with actual API call
-    const mockComplaint: Complaint = {
-      id: parseInt(complaintId),
-      title: "Road Pothole Repair Needed",
-      description: "There are multiple large potholes on Main Street near the market area. These potholes are causing damage to vehicles and creating safety hazards for pedestrians. The situation has worsened after recent rains, and immediate attention is required to prevent accidents.",
-      severity: 4,
-      status: "In Progress",
-      lat: 21.1458,
-      lng: 79.0882,
-      photoUrls: [
-        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400",
-        "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400"
-      ],
-      createdAt: "2024-01-20T10:30:00Z",
-      updatedAt: "2024-01-22T14:15:00Z",
-      citizenName: "Rajesh Kumar",
-      wardLabel: "Ward 5 - Central District",
-      category: "Infrastructure",
-      votes: {
-        upvotes: 23,
-        downvotes: 2,
-        userVote: null
-      },
-      comments: [
-        {
-          id: 1,
-          text: "This is a serious issue. I've also damaged my bike tire due to these potholes.",
-          authorName: "Priya Sharma",
-          authorRole: "Citizen",
-          createdAt: "2024-01-21T09:15:00Z",
-          likes: 5
-        },
-        {
-          id: 2,
-          text: "We have assigned a contractor for this issue. Work will begin next week.",
-          authorName: "Municipal Officer",
-          authorRole: "Admin",
-          createdAt: "2024-01-22T11:30:00Z",
-          likes: 12
-        }
-      ],
-      assignedContractor: {
-        id: 1,
-        companyName: "ABC Construction Ltd",
-        rating: 4.5
-      }
-    };
+    async function loadComplaint() {
+      if (!complaintId) return;
+      try {
+        setLoading(true);
+        const data = await fetchComplaintDetails(parseInt(complaintId));
+        const apiData = data as any; // Cast to any to handle missing fields gracefully
 
-    setTimeout(() => {
-      setComplaint(mockComplaint);
-      setLoading(false);
-    }, 1000);
+        setComplaint({
+          ...apiData,
+          // Fallbacks for missing optional data from basic API response to satisfy strictly typed UI
+          citizenName: apiData.citizenName || apiData.userFullName || "Concerned Citizen",
+          wardLabel: apiData.wardLabel || "General Ward",
+          category: apiData.category || "General",
+          votes: apiData.votes || { upvotes: 0, downvotes: 0, userVote: null },
+          comments: apiData.comments || [],
+          assignedContractor: apiData.assignedContractor,
+          photoUrls: apiData.photoUrls || (apiData.photoUrl ? [apiData.photoUrl] : [])
+        });
+      } catch (err) {
+        console.error("Failed to fetch complaint details", err);
+        // Fallback to error UI handled by !complaint check
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadComplaint();
   }, [complaintId]);
 
   const handleVote = (type: 'up' | 'down') => {
@@ -211,9 +187,9 @@ export default function ComplaintDetailPage() {
           <AlertTriangle className="mx-auto mb-4 text-slate-400" size={48} />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">Complaint not found</h3>
           <p className="text-slate-600 mb-4">The complaint you're looking for doesn't exist or has been removed.</p>
-          <Link href="/complaints">
+          <Link href="/map">
             <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-              Back to Complaints
+              Back to Map
             </button>
           </Link>
         </div>
@@ -226,9 +202,9 @@ export default function ComplaintDetailPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/complaints" className="inline-flex items-center gap-2 text-[#1e3a8a] hover:text-blue-800 font-bold mb-4 transition-colors">
+          <Link href="/map" className="inline-flex items-center gap-2 text-[#1e3a8a] hover:text-blue-800 font-bold mb-4 transition-colors">
             <ArrowLeft size={20} />
-            Back to Complaints
+            Back to Map
           </Link>
         </div>
 
@@ -260,7 +236,7 @@ export default function ComplaintDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <Calendar size={16} />
-              <span>Created {new Date(complaint.createdAt).toLocaleDateString()}</span>
+              <span>Created {complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'Unknown'}</span>
             </div>
             {complaint.wardLabel && (
               <div className="flex items-center gap-2">
@@ -270,7 +246,7 @@ export default function ComplaintDetailPage() {
             )}
             <div className="flex items-center gap-2">
               <Clock size={16} />
-              <span>Updated {new Date(complaint.updatedAt).toLocaleDateString()}</span>
+              <span>Updated {complaint.updatedAt ? new Date(complaint.updatedAt).toLocaleDateString() : 'Just now'}</span>
             </div>
           </div>
 
