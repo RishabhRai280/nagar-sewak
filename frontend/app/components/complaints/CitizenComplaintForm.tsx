@@ -182,11 +182,57 @@ export default function CitizenComplaintForm() {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] opacity-20 -ml-16 -mb-16"></div>
 
           <div className="relative z-10 flex flex-col h-full">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm border border-white/20">
-                <Shield size={24} className="text-white" />
+            <div className="flex flex-col items-start gap-4 mb-10">
+              <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 p-2 shadow-lg">
+                {/* Ashoka Emblem */}
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                  alt="Satyamev Jayate"
+                  className="w-full h-full object-contain drop-shadow-md invert brightness-0"
+                />
               </div>
-              <span className="font-bold text-lg tracking-wide">NAGAR SEWAK</span>
+              <div>
+                <h3 className="font-extrabold text-2xl tracking-tight leading-none">NAGAR<br />SEWAK</h3>
+                <p className="text-[10px] font-medium tracking-widest opacity-70 mt-1 uppercase">Official Citizen Portal</p>
+              </div>
+            </div>
+
+            {/* --- NEW: Middle Content - Live Stats Card --- */}
+            <div className="flex-1 flex flex-col justify-center py-6">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-3 opacity-20">
+                  <Building size={64} />
+                </div>
+
+                <div className="relative z-10 space-y-4">
+                  <div className="border-b border-white/10 pb-2 mb-2">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-blue-200">City Pulse</h4>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                      <CheckCircle size={20} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-black text-white">1,240+</div>
+                      <div className="text-[10px] uppercase font-bold text-blue-200">Issues Resolved</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                      <AlertTriangle size={20} className="text-amber-400" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-black text-white">24h</div>
+                      <div className="text-[10px] uppercase font-bold text-blue-200">Avg. Response Time</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              </div>
             </div>
 
             <div className="mt-auto mb-12">
@@ -225,16 +271,16 @@ export default function CitizenComplaintForm() {
             <div className="w-1/3 bg-[#166534]"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 md:p-12 h-full overflow-y-auto custom-scrollbar">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 h-full overflow-y-auto custom-scrollbar">
 
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">New Grievance Report</h1>
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-slate-900 mb-1">New Grievance Report</h1>
               <p className="text-slate-500 text-sm">Fill in the details below to file an official complaint.</p>
             </div>
 
             {/* Error Notification */}
             {(error || validationErrors.length > 0) && (
-              <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-md flex items-start gap-3 animate-pulse">
+              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-md flex items-start gap-3 animate-pulse">
                 <AlertCircle className="text-red-600 mt-0.5" size={20} />
                 <div>
                   <h4 className="text-red-800 font-bold text-sm">Submission Failed</h4>
@@ -248,17 +294,17 @@ export default function CitizenComplaintForm() {
               </div>
             )}
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* INPUTS */}
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="relative group">
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">Subject <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">Subject <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
                     <input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 placeholder:text-slate-400 font-medium"
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 placeholder:text-slate-400 font-bold text-sm shadow-sm"
                       placeholder="e.g. Water Leakage in Sector 4"
                       disabled={loading}
                     />
@@ -266,95 +312,127 @@ export default function CitizenComplaintForm() {
                 </div>
 
                 <div className="relative">
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">Description <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">Description <span className="text-red-500">*</span></label>
                   <textarea
                     rows={4}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400 shadow-sm leading-relaxed"
                     placeholder="Provide detailed information about the issue..."
                     disabled={loading}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-3 block">Urgency Level</label>
-                  <div className="flex gap-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-3 block tracking-wide">Urgency Level</label>
+                  <div className="flex gap-3">
                     {[1, 2, 3, 4, 5].map((lvl) => (
                       <button
                         key={lvl}
                         type="button"
                         onClick={() => setSeverity(lvl)}
-                        className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${severity === lvl
-                          ? lvl <= 2 ? 'bg-green-600 border-green-600 text-white shadow-md shadow-green-200'
-                            : lvl <= 3 ? 'bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-200'
-                              : 'bg-red-600 border-red-600 text-white shadow-md shadow-red-200'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                        className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all transform active:scale-95 ${severity === lvl
+                          ? lvl <= 2 ? 'bg-emerald-600 border-emerald-600 text-white shadow-emerald-200 shadow-lg'
+                            : lvl <= 3 ? 'bg-amber-500 border-amber-500 text-white shadow-amber-200 shadow-lg'
+                              : 'bg-red-600 border-red-600 text-white shadow-red-200 shadow-lg'
+                          : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                       >
                         {lvl}
                       </button>
                     ))}
                   </div>
-                  <div className="flex justify-between mt-1.5 text-[10px] text-slate-400 font-bold uppercase px-1">
-                    <span>Routine</span>
+                  <div className="flex justify-between mt-2 text-[10px] text-slate-400 font-bold uppercase px-1">
+                    <span>Routine Check</span>
                     <span>Immediate Action</span>
                   </div>
                 </div>
               </div>
 
-              {/* LOCATION & EVIDENCE GRID */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-                {/* Map Preview */}
-                <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Location</label>
-                  <div className="relative h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group cursor-pointer" onClick={() => setShowMapPicker(true)}>
+              {/* LOCATION & EVIDENCE - VERTICAL STACK */}
+              <div className="space-y-6 pt-6 mt-2 border-t border-slate-100">
+
+                {/* Location - Full Width */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end">
+                    <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">Location Details</label>
+                    {latitude && <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1"><CheckCircle size={10} /> GPS Locked</span>}
+                  </div>
+
+                  <div className="relative h-40 bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-100 group cursor-pointer shadow-inner" onClick={() => setShowMapPicker(true)}>
                     {latitude && longitude ? (
                       <MiniMap lat={latitude} lng={longitude} />
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                        <MapPin size={20} className="mb-1" />
-                        <span className="text-[10px] font-bold">Tap to Pick</span>
+                        <MapPin size={32} className="mb-2 opacity-50" />
+                        <span className="text-sm font-bold text-slate-500">Tap map to set location</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                   </div>
 
-                  <div className="flex gap-2 mt-2">
-                    <button type="button" onClick={getLocation} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded flex items-center justify-center gap-1 transition">
-                      <Navigation size={12} /> Detect
+                  <div className="grid grid-cols-2 gap-4">
+                    <button type="button" onClick={getLocation} className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider">
+                      <Navigation size={14} /> Detect My Location
                     </button>
-                    <button type="button" onClick={() => setShowMapPicker(true)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded flex items-center justify-center gap-1 transition">
-                      <MapPin size={12} /> Pin
+                    <button type="button" onClick={() => setShowMapPicker(true)} className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider">
+                      <MapPin size={14} /> Pin on Map
                     </button>
                   </div>
                 </div>
 
-                {/* File Upload */}
-                <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Evidence ({selectedFiles.length}/6)</label>
-                  <label className="h-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition group">
-                    <Upload className="text-slate-400 group-hover:text-blue-500 mb-1" size={20} />
-                    <span className="text-xs font-bold text-slate-500 group-hover:text-blue-600">Upload Files</span>
-                    <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleFileChange} />
-                  </label>
+                {/* File Upload - Adaptive sizing */}
+                <div className="space-y-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">Evidence Upload ({selectedFiles.length}/6)</label>
 
-                  {selectedFiles.length > 0 && (
-                    <div className="flex gap-2 mt-2 overflow-x-auto pb-2 scrollbar-hide">
-                      {selectedFiles.map((file, i) => (
-                        <div key={i} className="flex-shrink-0 w-10 h-10 rounded bg-slate-100 relative group overflow-hidden border border-slate-200">
-                          {file.type.startsWith('image') ? (
-                            <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center"><FileText size={14} className="text-slate-400" /></div>
-                          )}
-                          <button type="button" onClick={(e) => { e.preventDefault(); removeFile(i); }} className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white">
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className={selectedFiles.length > 0 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "block"}>
+                    {/* Dropzone - Resizes based on state */}
+                    <label className={`
+                          flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-500 transition group bg-slate-50/50 relative overflow-hidden
+                          ${selectedFiles.length === 0 ? "h-64 border-spacing-4" : "h-40"}
+                      `}>
+                      <div className={`
+                            rounded-full bg-slate-200 group-hover:bg-blue-100 flex items-center justify-center mb-3 transition-colors
+                            ${selectedFiles.length === 0 ? "w-20 h-20" : "w-12 h-12"}
+                        `}>
+                        <Upload className="text-slate-400 group-hover:text-blue-600" size={selectedFiles.length === 0 ? 32 : 20} />
+                      </div>
+                      <span className={`font-bold text-slate-500 group-hover:text-blue-700 uppercase ${selectedFiles.length === 0 ? "text-lg" : "text-xs"}`}>
+                        {selectedFiles.length === 0 ? "Click to Upload Evidence" : "Add More"}
+                      </span>
+                      {selectedFiles.length === 0 && (
+                        <p className="text-slate-400 text-xs mt-2">Supports JPG, PNG, MP4</p>
+                      )}
+                      <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleFileChange} />
+                    </label>
+
+                    {/* Side Previews */}
+                    {selectedFiles.length > 0 && (
+                      <div className="grid grid-cols-3 gap-3 h-40 overflow-y-auto custom-scrollbar content-start">
+                        {selectedFiles.map((file, i) => (
+                          <div key={i} className="relative aspect-square rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shadow-sm group h-full">
+                            {file.type.startsWith('image') ? (
+                              <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center">
+                                <FileText size={20} className="text-slate-400 mb-1" />
+                                <span className="text-[8px] text-slate-500 truncate w-full">{file.name}</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); removeFile(i); }}
+                                className="bg-red-600 text-white rounded-full p-1.5 hover:scale-110 transition"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
