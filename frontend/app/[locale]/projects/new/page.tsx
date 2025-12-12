@@ -17,7 +17,7 @@ export default function NewProjectPage() {
   const [error, setError] = useState<string | null>(null);
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [locationStatus, setLocationStatus] = useState<"idle" | "fetching" | "success" | "error">("idle");
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -115,12 +115,16 @@ export default function NewProjectPage() {
         priority: formData.priority,
         category: formData.category,
         location: formData.location,
-        lat: formData.lat,
-        lng: formData.lng
+        lat: formData.lat === null ? undefined : formData.lat,
+        lng: formData.lng === null ? undefined : formData.lng
       };
 
-      await createProject(projectData, files);
-      
+      await createProject(projectData, {
+        headerImage: files.headerImage === null ? undefined : files.headerImage,
+        headerVideo: files.headerVideo === null ? undefined : files.headerVideo,
+        documents: files.documents
+      });
+
       router.push("/projects?created=success");
     } catch (error: any) {
       setError(error.message || "Failed to create project. Please try again.");
@@ -156,9 +160,9 @@ export default function NewProjectPage() {
 
         {/* Error Banner */}
         {error && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }} 
-            animate={{ height: 'auto', opacity: 1 }} 
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
             className="mb-6 overflow-hidden"
           >
             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl backdrop-blur-md">
@@ -181,7 +185,7 @@ export default function NewProjectPage() {
               <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">
                 Basic Information
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -241,7 +245,7 @@ export default function NewProjectPage() {
               <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">
                 Financial & Timeline
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -302,7 +306,7 @@ export default function NewProjectPage() {
                 <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">
                   Location Details
                 </h2>
-                
+
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     <MapPin className="inline w-4 h-4 mr-1" />
@@ -336,11 +340,10 @@ export default function NewProjectPage() {
                       <button
                         type="button"
                         onClick={getLocation}
-                        className={`py-3 px-4 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 ${
-                          locationStatus === "success"
-                            ? "bg-emerald-500 text-white shadow-lg"
-                            : "bg-white text-blue-600 border border-blue-200 hover:bg-blue-50"
-                        }`}
+                        className={`py-3 px-4 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 ${locationStatus === "success"
+                          ? "bg-emerald-500 text-white shadow-lg"
+                          : "bg-white text-blue-600 border border-blue-200 hover:bg-blue-50"
+                          }`}
                       >
                         {locationStatus === "fetching" ? (
                           <Loader className="animate-spin" size={16} />

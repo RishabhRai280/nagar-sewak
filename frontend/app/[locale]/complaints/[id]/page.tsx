@@ -105,7 +105,7 @@ export default function ComplaintDetailPage() {
         rating: 4.5
       }
     };
-    
+
     setTimeout(() => {
       setComplaint(mockComplaint);
       setLoading(false);
@@ -114,21 +114,21 @@ export default function ComplaintDetailPage() {
 
   const handleVote = (type: 'up' | 'down') => {
     if (!complaint) return;
-    
+
     // Mock vote handling - replace with actual API call
     const newVote = complaint.votes.userVote === type ? null : type;
     const updatedVotes = { ...complaint.votes };
-    
+
     // Remove previous vote
     if (complaint.votes.userVote === 'up') updatedVotes.upvotes--;
     if (complaint.votes.userVote === 'down') updatedVotes.downvotes--;
-    
+
     // Add new vote
     if (newVote === 'up') updatedVotes.upvotes++;
     if (newVote === 'down') updatedVotes.downvotes++;
-    
+
     updatedVotes.userVote = newVote;
-    
+
     setComplaint({ ...complaint, votes: updatedVotes });
   };
 
@@ -137,7 +137,7 @@ export default function ComplaintDetailPage() {
     if (!newComment.trim() || !complaint) return;
 
     setSubmittingComment(true);
-    
+
     // Mock comment submission - replace with actual API call
     const newCommentObj: Comment = {
       id: complaint.comments.length + 1,
@@ -226,16 +226,18 @@ export default function ComplaintDetailPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/complaints" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4">
+          <Link href="/complaints" className="inline-flex items-center gap-2 text-[#1e3a8a] hover:text-blue-800 font-bold mb-4 transition-colors">
             <ArrowLeft size={20} />
             Back to Complaints
           </Link>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534]"></div>
+
           {/* Status and Meta */}
-          <div className="flex flex-wrap items-center gap-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-6 relative z-10">
             <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getStatusColor(complaint.status)}`}>
               {complaint.status}
             </span>
@@ -243,8 +245,8 @@ export default function ComplaintDetailPage() {
               <AlertTriangle size={16} />
               Severity {complaint.severity}/5
             </span>
-            <span className="text-sm text-slate-500">#{complaint.id}</span>
-            <span className="text-sm text-slate-500">{complaint.category}</span>
+            <span className="text-sm text-slate-500 font-mono">#{complaint.id}</span>
+            <span className="px-2 py-0.5 bg-slate-100 rounded text-slate-600 text-sm font-medium border border-slate-200">{complaint.category}</span>
           </div>
 
           {/* Title */}
@@ -324,22 +326,20 @@ export default function ComplaintDetailPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleVote('up')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition ${
-                  complaint.votes.userVote === 'up'
-                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    : 'bg-slate-100 text-slate-600 hover:bg-emerald-50'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition ${complaint.votes.userVote === 'up'
+                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-emerald-50'
+                  }`}
               >
                 <ThumbsUp size={16} />
                 <span>{complaint.votes.upvotes}</span>
               </button>
               <button
                 onClick={() => handleVote('down')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition ${
-                  complaint.votes.userVote === 'down'
-                    ? 'bg-red-100 text-red-700 border border-red-200'
-                    : 'bg-slate-100 text-slate-600 hover:bg-red-50'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition ${complaint.votes.userVote === 'down'
+                  ? 'bg-red-100 text-red-700 border border-red-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-red-50'
+                  }`}
               >
                 <ThumbsDown size={16} />
                 <span>{complaint.votes.downvotes}</span>
@@ -358,14 +358,16 @@ export default function ComplaintDetailPage() {
           {/* Location */}
           {complaint.lat && complaint.lng && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Location</h3>
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-2 text-slate-600">
-                  <MapPin size={16} />
+              <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <MapPin className="text-[#f97316]" size={20} /> Location Details
+              </h3>
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <div className="flex items-center gap-2 text-slate-700 font-mono">
+                  <MapPin size={16} className="text-slate-400" />
                   <span>{complaint.lat.toFixed(6)}, {complaint.lng.toFixed(6)}</span>
                 </div>
                 <Link href={`/map?complaintId=${complaint.id}`}>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+                  <button className="px-4 py-2 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-800 transition shadow-sm">
                     View on Map
                   </button>
                 </Link>
@@ -375,9 +377,10 @@ export default function ComplaintDetailPage() {
         </div>
 
         {/* Comments Section */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
-          <h3 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
-            <MessageCircle size={20} />
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a8a]"></div>
+          <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <MessageCircle size={20} className="text-[#1e3a8a]" />
             Comments ({complaint.comments.length})
           </h3>
 
@@ -412,11 +415,10 @@ export default function ComplaintDetailPage() {
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-slate-900">{comment.authorName}</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      comment.authorRole === 'Admin' 
-                        ? 'bg-blue-100 text-blue-700' 
-                        : 'bg-slate-100 text-slate-600'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${comment.authorRole === 'Admin'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-slate-100 text-slate-600'
+                      }`}>
                       {comment.authorRole}
                     </span>
                   </div>

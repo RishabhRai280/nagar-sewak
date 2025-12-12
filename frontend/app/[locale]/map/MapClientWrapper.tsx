@@ -42,7 +42,7 @@ export default function MapClientWrapper() {
       setLoading(true);
       try {
         const data = await fetchMapData();
-        
+
         // Normalize items: complaints with kind 'complaint', projects with kind 'project'
         const complaints = (data.complaints ?? []).map((c) => ({
           ...c,
@@ -52,7 +52,7 @@ export default function MapClientWrapper() {
           ...p,
           kind: "project" as const,
         }));
-        
+
         if (mounted) {
           setItems([...complaints, ...projects]);
           setError(null);
@@ -85,17 +85,17 @@ export default function MapClientWrapper() {
       ) {
         return false;
       }
-      
+
       if (it.kind === "complaint") {
         if (!showComplaints) return false;
-        
+
         // 2. Status filter
         if (statusFilter !== "all" && it.status?.toLowerCase() !== statusFilter)
           return false;
-        
+
         // 3. Severity filter
         if ((it.severity ?? 1) < severityMin) return false;
-        
+
         return true;
       } else {
         if (!showProjects) return false;
@@ -120,7 +120,7 @@ export default function MapClientWrapper() {
       const lng = searchParams.get('lng');
 
       if (complaintId) {
-        const complaint = items.find(item => 
+        const complaint = items.find(item =>
           item.kind === 'complaint' && item.id === parseInt(complaintId)
         );
         if (complaint) {
@@ -129,7 +129,7 @@ export default function MapClientWrapper() {
           setAutoSelectProcessed(true);
         }
       } else if (projectId) {
-        const project = items.find(item => 
+        const project = items.find(item =>
           item.kind === 'project' && item.id === parseInt(projectId)
         );
         if (project) {
@@ -141,10 +141,10 @@ export default function MapClientWrapper() {
         // Find closest item to the coordinates
         const targetLat = parseFloat(lat);
         const targetLng = parseFloat(lng);
-        
+
         let closestItem: MarkerItem | null = null;
         let minDistance = Infinity;
-        
+
         items.forEach(item => {
           if (item.lat && item.lng) {
             const distance = Math.sqrt(
@@ -156,11 +156,12 @@ export default function MapClientWrapper() {
             }
           }
         });
-        
+
         if (closestItem && minDistance < 0.01) { // Within reasonable distance
-          setSelectedItem(closestItem);
-          if (closestItem.kind === 'complaint') setShowComplaints(true);
-          if (closestItem.kind === 'project') setShowProjects(true);
+          const validItem = closestItem as MarkerItem;
+          setSelectedItem(validItem);
+          if (validItem.kind === 'complaint') setShowComplaints(true);
+          if (validItem.kind === 'project') setShowProjects(true);
           setAutoSelectProcessed(true);
         }
       }

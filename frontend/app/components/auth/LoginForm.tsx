@@ -100,13 +100,13 @@ export default function LoginForm() {
         >
           <label className="text-sm font-bold text-slate-700 ml-1">{t('email')}</label>
           <div className="relative group">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-600 group-focus-within:scale-110" size={20} />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-700 group-focus-within:scale-110" size={20} />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full pl-12 pr-4 py-4 bg-white/60 border-2 border-slate-200/60 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all duration-300 font-medium"
               placeholder="name@example.com"
             />
           </div>
@@ -120,18 +120,18 @@ export default function LoginForm() {
         >
           <div className="flex justify-between ml-1">
             <label className="text-sm font-bold text-slate-700">{t('password')}</label>
-            <Link href="#" className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors">
+            <Link href="#" className="text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline transition-colors">
               {t('forgotPassword')}
             </Link>
           </div>
           <div className="relative group">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-600 group-focus-within:scale-110" size={20} />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-700 group-focus-within:scale-110" size={20} />
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full pl-12 pr-4 py-4 bg-white/60 border-2 border-slate-200/60 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all duration-300 font-medium"
               placeholder="••••••••"
             />
           </div>
@@ -141,26 +141,23 @@ export default function LoginForm() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-bold text-lg shadow-xl shadow-blue-600/30 hover:shadow-2xl hover:shadow-blue-600/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden group"
+          className="w-full py-3.5 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <span className="relative flex items-center gap-2">
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                {t('signingIn')}
-              </>
-            ) : (
-              <>
-                {t('signIn')}
-                <ArrowRight size={20} />
-              </>
-            )}
-          </span>
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin" size={20} />
+              {t('signingIn')}
+            </>
+          ) : (
+            <>
+              {t('signIn')}
+              <ArrowRight size={20} />
+            </>
+          )}
         </motion.button>
       </form>
 
@@ -170,7 +167,7 @@ export default function LoginForm() {
         transition={{ delay: 0.4, duration: 0.5 }}
         className="mt-6"
       >
-        <div className="relative">
+        <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-200"></div>
           </div>
@@ -179,13 +176,33 @@ export default function LoginForm() {
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            className="py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 group relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/en/c/cf/Aadhaar_Logo.svg" alt="Aadhaar" className="w-6 h-6 object-contain relative z-10" />
+            <span className="text-sm font-bold text-slate-700 relative z-10">Aadhaar</span>
+          </button>
+
+          <button
+            type="button"
+            className="py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 group relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <img src="https://parichay.nic.in/assets/img/parichay_logo.png" alt="Parichay" className="w-6 h-6 object-contain relative z-10" />
+            <span className="text-sm font-bold text-slate-700 relative z-10">Parichay</span>
+          </button>
+        </div>
+
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading || isLoading}
-          className="mt-4 w-full py-3.5 rounded-2xl border-2 border-slate-200 bg-white text-slate-800 font-bold shadow-md hover:shadow-lg hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="mt-4 w-full py-3.5 rounded-xl border-2 border-slate-200 bg-white text-slate-800 font-bold shadow-sm hover:shadow-md hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isGoogleLoading ? (
             <>
@@ -205,15 +222,14 @@ export default function LoginForm() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
-        className="mt-8 p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/60 flex items-start gap-3 shadow-sm"
+        className="mt-8 text-center"
       >
-        <CheckCircle2 className="text-emerald-600 mt-0.5 flex-shrink-0" size={20} />
-        <div>
-          <p className="text-xs font-bold text-emerald-900 mb-1">{t('demoAccess')}</p>
-          <p className="text-xs text-emerald-700 font-medium">
-            Use any demo email with password: <span className="font-mono font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded">{t('demoPassword')}</span>
-          </p>
-        </div>
+        <p className="text-slate-600 font-medium">
+          Don't have an account?{' '}
+          <Link href="/register" className="text-blue-700 font-bold hover:underline transition-all">
+            Register Here
+          </Link>
+        </p>
       </motion.div>
     </div>
   );

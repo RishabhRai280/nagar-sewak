@@ -53,6 +53,17 @@ const PROJECT_DETAILS_PATH = "/projects";
 // --- Marker Icon Utilities ---
 
 function createDivIcon(color: string, type: "project" | "complaint") {
+  // Use Gov Palette colors if generic colors are passed
+  const mapColor = (c: string) => {
+    if (c === "#3b82f6") return "#1e3a8a"; // Blue -> Ashoka Blue
+    if (c === "#10b981") return "#166534"; // Green -> India Green
+    if (c === "#f59e0b") return "#f97316"; // Orange -> Saffron
+    if (c === "#ef4444") return "#ef4444"; // Red (keep for alerts)
+    return c;
+  };
+
+  const finalColor = mapColor(color);
+
   const iconHtml =
     type === "project"
       ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
@@ -71,8 +82,8 @@ function createDivIcon(color: string, type: "project" | "complaint") {
         width: 44px;
         height: 44px;
         border-radius: 50%;
-        background: ${color};
-        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        background: ${finalColor};
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         border: 3px solid white;
         cursor: pointer;
         will-change: transform;
@@ -176,7 +187,7 @@ function MapContent({
       >
         {/* Position zoom controls lower if needed, but usually topright is fine. Can add style if needed. */}
         <ZoomControl position="bottomright" />
-        
+
         {/* Auto-center on selected item - handled via useEffect below */}
 
         {/* Map Layer Provider - Handles base layers and overlays */}
@@ -254,11 +265,9 @@ function MapContent({
                   return {
                     position,
                     icon,
-                    popup: `<div class="p-1"><strong class="text-sm block mb-1 font-bold text-slate-800">${
-                      it.kind === "complaint" ? "Complaint" : "Project"
-                    }</strong><span class="text-sm text-slate-600">${
-                      it.title
-                    }</span></div>`,
+                    popup: `<div class="p-1"><strong class="text-sm block mb-1 font-bold text-slate-800">${it.kind === "complaint" ? "Complaint" : "Project"
+                      }</strong><span class="text-sm text-slate-600">${it.title
+                      }</span></div>`,
                     onClick: () => {
                       setSelectedItem(it);
                     },
@@ -455,11 +464,11 @@ function ItemDetails({
 
   const statusClasses =
     data.status?.toLowerCase() === "resolved" ||
-    data.status?.toLowerCase() === "completed"
+      data.status?.toLowerCase() === "completed"
       ? "bg-emerald-100 text-emerald-700 border-emerald-200"
       : data.status?.toLowerCase() === "pending"
-      ? "bg-red-100 text-red-700 border-red-200"
-      : "bg-amber-100 text-amber-700 border-amber-200";
+        ? "bg-red-100 text-red-700 border-red-200"
+        : "bg-amber-100 text-amber-700 border-amber-200";
 
   return (
     <motion.div
@@ -467,20 +476,20 @@ function ItemDetails({
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 50, opacity: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="h-full p-6 pt-28 flex flex-col relative"
+      className="h-full p-6 pt-28 flex flex-col relative overflow-hidden"
     >
       {/* Glass Background for Details Panel */}
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-xl z-[-1]" />
+      <div className="absolute inset-0 bg-white/60 backdrop-blur-xl z-[-1]" />
+      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534] z-10" />
 
       <div className="flex justify-between items-start border-b border-slate-200/60 pb-4 mb-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span
-              className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
-                isComplaint
-                  ? "bg-red-50 text-red-600 border-red-100"
-                  : "bg-blue-50 text-blue-600 border-blue-100"
-              }`}
+              className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${isComplaint
+                ? "bg-red-50 text-red-600 border-red-100"
+                : "bg-blue-50 text-[#1e3a8a] border-blue-100"
+                }`}
             >
               {isComplaint ? t("citizenComplaint") : t("publicProject")}
             </span>
@@ -491,7 +500,7 @@ function ItemDetails({
         </div>
         <button
           onClick={clearSelection}
-          className="p-2 bg-white/50 hover:bg-red-50 text-slate-400 hover:text-red-500 transition rounded-full shadow-sm backdrop-blur-md"
+          className="p-2 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 transition rounded-full shadow-sm border border-slate-200"
           title="Close Details"
         >
           <X size={20} />
@@ -508,11 +517,10 @@ function ItemDetails({
 
           {isComplaint && data.severity && (
             <span
-              className={`px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-1.5 ${
-                data.severity >= 4
-                  ? "bg-red-50 text-red-700 border-red-100"
-                  : "bg-yellow-50 text-yellow-700 border-yellow-100"
-              }`}
+              className={`px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-1.5 ${data.severity >= 4
+                ? "bg-red-50 text-red-700 border-red-100"
+                : "bg-yellow-50 text-yellow-700 border-yellow-100"
+                }`}
             >
               <AlertTriangle size={14} /> {t("severity")}: {data.severity}/5
             </span>
@@ -591,17 +599,17 @@ function ItemDetails({
           <Link
             href={
               isComplaint
-                ? `/dashboard/citizen/complaints/${data.id}`
+                ? `/complaints/${data.id}` // Direct link to complaint details
                 : `${PROJECT_DETAILS_PATH}/${data.id}`
             }
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/30 hover:scale-[1.02] transition-all duration-200"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] text-white rounded-xl font-bold hover:shadow-lg hover:shadow-blue-900/20 hover:scale-[1.02] transition-all duration-200"
           >
             {t("viewFullDetails")} <ArrowRight size={18} />
           </Link>
           {isComplaint && data.status?.toLowerCase() === "resolved" && (
             <Link
               href={`/rate/${data.id}`}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-white text-emerald-600 border border-emerald-200 rounded-xl font-bold hover:bg-emerald-50 transition shadow-sm"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-white text-[#166534] border border-[#166534]/30 rounded-xl font-bold hover:bg-emerald-50 transition shadow-sm"
             >
               <Star size={18} /> {t("rateWorkQuality")}
             </Link>
@@ -648,11 +656,11 @@ function ItemListing({
 
         const statusColor =
           data.status?.toLowerCase() === "resolved" ||
-          data.status?.toLowerCase() === "completed"
-            ? "text-emerald-600 bg-emerald-50 border-emerald-100"
+            data.status?.toLowerCase() === "completed"
+            ? "text-[#166534] bg-emerald-50 border-emerald-100"
             : data.status?.toLowerCase() === "pending"
-            ? "text-red-600 bg-red-50 border-red-100"
-            : "text-amber-600 bg-amber-50 border-amber-100";
+              ? "text-red-600 bg-red-50 border-red-100"
+              : "text-[#f97316] bg-amber-50 border-amber-100";
 
         return (
           <motion.div
@@ -661,14 +669,15 @@ function ItemListing({
             animate={{ opacity: 1, y: 0 }}
             whileHover={{
               scale: 1.02,
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
             }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-white/60 p-4 rounded-xl border border-white/60 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm group"
+            className="bg-white/70 p-4 rounded-xl border border-white/60 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md group relative overflow-hidden"
             onClick={() => setSelectedItem(item)}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1e3a8a] to-[#f97316] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="flex items-center justify-between mb-2 pl-2">
               <span
                 className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${statusColor}`}
               >
@@ -678,10 +687,10 @@ function ItemListing({
                 {isComplaint ? t("complaint") : t("project")}
               </span>
             </div>
-            <h4 className="font-bold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
+            <h4 className="font-bold text-slate-800 line-clamp-1 group-hover:text-[#1e3a8a] transition-colors pl-2">
               {data.title}
             </h4>
-            <p className="text-xs text-slate-500 line-clamp-2 mt-1.5 leading-relaxed">
+            <p className="text-xs text-slate-500 line-clamp-2 mt-1.5 leading-relaxed pl-2">
               {data.description || "No description available."}
             </p>
 
@@ -694,9 +703,8 @@ function ItemListing({
                   {[...Array(5)].map((_, i) => (
                     <div
                       key={i}
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        i < data.severity ? "bg-red-400" : "bg-slate-200"
-                      }`}
+                      className={`w-1.5 h-1.5 rounded-full ${i < data.severity ? "bg-red-400" : "bg-slate-200"
+                        }`}
                     />
                   ))}
                 </div>
@@ -724,8 +732,8 @@ interface MapProps {
   setShowComplaints: (show: boolean) => void;
   showProjects: boolean;
   setShowProjects: (show: boolean) => void;
-  statusFilter: string;
-  setStatusFilter: (filter: string) => void;
+  statusFilter: "all" | "pending" | "in_progress" | "resolved";
+  setStatusFilter: (filter: "all" | "pending" | "in_progress" | "resolved") => void;
   severityMin: number;
   setSeverityMin: (min: number) => void;
   search: string;
@@ -763,14 +771,14 @@ export default function Map({
   useEffect(() => {
     const savedLayer = typeof window !== "undefined" ? localStorage.getItem("ns:map:layer") : null;
     const savedOverlays = typeof window !== "undefined" ? localStorage.getItem("ns:map:overlays") : null;
-    if (savedLayer && (["osm","satellite","terrain","dark","light","topo"] as MapLayer[]).includes(savedLayer as MapLayer)) {
+    if (savedLayer && (["osm", "satellite", "terrain", "dark", "light", "topo"] as MapLayer[]).includes(savedLayer as MapLayer)) {
       setCurrentLayer(savedLayer as MapLayer);
     }
     if (savedOverlays) {
       try {
         const parsed = JSON.parse(savedOverlays);
         if (Array.isArray(parsed)) setActiveOverlays(parsed);
-      } catch {}
+      } catch { }
     }
   }, []);
 
@@ -870,10 +878,10 @@ export default function Map({
   useEffect(() => {
     if (autoSelectProcessed && selectedItem && selectedItem.lat && selectedItem.lng) {
       // Set location target to center on the selected item
-      setLocationTarget({ 
-        lat: selectedItem.lat, 
-        lng: selectedItem.lng, 
-        zoom: 16 
+      setLocationTarget({
+        lat: selectedItem.lat,
+        lng: selectedItem.lng,
+        zoom: 16
       });
     }
   }, [selectedItem, autoSelectProcessed]);
@@ -965,11 +973,10 @@ export default function Map({
             setLocationQuery("");
             setShowLocationResults(false);
           }}
-          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-            searchMode === "filter"
-              ? "bg-white text-blue-600 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${searchMode === "filter"
+            ? "bg-white text-blue-600 shadow-sm"
+            : "text-slate-600 hover:text-slate-900"
+            }`}
         >
           <Search size={14} /> Filter Items
         </button>
@@ -978,11 +985,10 @@ export default function Map({
             setSearchMode("location");
             setSearch("");
           }}
-          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-            searchMode === "location"
-              ? "bg-white text-blue-600 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${searchMode === "location"
+            ? "bg-white text-blue-600 shadow-sm"
+            : "text-slate-600 hover:text-slate-900"
+            }`}
         >
           <MapPin size={14} /> Location
         </button>
@@ -1029,21 +1035,21 @@ export default function Map({
         />
         {((searchMode === "filter" && search) ||
           (searchMode === "location" && locationQuery)) && (
-          <button
-            onClick={() => {
-              if (searchMode === "filter") {
-                setSearch("");
-              } else {
-                setLocationQuery("");
-                setLocationResults([]);
-                setShowLocationResults(false);
-              }
-            }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
-          >
-            <X size={16} />
-          </button>
-        )}
+            <button
+              onClick={() => {
+                if (searchMode === "filter") {
+                  setSearch("");
+                } else {
+                  setLocationQuery("");
+                  setLocationResults([]);
+                  setShowLocationResults(false);
+                }
+              }}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X size={16} />
+            </button>
+          )}
 
         {/* Location Search Results Dropdown */}
         <AnimatePresence>
@@ -1101,11 +1107,10 @@ export default function Map({
 
           <div className="flex gap-1.5">
             <button
-              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${
-                showComplaints
-                  ? "bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30 scale-105"
-                  : "bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105"
-              }`}
+              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showComplaints
+                ? "bg-red-500 text-white border-red-600 shadow-md shadow-red-500/30 scale-105"
+                : "bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105"
+                }`}
               onClick={() => {
                 setShowComplaints(!showComplaints);
                 setSelectedItem(null);
@@ -1114,11 +1119,10 @@ export default function Map({
               {t("complaints")}
             </button>
             <button
-              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${
-                showProjects
-                  ? "bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105"
-                  : "bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105"
-              }`}
+              className={`text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full font-bold border transition-all duration-300 ${showProjects
+                ? "bg-blue-500 text-white border-blue-600 shadow-md shadow-blue-500/30 scale-105"
+                : "bg-white/50 text-slate-500 border-transparent hover:bg-white hover:scale-105"
+                }`}
               onClick={() => {
                 setShowProjects(!showProjects);
                 setSelectedItem(null);

@@ -105,10 +105,11 @@ export default function ProjectDetailsPage() {
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534]"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => router.back()} className="p-2 hover:bg-slate-100 rounded-full transition text-slate-500">
+                        <button onClick={() => router.back()} className="p-2 hover:bg-slate-100 rounded-full transition text-[#1e3a8a]">
                             <ArrowLeft size={20} />
                         </button>
                         <h1 className="text-xl font-bold text-slate-900 truncate max-w-md">{project.title}</h1>
@@ -129,9 +130,10 @@ export default function ProjectDetailsPage() {
                     <div className="lg:col-span-2 space-y-8">
 
                         {/* Overview Card */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#1e3a8a] to-[#f97316]"></div>
                             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                <Construction className="text-blue-600" size={20} /> Project Overview
+                                <Construction className="text-[#1e3a8a]" size={20} /> Project Overview
                             </h2>
                             <p className="text-slate-600 leading-relaxed text-lg">
                                 {project.description}
@@ -141,14 +143,14 @@ export default function ProjectDetailsPage() {
                                 <div>
                                     <p className="text-sm font-bold text-slate-400 uppercase mb-1">Budget</p>
                                     <p className="text-2xl font-extrabold text-slate-900 flex items-center gap-1">
-                                        <DollarSign size={20} className="text-emerald-500" />
+                                        <DollarSign size={20} className="text-[#166534]" />
                                         {project.budget.toLocaleString()}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-slate-400 uppercase mb-1">Timeline</p>
                                     <p className="text-2xl font-extrabold text-slate-900 flex items-center gap-1">
-                                        <Clock size={20} className="text-blue-500" />
+                                        <Clock size={20} className="text-[#f97316]" />
                                         TBD
                                     </p>
                                 </div>
@@ -163,20 +165,21 @@ export default function ProjectDetailsPage() {
 
                         {/* Progress Section */}
                         {(project.progressPercentage !== undefined && project.progressPercentage !== null) && (
-                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-[#166534]"></div>
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                                     📊 Project Progress
                                 </h2>
-                                
+
                                 {/* Progress Bar */}
                                 <div className="mb-6">
                                     <div className="flex justify-between text-sm mb-2">
                                         <span className="font-bold text-slate-700">Completion</span>
-                                        <span className="font-bold text-blue-600">{project.progressPercentage}%</span>
+                                        <span className="font-bold text-[#1e3a8a]">{project.progressPercentage}%</span>
                                     </div>
                                     <div className="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
-                                        <div 
-                                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500"
+                                        <div
+                                            className="h-full bg-gradient-to-r from-[#f97316] to-[#166534] rounded-full transition-all duration-500"
                                             style={{ width: `${project.progressPercentage}%` }}
                                         />
                                     </div>
@@ -198,7 +201,7 @@ export default function ProjectDetailsPage() {
                                         <h3 className="text-sm font-bold text-slate-700 mb-3">Progress Photos</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                             {project.progressPhotos.split(',').filter(p => p.trim()).map((photo, index) => (
-                                                <a 
+                                                <a
                                                     key={index}
                                                     href={`http://localhost:8080${photo.trim()}`}
                                                     target="_blank"

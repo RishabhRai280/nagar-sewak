@@ -142,11 +142,6 @@ export default function ContractorDashboardComponent() {
     return (
         <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
             <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-            {/* Background */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-                <motion.div animate={{ x: [0, 30, 0], y: [0, 40, 0] }} transition={{ duration: 10, repeat: Infinity }} className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-200 rounded-full blur-[100px] opacity-50" />
-                <motion.div animate={{ x: [0, -30, 0], y: [0, -20, 0] }} transition={{ duration: 15, repeat: Infinity }} className="absolute bottom-[-10%] left-[10%] w-[400px] h-[400px] bg-indigo-200 rounded-full blur-[100px] opacity-40" />
-            </div>
 
             <Sidebar />
 
@@ -157,12 +152,13 @@ export default function ContractorDashboardComponent() {
                 {/* Overview Section - Full Dashboard */}
                 <section id="overview" className={`space-y-8 ${sectionVisible('overview') ? '' : 'hidden'}`}>
                     {/* Header Card */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534]"></div>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                        <Construction className="text-blue-600" size={24} />
+                                    <div className="w-12 h-12 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-center">
+                                        <Construction className="text-[#1e3a8a]" size={24} />
                                     </div>
                                     <div>
                                         <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Contractor Dashboard</h1>
@@ -174,14 +170,14 @@ export default function ContractorDashboardComponent() {
                             <div className="flex flex-wrap gap-3 justify-end">
                                 <button
                                     onClick={loadData}
-                                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition"
+                                    className="px-4 py-2.5 rounded-xl bg-[#1e3a8a] hover:bg-blue-800 text-white font-bold shadow-lg transition"
                                     title="Refresh Data"
                                 >
                                     <div className="flex items-center gap-2"><RefreshCcw size={18} /> Refresh</div>
                                 </button>
                                 <button
                                     onClick={handleLogout}
-                                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-semibold border border-slate-200 hover:border-red-200 transition"
+                                    className="px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 font-semibold border border-slate-200 hover:border-red-200 transition"
                                 >
                                     <div className="flex items-center gap-2"><LogOut size={16} /> Sign Out</div>
                                 </button>
@@ -201,7 +197,7 @@ export default function ContractorDashboardComponent() {
                     <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
                         <h2 className="text-xl font-bold text-slate-900 mb-6">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <button 
+                            <button
                                 onClick={() => navigateToSection('available')}
                                 className="w-full p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition group"
                             >
@@ -215,8 +211,8 @@ export default function ContractorDashboardComponent() {
                                     </div>
                                 </div>
                             </button>
-                            
-                            <button 
+
+                            <button
                                 onClick={() => navigateToSection('tenders')}
                                 className="w-full p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition group"
                             >
@@ -230,8 +226,8 @@ export default function ContractorDashboardComponent() {
                                     </div>
                                 </div>
                             </button>
-                            
-                            <button 
+
+                            <button
                                 onClick={() => navigateToSection('projects')}
                                 className="w-full p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition group"
                             >
@@ -245,7 +241,7 @@ export default function ContractorDashboardComponent() {
                                     </div>
                                 </div>
                             </button>
-                            
+
                             <Link href="/map">
                                 <button className="w-full p-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl transition group">
                                     <div className="flex items-center gap-3">
@@ -271,7 +267,7 @@ export default function ContractorDashboardComponent() {
                                     <Construction className="text-blue-600" size={20} />
                                     Recent Projects
                                 </h2>
-                                <button 
+                                <button
                                     onClick={() => navigateToSection('projects')}
                                     className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                                 >
@@ -280,17 +276,16 @@ export default function ContractorDashboardComponent() {
                             </div>
                             <div className="space-y-4">
                                 {assignedProjects.slice(0, 3).map(p => {
-                                    const progress = p.progressPercentage !== undefined && p.progressPercentage !== null 
-                                        ? p.progressPercentage 
-                                        : (p.status?.toLowerCase() === 'completed' ? 100 : 
-                                           p.status?.toLowerCase() === 'in progress' ? 50 : 0);
+                                    const progress = p.progressPercentage !== undefined && p.progressPercentage !== null
+                                        ? p.progressPercentage
+                                        : (p.status?.toLowerCase() === 'completed' ? 100 :
+                                            p.status?.toLowerCase() === 'in progress' ? 50 : 0);
                                     return (
                                         <div key={p.id} className="p-4 border border-slate-200 rounded-xl hover:shadow-md transition">
                                             <div className="flex justify-between items-start mb-2">
                                                 <h3 className="font-semibold text-slate-900 line-clamp-1">{p.title}</h3>
-                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                    p.status?.toLowerCase() === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
-                                                }`}>
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.status?.toLowerCase() === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+                                                    }`}>
                                                     {p.status}
                                                 </span>
                                             </div>
@@ -299,7 +294,7 @@ export default function ContractorDashboardComponent() {
                                                 <span>{progress}% Complete</span>
                                             </div>
                                             <div className="w-full bg-slate-200 rounded-full h-2">
-                                                <div 
+                                                <div
                                                     className="h-full bg-blue-600 rounded-full transition-all duration-500"
                                                     style={{ width: `${progress}%` }}
                                                 />
@@ -323,7 +318,7 @@ export default function ContractorDashboardComponent() {
                                     <AlertTriangle className="text-orange-600" size={20} />
                                     New Opportunities
                                 </h2>
-                                <button 
+                                <button
                                     onClick={() => navigateToSection('available')}
                                     className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                                 >
@@ -335,10 +330,9 @@ export default function ContractorDashboardComponent() {
                                     <div key={c.id} className="p-4 border border-slate-200 rounded-xl hover:shadow-md transition">
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-semibold text-slate-900 line-clamp-1">{c.title}</h3>
-                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                c.severity >= 4 ? 'bg-red-100 text-red-700' : 
+                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${c.severity >= 4 ? 'bg-red-100 text-red-700' :
                                                 c.severity >= 3 ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'
-                                            }`}>
+                                                }`}>
                                                 Severity {c.severity}
                                             </span>
                                         </div>
@@ -439,12 +433,12 @@ export default function ContractorDashboardComponent() {
                                 <h3 className="font-bold text-slate-900">Avg Progress</h3>
                             </div>
                             <div className="text-3xl font-bold text-slate-900 mb-2">
-                                {assignedProjects.length > 0 
+                                {assignedProjects.length > 0
                                     ? Math.round(assignedProjects.reduce((sum, p) => {
-                                        const progress = p.progressPercentage !== undefined && p.progressPercentage !== null 
-                                            ? p.progressPercentage 
-                                            : (p.status?.toLowerCase() === 'completed' ? 100 : 
-                                               p.status?.toLowerCase() === 'in progress' ? 50 : 0);
+                                        const progress = p.progressPercentage !== undefined && p.progressPercentage !== null
+                                            ? p.progressPercentage
+                                            : (p.status?.toLowerCase() === 'completed' ? 100 :
+                                                p.status?.toLowerCase() === 'in progress' ? 50 : 0);
                                         return sum + progress;
                                     }, 0) / assignedProjects.length)
                                     : 0
@@ -460,18 +454,17 @@ export default function ContractorDashboardComponent() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                             {assignedProjects.length > 0 ? (
                                 assignedProjects.map(p => {
-                                    const progress = p.progressPercentage !== undefined && p.progressPercentage !== null 
-                                        ? p.progressPercentage 
-                                        : (p.status?.toLowerCase() === 'completed' ? 100 : 
-                                           p.status?.toLowerCase() === 'in progress' ? 50 : 0);
+                                    const progress = p.progressPercentage !== undefined && p.progressPercentage !== null
+                                        ? p.progressPercentage
+                                        : (p.status?.toLowerCase() === 'completed' ? 100 :
+                                            p.status?.toLowerCase() === 'in progress' ? 50 : 0);
                                     return (
                                         <div key={p.id} className="p-6 border border-slate-200 rounded-2xl hover:shadow-lg transition group">
                                             <div className="flex justify-between items-start mb-4">
-                                                <span className={`text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full ${
-                                                    p.status?.toLowerCase() === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
+                                                <span className={`text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full ${p.status?.toLowerCase() === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
                                                     p.status?.toLowerCase() === 'in progress' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                                                    'bg-orange-100 text-orange-700 border border-orange-200'
-                                                }`}>
+                                                        'bg-orange-100 text-orange-700 border border-orange-200'
+                                                    }`}>
                                                     {p.status}
                                                 </span>
                                                 <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
@@ -479,7 +472,7 @@ export default function ContractorDashboardComponent() {
                                                 </span>
                                             </div>
                                             <h3 className="font-bold text-slate-900 text-lg mb-3 group-hover:text-blue-700 transition-colors line-clamp-2">{p.title}</h3>
-                                            
+
                                             <div className="space-y-3 mb-4">
                                                 <div className="flex items-center justify-between text-sm">
                                                     <span className="text-slate-600">Budget:</span>
@@ -492,14 +485,14 @@ export default function ContractorDashboardComponent() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="mb-4">
                                                 <div className="flex justify-between text-sm mb-2">
                                                     <span className="text-slate-700 font-semibold">Progress</span>
                                                     <span className="text-blue-600 font-bold">{progress}%</span>
                                                 </div>
                                                 <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                                                    <div 
+                                                    <div
                                                         className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500"
                                                         style={{ width: `${progress}%` }}
                                                     />
@@ -510,7 +503,7 @@ export default function ContractorDashboardComponent() {
                                                 <Link href={`/projects/${p.id}`} className="flex-1 text-center py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition">
                                                     View Details
                                                 </Link>
-                                                <button 
+                                                <button
                                                     onClick={() => {
                                                         setSelectedProject(p);
                                                         setShowProgressModal(true);
@@ -623,20 +616,18 @@ export default function ContractorDashboardComponent() {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <h4 className="font-bold text-slate-900 text-lg">{c.title}</h4>
-                                                    <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase ${
-                                                        c.status?.toLowerCase() === 'resolved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
+                                                    <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase ${c.status?.toLowerCase() === 'resolved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
                                                         c.status?.toLowerCase() === 'in progress' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                                                        'bg-orange-100 text-orange-700 border border-orange-200'
-                                                    }`}>
+                                                            'bg-orange-100 text-orange-700 border border-orange-200'
+                                                        }`}>
                                                         {c.status}
                                                     </span>
                                                 </div>
                                                 <p className="text-slate-600 text-sm mb-3 line-clamp-2">{c.description}</p>
                                                 <div className="flex items-center gap-4 text-sm">
-                                                    <span className={`flex items-center gap-1 font-semibold ${
-                                                        c.severity >= 4 ? 'text-red-600' : 
+                                                    <span className={`flex items-center gap-1 font-semibold ${c.severity >= 4 ? 'text-red-600' :
                                                         c.severity >= 3 ? 'text-orange-600' : 'text-yellow-600'
-                                                    }`}>
+                                                        }`}>
                                                         <AlertTriangle size={14} />
                                                         Severity: {c.severity}/5
                                                     </span>
@@ -669,16 +660,16 @@ export default function ContractorDashboardComponent() {
                     </div>
                 </section>
 
-                <section id="available" className={`bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-8 ${sectionVisible('available') ? '' : 'hidden'}`}>
+                <section id="available" className={`bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8 ${sectionVisible('available') ? '' : 'hidden'}`}>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                             <Construction className="text-blue-600" /> Available Works
                             <span className="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{filteredComplaints.length}</span>
                         </h2>
-                        
+
                         <div className="flex gap-3 flex-wrap">
-                            <select 
-                                value={filterSeverity || ''} 
+                            <select
+                                value={filterSeverity || ''}
                                 onChange={(e) => setFilterSeverity(e.target.value ? Number(e.target.value) : null)}
                                 className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
@@ -687,9 +678,9 @@ export default function ContractorDashboardComponent() {
                                 <option value="3">Medium (3+)</option>
                                 <option value="1">Low (1+)</option>
                             </select>
-                            
-                            <select 
-                                value={sortBy} 
+
+                            <select
+                                value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value as 'severity' | 'recent')}
                                 className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
@@ -818,7 +809,7 @@ export default function ContractorDashboardComponent() {
                                     // Find the complaint title from openComplaints
                                     const complaint = openComplaints.find(c => c.id === tender.complaintId);
                                     const complaintTitle = complaint?.title || `Complaint #${tender.complaintId}`;
-                                    
+
                                     return (
                                         <motion.div
                                             key={tender.id}
@@ -830,11 +821,10 @@ export default function ContractorDashboardComponent() {
                                             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-3 mb-3">
-                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                                            tender.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${tender.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
                                                             tender.status === 'REJECTED' ? 'bg-red-100 text-red-700 border border-red-200' :
-                                                            'bg-orange-100 text-orange-700 border border-orange-200'
-                                                        }`}>
+                                                                'bg-orange-100 text-orange-700 border border-orange-200'
+                                                            }`}>
                                                             {tender.status}
                                                         </span>
                                                         <span className="text-xs text-slate-500">
@@ -889,7 +879,7 @@ export default function ContractorDashboardComponent() {
                                     <FileText className="mx-auto mb-4 opacity-50 text-purple-400" size={48} />
                                     <p className="text-lg font-medium">No tenders submitted yet</p>
                                     <p className="text-sm mt-1">Browse available works to submit your first tender</p>
-                                    <button 
+                                    <button
                                         onClick={() => navigateToSection('available')}
                                         className="mt-4 px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition"
                                     >
@@ -966,7 +956,7 @@ const ProgressUpdateModal = ({ project, onClose, onSuccess }: any) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
-        
+
         try {
             // Mock API call - replace with actual implementation
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1123,7 +1113,7 @@ const ProgressUpdateModal = ({ project, onClose, onSuccess }: any) => {
 function StatCard({ label, value, icon: Icon, color, suffix = "" }: any) {
     const colorMap = {
         blue: "bg-blue-50 text-blue-600 border-blue-100",
-        orange: "bg-orange-50 text-orange-600 border-orange-100", 
+        orange: "bg-orange-50 text-orange-600 border-orange-100",
         emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
         yellow: "bg-yellow-50 text-yellow-600 border-yellow-100",
     };

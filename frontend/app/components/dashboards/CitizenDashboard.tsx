@@ -16,9 +16,9 @@ interface DashboardComplaint {
   description?: string | null;
   severity: number;
   status?: string | null;
-  photoUrl?: string | null; 
-  rating?: number | null;   
-  projectId?: number | null; 
+  photoUrl?: string | null;
+  rating?: number | null;
+  projectId?: number | null;
 }
 
 export default function CitizenDashboardComponent() {
@@ -68,7 +68,7 @@ export default function CitizenDashboardComponent() {
     const inProgress = complaints.filter(c => c.status?.toLowerCase() === "in_progress").length;
     const resolved = complaints.filter(c => c.status?.toLowerCase() === "resolved").length;
     const highPriority = complaints.filter(c => c.severity >= 4).length;
-    
+
     return {
       total: complaints.length,
       pending,
@@ -100,52 +100,53 @@ export default function CitizenDashboardComponent() {
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-      
+
       {/* --- GLOBAL PARALLAX BACKGROUND --- */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-         <motion.div animate={{ x: [0, 50, 0], y: [0, 30, 0] }} transition={{ duration: 20, repeat: Infinity }} className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-200 rounded-full blur-[120px] opacity-40" />
-         <motion.div animate={{ x: [0, -50, 0], y: [0, -50, 0] }} transition={{ duration: 25, repeat: Infinity }} className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200 rounded-full blur-[120px] opacity-40" />
+        <motion.div animate={{ x: [0, 50, 0], y: [0, 30, 0] }} transition={{ duration: 20, repeat: Infinity }} className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-200 rounded-full blur-[120px] opacity-40" />
+        <motion.div animate={{ x: [0, -50, 0], y: [0, -50, 0] }} transition={{ duration: 25, repeat: Infinity }} className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200 rounded-full blur-[120px] opacity-40" />
       </div>
 
       <Sidebar />
 
-      {/* Main Content - Better spacing */}
+      {/* Main Content - Better spacing for Gov Header */}
       <main
-        className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300"
+        className="flex-1 px-6 pb-12 pt-32 lg:px-10 lg:pb-16 lg:pt-36 relative z-10 overflow-y-auto w-full transition-all duration-300"
         data-dashboard-scroll
       >
         {/* Overview Section */}
         <section id="overview" className="space-y-8">
           {/* Header Card */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534]"></div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <LayoutDashboard className="text-blue-600" size={24} />
+                  <div className="w-12 h-12 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-center">
+                    <LayoutDashboard className="text-[#1e3a8a]" size={24} />
                   </div>
                   <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Citizen Dashboard</h1>
                     <p className="text-slate-600">Welcome back, {userData.fullName || userData.username}</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-500">Your voice matters - help improve your community</p>
+                <p className="text-sm text-slate-500 max-w-lg">Your contributions help build a better city. Track your reports and see the impact.</p>
               </div>
               <div className="flex flex-wrap gap-3 justify-end">
                 <NotificationWrapper />
-                <button onClick={loadData} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
+                <button onClick={loadData} className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition shadow-sm">
                   <RefreshCcw size={16} />
                 </button>
                 <Link href="/report">
-                    <button className="inline-flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition-all duration-300 text-sm lg:text-base">
+                  <button className="inline-flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-[#f97316] hover:bg-orange-600 text-white rounded-lg font-bold shadow-md transition-all duration-300 text-sm lg:text-base">
                     <Plus size={18} /> New Report
-                    </button>
+                  </button>
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards - Gov Colors */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-6">
             <StatCard label="Total Reports" value={stats.total} icon={AlertCircle} color="blue" delay={0.1} />
             <StatCard label="Pending" value={stats.pending} icon={Clock} color="orange" delay={0.2} />
@@ -170,7 +171,7 @@ export default function CitizenDashboardComponent() {
                   </div>
                 </button>
               </Link>
-              
+
               <Link href="/map">
                 <button className="w-full p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition group">
                   <div className="flex items-center gap-3">
@@ -184,7 +185,7 @@ export default function CitizenDashboardComponent() {
                   </div>
                 </button>
               </Link>
-              
+
               <Link href="/dashboard/citizen/reports">
                 <button className="w-full p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition group">
                   <div className="flex items-center gap-3">
@@ -198,7 +199,7 @@ export default function CitizenDashboardComponent() {
                   </div>
                 </button>
               </Link>
-              
+
               <Link href="/dashboard/citizen/profile">
                 <button className="w-full p-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl transition group">
                   <div className="flex items-center gap-3">
@@ -237,10 +238,9 @@ export default function CitizenDashboardComponent() {
                     </div>
                     <p className="text-sm text-slate-600 line-clamp-2 mb-2">{complaint.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className={`text-xs font-medium ${
-                        complaint.severity >= 4 ? 'text-red-600' : 
+                      <span className={`text-xs font-medium ${complaint.severity >= 4 ? 'text-red-600' :
                         complaint.severity >= 3 ? 'text-orange-600' : 'text-yellow-600'
-                      }`}>
+                        }`}>
                         Severity {complaint.severity}/5
                       </span>
                       <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="text-xs text-blue-600 hover:underline">
@@ -269,37 +269,57 @@ export default function CitizenDashboardComponent() {
                   View Analytics
                 </Link>
               </div>
-              <div className="space-y-4">
-                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <CheckCircle className="text-emerald-600" size={20} />
-                    <h3 className="font-semibold text-slate-900">Issues Resolved</h3>
+              <div className="space-y-6">
+
+                {/* Visual Civic Score */}
+                <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 relative overflow-hidden">
+                  <div className="flex justify-between items-start relative z-10">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Star className="text-orange-500 fill-orange-500" size={18} />
+                        <h3 className="font-bold text-slate-900">Civic Score</h3>
+                      </div>
+                      <p className="text-xs text-slate-600 mb-3">Your contribution rating</p>
+                      <div className="text-4xl font-black text-slate-900">
+                        {Math.min(100, stats.total * 10 + stats.resolved * 15)}
+                        <span className="text-lg text-slate-400 font-medium">/100</span>
+                      </div>
+                    </div>
+                    {/* Progress Circle Mockup */}
+                    <div className="relative w-20 h-20">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-blue-200" />
+                        <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent"
+                          strokeDasharray={226}
+                          strokeDashoffset={226 - (226 * Math.min(100, stats.total * 10 + stats.resolved * 15)) / 100}
+                          className="text-blue-600 transition-all duration-1000 ease-out" />
+                      </svg>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{stats.resolved}</p>
-                  <p className="text-sm text-slate-600">Thanks to your reports</p>
                 </div>
-                
-                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Star className="text-blue-600" size={20} />
-                    <h3 className="font-semibold text-slate-900">Citizen Score</h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-center items-center text-center">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mb-2 text-emerald-600">
+                      <CheckCircle size={20} />
+                    </div>
+                    <p className="text-2xl font-bold text-slate-900">{stats.resolved}</p>
+                    <p className="text-xs text-slate-600 font-medium">Issues Solved</p>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{Math.min(100, stats.total * 10 + stats.resolved * 15)}</p>
-                  <p className="text-sm text-slate-600">Community contribution points</p>
-                </div>
-                
-                <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Award className="text-purple-600" size={20} />
-                    <h3 className="font-semibold text-slate-900">Recognition</h3>
+
+                  <div className="p-4 bg-purple-50 rounded-xl border border-purple-100 flex flex-col justify-center items-center text-center">
+                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 text-purple-600">
+                      <Award size={20} />
+                    </div>
+                    <p className="text-sm font-bold text-slate-900 mt-1">
+                      {stats.total >= 10 ? 'Active Citizen' :
+                        stats.total >= 5 ? 'Contributor' :
+                          stats.total >= 1 ? 'Helper' : 'New Member'}
+                    </p>
+                    <p className="text-xs text-slate-600 font-medium">Current Badge</p>
                   </div>
-                  <p className="text-lg font-bold text-slate-900">
-                    {stats.total >= 10 ? 'Active Citizen' : 
-                     stats.total >= 5 ? 'Contributing Member' : 
-                     stats.total >= 1 ? 'Community Helper' : 'New Member'}
-                  </p>
-                  <p className="text-sm text-slate-600">Your community status</p>
                 </div>
+
               </div>
             </div>
           </div>
@@ -314,40 +334,40 @@ export default function CitizenDashboardComponent() {
 }
 
 function StatCard({ label, value, icon: Icon, color, delay, suffix = "" }: any) {
-    const colorStyles = {
-        blue: "bg-blue-50 text-blue-600 border-blue-100",
-        orange: "bg-orange-50 text-orange-600 border-orange-100",
-        emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-        red: "bg-red-50 text-red-600 border-red-100",
-    }[color as string] || "bg-slate-50 text-slate-600";
+  const colorStyles = {
+    blue: "bg-blue-50 text-blue-600 border-blue-100",
+    orange: "bg-orange-50 text-orange-600 border-orange-100",
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    red: "bg-red-50 text-red-600 border-red-100",
+  }[color as string] || "bg-slate-50 text-slate-600";
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay }}
-            className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wide">{label}</h3>
-                <div className={`p-2.5 rounded-xl ${colorStyles} border`}>
-                    <Icon size={20} />
-                </div>
-            </div>
-            <p className="text-4xl font-extrabold text-slate-900">{value}{suffix}</p>
-        </motion.div>
-    )
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wide">{label}</h3>
+        <div className={`p-2.5 rounded-xl ${colorStyles} border`}>
+          <Icon size={20} />
+        </div>
+      </div>
+      <p className="text-4xl font-extrabold text-slate-900">{value}{suffix}</p>
+    </motion.div>
+  )
 }
 
 function StatusBadge({ status }: { status?: string | null }) {
-    const s = status?.toLowerCase() || 'pending';
-    const styles = s === 'resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
-                   s === 'in_progress' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                   'bg-orange-100 text-orange-700 border-orange-200';
-    
-    return (
-        <span className={`px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${styles}`}>
-            {s.replace('_', ' ')}
-        </span>
-    )
+  const s = status?.toLowerCase() || 'pending';
+  const styles = s === 'resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+    s === 'in_progress' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+      'bg-orange-100 text-orange-700 border-orange-200';
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${styles}`}>
+      {s.replace('_', ' ')}
+    </span>
+  )
 }

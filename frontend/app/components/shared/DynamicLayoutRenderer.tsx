@@ -22,7 +22,7 @@ export default function DynamicLayoutRenderer({
       {!shouldHideHeaderFooter && <Header />}
 
       {/* No padding for dashboard pages (they have their own layout with sidebar), map page (full-screen), or auth pages (full-screen) */}
-      <main className={shouldHideHeaderFooter ? "" : "pt-16"}>
+      <main className={shouldHideHeaderFooter ? "" : ""}>
         {children}
       </main>
 

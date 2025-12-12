@@ -25,7 +25,12 @@ export const metadata: Metadata = {
   description: "Report civic issues, track projects, and engage with your local administration",
   keywords: "civic engagement, complaint management, local government, community platform",
   authors: [{ name: "Nagar Sewak Team" }],
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
   themeColor: "#3b82f6",
 };
 

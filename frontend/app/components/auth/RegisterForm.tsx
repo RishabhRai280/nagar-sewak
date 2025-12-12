@@ -92,7 +92,7 @@ export default function RegisterForm() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full pl-11 pr-4 py-3.5 bg-white/60 border-2 border-slate-200/60 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+              className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all duration-300 font-medium"
               placeholder="John Doe"
             />
           </div>
@@ -113,7 +113,7 @@ export default function RegisterForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full pl-11 pr-4 py-3.5 bg-white/60 border-2 border-slate-200/60 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+              className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all duration-300 font-medium"
               placeholder="you@example.com"
             />
           </div>
@@ -134,7 +134,7 @@ export default function RegisterForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full pl-11 pr-4 py-3.5 bg-white/60 border-2 border-slate-200/60 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+              className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all duration-300 font-medium"
               placeholder="johndoe"
             />
           </div>
@@ -156,7 +156,7 @@ export default function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-11 pr-4 py-3.5 bg-white/60 border-2 border-slate-200/60 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all duration-300 font-medium"
                 placeholder="••••••••"
               />
             </div>
@@ -175,7 +175,7 @@ export default function RegisterForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full pl-11 pr-4 py-3.5 bg-white/60 border-2 border-slate-200/60 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all duration-300 font-medium"
                 placeholder="••••••••"
               />
             </div>
@@ -190,7 +190,7 @@ export default function RegisterForm() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-gradient-to-br from-slate-50 to-emerald-50/30 p-4 rounded-xl border border-slate-200/60 overflow-hidden"
+              className="bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-hidden"
             >
               <div className="flex justify-between items-center mb-2.5">
                 <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">{t('strength')}</span>
@@ -207,7 +207,7 @@ export default function RegisterForm() {
                   initial={{ width: 0 }}
                   animate={{ width: `${passwordStrength}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`h-full transition-colors duration-500 ${passwordStrength < 40 ? 'bg-gradient-to-r from-red-500 to-red-600' : passwordStrength < 80 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`}
+                  className={`h-full transition-colors duration-500 ${passwordStrength < 40 ? 'bg-red-500' : passwordStrength < 80 ? 'bg-orange-500' : 'bg-emerald-600'}`}
                 />
               </div>
             </motion.div>
@@ -221,16 +221,16 @@ export default function RegisterForm() {
           className="flex items-start gap-3 cursor-pointer pt-2"
         >
           <div className="relative flex items-center mt-0.5">
-            <input type="checkbox" required className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border-2 border-slate-300 bg-white transition-all checked:border-emerald-500 checked:bg-emerald-500 hover:border-emerald-400 shadow-sm" />
+            <input type="checkbox" required className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border-2 border-slate-300 bg-white transition-all checked:border-emerald-600 checked:bg-emerald-600 hover:border-emerald-500 shadow-sm" />
             <Check size={14} strokeWidth={3} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
           </div>
           <span className="text-sm text-slate-600 select-none font-medium">
             {t('agreeTerms')}{' '}
-            <a href="#" className="text-emerald-600 font-bold hover:text-emerald-700 hover:underline transition-colors">
+            <a href="#" className="text-emerald-700 font-bold hover:text-emerald-800 hover:underline transition-colors">
               {t('terms')}
             </a>
             {' '}and{' '}
-            <a href="#" className="text-emerald-600 font-bold hover:text-emerald-700 hover:underline transition-colors">
+            <a href="#" className="text-emerald-700 font-bold hover:text-emerald-800 hover:underline transition-colors">
               {t('privacyPolicy')}
             </a>
           </span>
@@ -240,13 +240,12 @@ export default function RegisterForm() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 text-white font-bold text-lg shadow-xl shadow-emerald-600/30 hover:shadow-2xl hover:shadow-emerald-600/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden group"
+          className="w-full py-3.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <span className="relative flex items-center gap-2">
             {isLoading ? (
               <>
@@ -262,6 +261,19 @@ export default function RegisterForm() {
           </span>
         </motion.button>
       </form>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="mt-8 text-center"
+      >
+        <p className="text-slate-600 font-medium">
+          Already have an account?{' '}
+          <Link href="/login" className="text-emerald-700 font-bold hover:underline transition-all">
+            Login Here
+          </Link>
+        </p>
+      </motion.div>
     </div>
   );
 }
