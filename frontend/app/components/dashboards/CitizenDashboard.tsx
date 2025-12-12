@@ -6,8 +6,9 @@ import Sidebar from "../shared/Sidebar";
 import Link from "next/link";
 import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api/api";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle, Clock, Plus, Eye, MapPin, Share2 } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Plus, Map, ClipboardList, FileEdit, LayoutDashboard, User, TrendingUp, Star, RefreshCcw, AlertTriangle, Share2, Award } from 'lucide-react';
 import NotificationWrapper from "../notifications/NotificationWrapper";
+import { useSidebar } from "@/app/contexts/SidebarContext";
 
 interface DashboardComplaint {
   id: number;
@@ -22,9 +23,10 @@ interface DashboardComplaint {
 
 export default function CitizenDashboardComponent() {
   const router = useRouter();
+  const { collapsed } = useSidebar();
   const [userData, setUserData] = useState<UserProfile | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     if (!Token.get()) {
@@ -36,7 +38,7 @@ export default function CitizenDashboardComponent() {
         const profile = await fetchCurrentUserProfile();
         setUserData(profile);
       } catch (err: any) {
-        setError(err.message || "Unable to load your profile.");
+        console.error("Error loading profile:", err);
       } finally {
         setLoading(false);
       }
@@ -44,23 +46,60 @@ export default function CitizenDashboardComponent() {
     loadProfile();
   }, [router]);
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const profile = await fetchCurrentUserProfile();
+      setUserData(profile);
+    } catch (err: any) {
+      console.error("Error loading profile:", err);
+      // Handle error silently for now
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
   const complaints: DashboardComplaint[] = (userData?.complaints ?? []) as DashboardComplaint[];
 
   const stats = useMemo(() => {
     const pending = complaints.filter(c => c.status?.toLowerCase() === "pending").length;
+    const inProgress = complaints.filter(c => c.status?.toLowerCase() === "in_progress").length;
+    const resolved = complaints.filter(c => c.status?.toLowerCase() === "resolved").length;
+    const highPriority = complaints.filter(c => c.severity >= 4).length;
+    
     return {
       total: complaints.length,
       pending,
-      resolved: complaints.length - pending,
+      inProgress,
+      resolved,
+      highPriority,
     };
   }, [complaints]);
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen bg-slate-50 text-slate-500 font-medium">Loading...</div>;
+
+
+  const navigateToSection = (section: string) => {
+    router.push(`/dashboard/citizen/${section}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+          <p className="text-slate-500 font-medium">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!userData) return null;
 
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
+      <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
       
       {/* --- GLOBAL PARALLAX BACKGROUND --- */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
@@ -71,153 +110,215 @@ export default function CitizenDashboardComponent() {
       <Sidebar />
 
       {/* Main Content - Better spacing */}
-      <main className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto max-w-7xl mx-auto w-full">
-        {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-1">
-              Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{userData.fullName || userData.username}</span>
-            </h1>
-            <p className="text-slate-600 font-medium text-sm lg:text-base">Here is what's happening with your reports.</p>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
-            <NotificationWrapper />
-            <Link href="/report">
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 text-sm lg:text-base">
-                <Plus size={18} /> Report New Issue
-                </button>
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Stats Cards (Glass) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8 lg:mb-10">
-          <StatCard label="Total Reports" value={stats.total} icon={AlertCircle} color="blue" delay={0.1} />
-          <StatCard label="Pending" value={stats.pending} icon={Clock} color="orange" delay={0.2} />
-          <StatCard label="Resolved" value={stats.resolved} icon={CheckCircle} color="emerald" delay={0.3} />
-        </div>
-
-        {/* Complaints List (Glass) */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/60 backdrop-blur-xl rounded-2xl lg:rounded-3xl shadow-xl border border-white/60 p-6 lg:p-8"
-        >
-          <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mb-6 lg:mb-8 flex items-center gap-2">
-            <div className="h-6 lg:h-8 w-1 bg-blue-600 rounded-full"/> Your History
-          </h2>
-
-          {complaints.length === 0 ? (
-            <div className="text-center py-12 lg:py-16 bg-white/40 rounded-2xl border border-dashed border-slate-300">
-              <div className="w-14 h-14 lg:w-16 lg:h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                 <AlertCircle className="text-slate-400" size={28} />
+      <main
+        className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300"
+        data-dashboard-scroll
+      >
+        {/* Overview Section */}
+        <section id="overview" className="space-y-8">
+          {/* Header Card */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <LayoutDashboard className="text-blue-600" size={24} />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Citizen Dashboard</h1>
+                    <p className="text-slate-600">Welcome back, {userData.fullName || userData.username}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500">Your voice matters - help improve your community</p>
               </div>
-              <p className="text-slate-600 text-base lg:text-lg font-medium">No complaints submitted yet.</p>
-              <p className="text-slate-500 text-sm mt-1">Be the change your community needs.</p>
+              <div className="flex flex-wrap gap-3 justify-end">
+                <NotificationWrapper />
+                <button onClick={loadData} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
+                  <RefreshCcw size={16} />
+                </button>
+                <Link href="/report">
+                    <button className="inline-flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition-all duration-300 text-sm lg:text-base">
+                    <Plus size={18} /> New Report
+                    </button>
+                </Link>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 lg:gap-4">
-              {complaints.map((complaint, i) => (
-                <motion.div
-                  key={complaint.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="group bg-white/50 hover:bg-white/80 border border-white/60 hover:border-blue-200 rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300"
-                >
-                  <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 items-start">
-                    {/* Thumbnail - photo or video */}
-                    <div className="w-full sm:w-20 lg:w-24 h-20 lg:h-24 flex-shrink-0 bg-slate-200 rounded-lg lg:rounded-xl overflow-hidden shadow-inner relative">
-                      {(() => {
-                        const urls =
-                          (complaint as any).photoUrls && (complaint as any).photoUrls.length > 0
-                            ? (complaint as any).photoUrls
-                            : complaint.photoUrl
-                            ? [buildAssetUrl(complaint.photoUrl) || ""]
-                            : [];
-                        if (urls.length === 0) {
-                          return (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400">
-                              <MapPin size={24} />
-                            </div>
-                          );
-                        }
-                        const first = urls[0];
-                        const isVideo = /\.(mp4|webm|ogg)$/i.test(first);
-                        return (
-                          <>
-                            {isVideo ? (
-                              <video src={first} className="w-full h-full object-cover bg-black" />
-                            ) : (
-                              <img
-                                src={first}
-                                className="w-full h-full object-cover"
-                                alt="evidence"
-                                onError={(e) =>
-                                  ((e.target as HTMLImageElement).src = "https://placehold.co/100?text=No+Media")
-                                }
-                              />
-                            )}
-                            {urls.length > 1 && (
-                              <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded font-bold">
-                                +{urls.length - 1}
-                              </div>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
+          </div>
 
-                    <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                            <h3 className="text-base lg:text-lg font-bold text-slate-900 line-clamp-1 group-hover:text-blue-700 transition-colors">{complaint.title}</h3>
-                            <StatusBadge status={complaint.status} />
-                        </div>
-                        <p className="text-slate-600 text-xs lg:text-sm mt-1 line-clamp-2 leading-relaxed">{complaint.description}</p>
-                        
-                        <div className="flex flex-wrap items-center gap-3 lg:gap-4 mt-3 lg:mt-4 text-xs lg:text-sm">
-                            <span className={`flex items-center gap-1.5 font-bold ${complaint.severity >= 4 ? 'text-red-600' : 'text-yellow-600'}`}>
-                                <AlertCircle size={14} /> Severity {complaint.severity}/5
-                            </span>
-                            <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="ml-auto flex items-center gap-1 text-blue-600 font-bold hover:underline">
-                                View Details <Eye size={14} />
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const shareUrl = `${window.location.origin}/dashboard/citizen/complaints/${complaint.id}`;
-                                if (navigator.share) {
-                                  navigator.share({ title: complaint.title, url: shareUrl }).catch(() => {});
-                                } else {
-                                  navigator.clipboard.writeText(shareUrl).catch(() => {});
-                                }
-                              }}
-                              className="text-slate-500 hover:text-blue-600"
-                              title="Share"
-                            >
-                              <Share2 size={14} />
-                            </button>
-                        </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-6">
+            <StatCard label="Total Reports" value={stats.total} icon={AlertCircle} color="blue" delay={0.1} />
+            <StatCard label="Pending" value={stats.pending} icon={Clock} color="orange" delay={0.2} />
+            <StatCard label="In Progress" value={stats.inProgress} icon={TrendingUp} color="purple" delay={0.25} />
+            <StatCard label="Resolved" value={stats.resolved} icon={CheckCircle} color="emerald" delay={0.3} />
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
+            <h2 className="text-xl font-bold text-slate-900 mb-6">Quick Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/report">
+                <button className="w-full p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+                      <FileEdit className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-slate-900">Report Issue</h3>
+                      <p className="text-xs text-slate-600">Submit new complaint</p>
                     </div>
                   </div>
-                </motion.div>
-              ))}
+                </button>
+              </Link>
+              
+              <Link href="/map">
+                <button className="w-full p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+                      <Map className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-slate-900">Live Map</h3>
+                      <p className="text-xs text-slate-600">View community issues</p>
+                    </div>
+                  </div>
+                </button>
+              </Link>
+              
+              <Link href="/dashboard/citizen/reports">
+                <button className="w-full p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+                      <ClipboardList className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-slate-900">My Reports</h3>
+                      <p className="text-xs text-slate-600">Track submissions</p>
+                    </div>
+                  </div>
+                </button>
+              </Link>
+              
+              <Link href="/dashboard/citizen/profile">
+                <button className="w-full p-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl transition group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+                      <User className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-slate-900">Profile</h3>
+                      <p className="text-xs text-slate-600">Manage account</p>
+                    </div>
+                  </div>
+                </button>
+              </Link>
             </div>
-          )}
-        </motion.div>
+          </div>
+
+          {/* Recent Activity Overview */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Recent Reports */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <ClipboardList className="text-blue-600" size={20} />
+                  Recent Reports
+                </h2>
+                <Link href="/dashboard/citizen/reports" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  View All
+                </Link>
+              </div>
+              <div className="space-y-4">
+                {complaints.slice(0, 3).map(complaint => (
+                  <div key={complaint.id} className="p-4 border border-slate-200 rounded-xl hover:shadow-md transition">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-slate-900 line-clamp-1">{complaint.title}</h3>
+                      <StatusBadge status={complaint.status} />
+                    </div>
+                    <p className="text-sm text-slate-600 line-clamp-2 mb-2">{complaint.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className={`text-xs font-medium ${
+                        complaint.severity >= 4 ? 'text-red-600' : 
+                        complaint.severity >= 3 ? 'text-orange-600' : 'text-yellow-600'
+                      }`}>
+                        Severity {complaint.severity}/5
+                      </span>
+                      <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="text-xs text-blue-600 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+                {complaints.length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    <AlertCircle className="mx-auto mb-2 opacity-50" size={32} />
+                    <p>No reports submitted yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Community Impact */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <TrendingUp className="text-emerald-600" size={20} />
+                  Community Impact
+                </h2>
+                <Link href="/dashboard/citizen/analytics" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  View Analytics
+                </Link>
+              </div>
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CheckCircle className="text-emerald-600" size={20} />
+                    <h3 className="font-semibold text-slate-900">Issues Resolved</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-slate-900">{stats.resolved}</p>
+                  <p className="text-sm text-slate-600">Thanks to your reports</p>
+                </div>
+                
+                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Star className="text-blue-600" size={20} />
+                    <h3 className="font-semibold text-slate-900">Citizen Score</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-slate-900">{Math.min(100, stats.total * 10 + stats.resolved * 15)}</p>
+                  <p className="text-sm text-slate-600">Community contribution points</p>
+                </div>
+                
+                <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Award className="text-purple-600" size={20} />
+                    <h3 className="font-semibold text-slate-900">Recognition</h3>
+                  </div>
+                  <p className="text-lg font-bold text-slate-900">
+                    {stats.total >= 10 ? 'Active Citizen' : 
+                     stats.total >= 5 ? 'Contributing Member' : 
+                     stats.total >= 1 ? 'Community Helper' : 'New Member'}
+                  </p>
+                  <p className="text-sm text-slate-600">Your community status</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+
+
       </main>
     </div>
   );
 }
 
-function StatCard({ label, value, icon: Icon, color, delay }: any) {
+function StatCard({ label, value, icon: Icon, color, delay, suffix = "" }: any) {
     const colorStyles = {
         blue: "bg-blue-50 text-blue-600 border-blue-100",
         orange: "bg-orange-50 text-orange-600 border-orange-100",
         emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+        red: "bg-red-50 text-red-600 border-red-100",
     }[color as string] || "bg-slate-50 text-slate-600";
 
     return (
@@ -233,7 +334,7 @@ function StatCard({ label, value, icon: Icon, color, delay }: any) {
                     <Icon size={20} />
                 </div>
             </div>
-            <p className="text-4xl font-extrabold text-slate-900">{value}</p>
+            <p className="text-4xl font-extrabold text-slate-900">{value}{suffix}</p>
         </motion.div>
     )
 }

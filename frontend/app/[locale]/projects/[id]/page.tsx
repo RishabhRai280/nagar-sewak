@@ -278,7 +278,7 @@ export default function ProjectDetailsPage() {
                             <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center p-6 text-center">
                                 <MapPin className="text-slate-400 mb-2" size={32} />
                                 <p className="text-slate-500 font-medium mb-4">View project location on the main map</p>
-                                <Link href="/map" className="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">
+                                <Link href={`/map?projectId=${project.id}`} className="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">
                                     Open Map
                                 </Link>
                             </div>

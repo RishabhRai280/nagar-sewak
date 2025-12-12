@@ -197,7 +197,7 @@ export default function ComplaintDetailPage() {
                   <MapPin size={18} className="text-blue-500" />
                   Location
                 </h3>
-                <Link href={`/map?lat=${complaint.lat}&lng=${complaint.lng}`} target="_blank">
+                <Link href={`/map?complaintId=${complaint.id}`} target="_blank">
                   <button className="flex items-center gap-1 text-xs lg:text-sm text-blue-600 font-bold hover:underline">
                     View on Main Map <ExternalLink size={12} />
                   </button>

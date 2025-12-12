@@ -114,7 +114,7 @@ export default function MilestoneUpdateForm({ projectId, onSuccess }: MilestoneU
             onChange={(e) => setNotes(e.target.value)}
             required
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-slate-900"
             placeholder="Describe the work completed at this milestone..."
           />
         </div>

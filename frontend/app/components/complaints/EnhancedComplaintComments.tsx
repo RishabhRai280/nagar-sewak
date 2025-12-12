@@ -331,7 +331,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
             value={newComment}
             onChange={handleTextChange}
             placeholder="Add a comment... (Use @ to mention someone)"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none text-slate-900"
             rows={3}
             disabled={loading}
           />

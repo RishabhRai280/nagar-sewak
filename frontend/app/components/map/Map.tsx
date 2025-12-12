@@ -176,6 +176,8 @@ function MapContent({
       >
         {/* Position zoom controls lower if needed, but usually topright is fine. Can add style if needed. */}
         <ZoomControl position="bottomright" />
+        
+        {/* Auto-center on selected item - handled via useEffect below */}
 
         {/* Map Layer Provider - Handles base layers and overlays */}
         <MapLayerProvider
@@ -373,8 +375,6 @@ function MapContent({
         onOverlayToggle={handleOverlayToggle}
       />
 
-      {/* Location Search is now integrated into the sidebar */}
-
       {/* Map Legend */}
       <MapLegend activeOverlays={activeOverlays} />
 
@@ -467,7 +467,6 @@ function ItemDetails({
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 50, opacity: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      // UPDATED: Added 'pt-28' to push content below the transparent header
       className="h-full p-6 pt-28 flex flex-col relative"
     >
       {/* Glass Background for Details Panel */}
@@ -712,6 +711,29 @@ function ItemListing({
 
 // --- Main Component ---
 
+interface MapProps {
+  items: MarkerItem[];
+  loading: boolean;
+  error: string | null;
+  selectedItem: MarkerItem | null;
+  setSelectedItem: (item: MarkerItem | null) => void;
+  setItems: (items: MarkerItem[]) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  showComplaints: boolean;
+  setShowComplaints: (show: boolean) => void;
+  showProjects: boolean;
+  setShowProjects: (show: boolean) => void;
+  statusFilter: string;
+  setStatusFilter: (filter: string) => void;
+  severityMin: number;
+  setSeverityMin: (min: number) => void;
+  search: string;
+  setSearch: (search: string) => void;
+  filtered: MarkerItem[];
+  autoSelectProcessed: boolean;
+}
+
 export default function Map({
   items,
   loading,
@@ -732,7 +754,8 @@ export default function Map({
   search,
   setSearch,
   filtered,
-}: any) {
+  autoSelectProcessed,
+}: MapProps) {
   const [currentLayer, setCurrentLayer] = useState<MapLayer>("osm");
   const [activeOverlays, setActiveOverlays] = useState<MapOverlay[]>([]);
 
@@ -756,6 +779,7 @@ export default function Map({
     localStorage.setItem("ns:map:layer", currentLayer);
     localStorage.setItem("ns:map:overlays", JSON.stringify(activeOverlays));
   }, [currentLayer, activeOverlays]);
+
   const t = useTranslations("map");
 
   const [sortBy, setSortBy] = useState<"severity_desc" | "title_asc">(
@@ -841,6 +865,18 @@ export default function Map({
     }
     // If filtered becomes empty, keep last known center to avoid jump to default
   }, [filtered]);
+
+  // Auto-center on selected item when coming from URL parameters
+  useEffect(() => {
+    if (autoSelectProcessed && selectedItem && selectedItem.lat && selectedItem.lng) {
+      // Set location target to center on the selected item
+      setLocationTarget({ 
+        lat: selectedItem.lat, 
+        lng: selectedItem.lng, 
+        zoom: 16 
+      });
+    }
+  }, [selectedItem, autoSelectProcessed]);
 
   const handleLocationSelect = (result: any) => {
     const lat = parseFloat(result.lat);
@@ -986,7 +1022,10 @@ export default function Map({
               ? t("filterPlaceholder")
               : "Search area, city, or state..."
           }
-          className="w-full pl-10 pr-10 py-2.5 bg-white/60 border border-white/60 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 shadow-sm placeholder-slate-400 focus:bg-white"
+          className="w-full pl-10 pr-10 py-2.5 bg-white/60 border border-white/60 
+             rounded-xl text-sm focus:ring-2 focus:ring-blue-500/50 
+             focus:border-blue-500 transition-all duration-300 shadow-sm 
+             placeholder-slate-400 focus:bg-white text-slate-900"
         />
         {((searchMode === "filter" && search) ||
           (searchMode === "location" && locationQuery)) && (
@@ -1193,7 +1232,7 @@ export default function Map({
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-80 h-full bg-white/90 backdrop-blur-2xl p-6 shadow-2xl border-r border-white/50 overflow-y-auto pt-24" // Added pt-24 here for mobile too
+              className="w-80 h-full bg-white/90 backdrop-blur-2xl p-6 shadow-2xl border-r border-white/50 overflow-y-auto pt-24"
             >
               <div className="flex justify-between items-center pb-6 mb-2">
                 <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -1251,7 +1290,7 @@ export default function Map({
                         onChange={(e) =>
                           setMobileStatusFilter(e.target.value as any)
                         }
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/50 outline-none"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/50 outline-none text-slate-900"
                       >
                         <option value="all">{t("allStatuses")}</option>
                         <option value="pending">{t("pending")}</option>
@@ -1302,4 +1341,3 @@ export default function Map({
     </div>
   );
 }
-

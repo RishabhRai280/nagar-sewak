@@ -184,7 +184,7 @@ export default function RatingForm({ projectId }: RatingFormProps) {
                         onChange={(e) => setComment(e.target.value)}
                         disabled={submitting || loadingProject || !project}
                         placeholder="Share your feedback on the quality, timeliness, or transparency of the project..."
-                        className="mt-1 block w-full px-4 py-3 border border-slate-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none disabled:opacity-50"
+                        className="mt-1 block w-full px-4 py-3 border border-slate-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none disabled:opacity-50 text-slate-900"
                     />
                 </div>
 

@@ -37,6 +37,8 @@ export default function CitizenComplaintForm() {
       return;
     }
     setLocationStatus("fetching");
+    setError(null);
+    
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLatitude(pos.coords.latitude);
@@ -45,10 +47,29 @@ export default function CitizenComplaintForm() {
         setError(null);
       },
       (err) => {
-        setError(`Location access denied: ${err.message}`);
+        let errorMessage = "Unable to get your location. ";
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            errorMessage += "Please allow location access and try again.";
+            break;
+          case err.POSITION_UNAVAILABLE:
+            errorMessage += "Location information is unavailable.";
+            break;
+          case err.TIMEOUT:
+            errorMessage += "Location request timed out. Please try again.";
+            break;
+          default:
+            errorMessage += "An unknown error occurred.";
+            break;
+        }
+        setError(errorMessage);
         setLocationStatus("error");
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { 
+        enableHighAccuracy: false, // Use less accurate but faster positioning
+        timeout: 30000, // Increase timeout to 30 seconds
+        maximumAge: 300000 // Allow cached position up to 5 minutes old
+      }
     );
   };
 

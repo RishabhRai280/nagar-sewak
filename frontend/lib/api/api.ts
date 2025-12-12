@@ -653,3 +653,142 @@ export interface ContractorProfile {
 export async function fetchContractorProfile(contractorId: number): Promise<ContractorProfile> {
   return request<ContractorProfile>(`/contractors/${contractorId}`, { method: 'GET' }, true);
 }
+
+// ===================== PROJECT CREATION & MANAGEMENT =====================
+
+export interface ProjectCreateData {
+  title: string;
+  description: string;
+  budget: number;
+  expectedDuration?: number;
+  priority: string;
+  category: string;
+  location?: string;
+  lat?: number;
+  lng?: number;
+  headerImage?: File;
+  headerVideo?: File;
+  documents?: File[];
+}
+
+export async function createProject(data: ProjectCreateData, files?: { headerImage?: File; headerVideo?: File; documents?: File[] }): Promise<ProjectData> {
+  // For now, create project with JSON data only (files will be handled separately if needed)
+  const projectData = {
+    title: data.title,
+    description: data.description,
+    budget: data.budget,
+    priority: data.priority,
+    category: data.category,
+    expectedDuration: data.expectedDuration,
+    location: data.location,
+    lat: data.lat,
+    lng: data.lng,
+    status: 'Pending'
+  };
+
+  return request<ProjectData>('/projects', {
+    method: 'POST',
+    body: JSON.stringify(projectData),
+  }, true);
+}
+
+export async function fetchAllProjects(params?: { 
+  search?: string; 
+  status?: string; 
+  category?: string; 
+  page?: number; 
+  limit?: number; 
+}): Promise<{ projects: ProjectData[]; total: number; page: number; totalPages: number }> {
+  const searchParams = new URLSearchParams();
+  if (params?.search) searchParams.append('search', params.search);
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.category) searchParams.append('category', params.category);
+  if (params?.page) searchParams.append('page', params.page.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  
+  const url = `/projects${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  return request<{ projects: ProjectData[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
+}
+
+// ===================== TENDER CREATION & BIDDING =====================
+
+export interface TenderCreateData {
+  complaintId: number;
+  description: string;
+  quoteAmount: number;
+  estimatedDays: number;
+  materials?: string;
+  methodology?: string;
+  timeline?: string;
+  documents?: File[];
+}
+
+export async function createTender(data: TenderCreateData): Promise<TenderData> {
+  const formData = new FormData();
+  
+  formData.append('complaintId', data.complaintId.toString());
+  formData.append('description', data.description);
+  formData.append('quoteAmount', data.quoteAmount.toString());
+  formData.append('estimatedDays', data.estimatedDays.toString());
+  
+  if (data.materials) formData.append('materials', data.materials);
+  if (data.methodology) formData.append('methodology', data.methodology);
+  if (data.timeline) formData.append('timeline', data.timeline);
+  
+  if (data.documents) {
+    data.documents.forEach((doc) => {
+      formData.append('documents', doc);
+    });
+  }
+
+  const token = Token.get();
+  if (!token) throw new Error('Authentication required. Please log in.');
+
+  const response = await fetch(`${API_BASE_URL}/tenders`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  return parseResponse<TenderData>(response);
+}
+
+export async function fetchAllTenders(params?: { 
+  search?: string; 
+  status?: string; 
+  page?: number; 
+  limit?: number; 
+}): Promise<{ tenders: TenderData[]; total: number; page: number; totalPages: number }> {
+  const searchParams = new URLSearchParams();
+  if (params?.search) searchParams.append('search', params.search);
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.page) searchParams.append('page', params.page.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  
+  const url = `/tenders${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  return request<{ tenders: TenderData[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
+}
+
+
+
+// ===================== CONTRACTOR MANAGEMENT =====================
+
+export async function fetchAllContractors(params?: { 
+  search?: string; 
+  status?: string; 
+  specialization?: string; 
+  page?: number; 
+  limit?: number; 
+}): Promise<{ contractors: ContractorProfile[]; total: number; page: number; totalPages: number }> {
+  const searchParams = new URLSearchParams();
+  if (params?.search) searchParams.append('search', params.search);
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.specialization) searchParams.append('specialization', params.specialization);
+  if (params?.page) searchParams.append('page', params.page.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  
+  const url = `/contractors${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  return request<{ contractors: ContractorProfile[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
+}

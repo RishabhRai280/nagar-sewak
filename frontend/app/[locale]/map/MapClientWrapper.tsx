@@ -3,6 +3,7 @@
 
 import React, { Suspense, useEffect, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 import LoadingState from "@/app/components/map/LoadingState";
 import { fetchMapData, ComplaintData, ProjectData } from "@/lib/api";
@@ -16,6 +17,7 @@ type MarkerItem =
 const Map = dynamic(() => import("@/app/components/map/Map"), { ssr: false });
 
 export default function MapClientWrapper() {
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<MarkerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +33,7 @@ export default function MapClientWrapper() {
 
   // Selection State
   const [selectedItem, setSelectedItem] = useState<MarkerItem | null>(null);
+  const [autoSelectProcessed, setAutoSelectProcessed] = useState(false);
 
   // --- Data Fetching Effect ---
   useEffect(() => {
@@ -108,6 +111,62 @@ export default function MapClientWrapper() {
     }
   }, [filtered, selectedItem]);
 
+  // Handle URL parameters for auto-selection
+  useEffect(() => {
+    if (!autoSelectProcessed && items.length > 0) {
+      const complaintId = searchParams.get('complaintId');
+      const projectId = searchParams.get('projectId');
+      const lat = searchParams.get('lat');
+      const lng = searchParams.get('lng');
+
+      if (complaintId) {
+        const complaint = items.find(item => 
+          item.kind === 'complaint' && item.id === parseInt(complaintId)
+        );
+        if (complaint) {
+          setSelectedItem(complaint);
+          setShowComplaints(true);
+          setAutoSelectProcessed(true);
+        }
+      } else if (projectId) {
+        const project = items.find(item => 
+          item.kind === 'project' && item.id === parseInt(projectId)
+        );
+        if (project) {
+          setSelectedItem(project);
+          setShowProjects(true);
+          setAutoSelectProcessed(true);
+        }
+      } else if (lat && lng) {
+        // Find closest item to the coordinates
+        const targetLat = parseFloat(lat);
+        const targetLng = parseFloat(lng);
+        
+        let closestItem: MarkerItem | null = null;
+        let minDistance = Infinity;
+        
+        items.forEach(item => {
+          if (item.lat && item.lng) {
+            const distance = Math.sqrt(
+              Math.pow(item.lat - targetLat, 2) + Math.pow(item.lng - targetLng, 2)
+            );
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestItem = item;
+            }
+          }
+        });
+        
+        if (closestItem && minDistance < 0.01) { // Within reasonable distance
+          setSelectedItem(closestItem);
+          if (closestItem.kind === 'complaint') setShowComplaints(true);
+          if (closestItem.kind === 'project') setShowProjects(true);
+          setAutoSelectProcessed(true);
+        }
+      }
+    }
+  }, [items, searchParams, autoSelectProcessed]);
+
 
   return (
     <Suspense fallback={<LoadingState />}>
@@ -131,6 +190,7 @@ export default function MapClientWrapper() {
         search={search}
         setSearch={setSearch}
         filtered={filtered}
+        autoSelectProcessed={autoSelectProcessed}
       />
     </Suspense>
   );

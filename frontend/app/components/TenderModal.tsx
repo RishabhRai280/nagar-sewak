@@ -69,7 +69,7 @@ export default function TenderModal({ complaintId, complaintTitle, onClose, onSu
                                     type="number"
                                     required
                                     min="1"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-medium"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-medium text-slate-900"
                                     placeholder="0.00"
                                     value={formData.quoteAmount || ''}
                                     onChange={e => setFormData({ ...formData, quoteAmount: Number(e.target.value) })}
@@ -85,7 +85,7 @@ export default function TenderModal({ complaintId, complaintTitle, onClose, onSu
                                     type="number"
                                     required
                                     min="1"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-medium"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-medium text-slate-900"
                                     placeholder="Days to complete"
                                     value={formData.estimatedDays || ''}
                                     onChange={e => setFormData({ ...formData, estimatedDays: Number(e.target.value) })}
@@ -100,7 +100,7 @@ export default function TenderModal({ complaintId, complaintTitle, onClose, onSu
                                 <textarea
                                     required
                                     rows={4}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-medium resize-none"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-medium resize-none text-slate-900"
                                     placeholder="Describe your approach, materials, and timeline..."
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
