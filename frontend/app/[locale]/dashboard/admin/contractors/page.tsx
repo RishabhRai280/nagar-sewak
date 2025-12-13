@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fetchAdminDashboard, AdminDashboardData, Token } from "@/lib/api/api";
+import { fetchAdminDashboard, AdminDashboardData, Token, fetchAllContractors, ContractorProfile } from "@/lib/api/api";
 import { Users, CheckCircle, AlertTriangle, Star, RefreshCcw } from 'lucide-react';
 import ContractorManagement from '@/app/components/contractors/ContractorManagement';
 import Sidebar from "@/app/components/Sidebar";
@@ -13,6 +13,7 @@ export default function AdminContractorsPage() {
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [allContractors, setAllContractors] = useState<ContractorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,8 +21,12 @@ export default function AdminContractorsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchAdminDashboard();
-      setData(res);
+      const [dashboardRes, contractorsRes] = await Promise.all([
+        fetchAdminDashboard(),
+        fetchAllContractors({ limit: 100 })
+      ]);
+      setData(dashboardRes);
+      setAllContractors(contractorsRes.contractors);
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Error loading dashboard");
@@ -31,19 +36,23 @@ export default function AdminContractorsPage() {
   };
 
   useEffect(() => {
-    if (!Token.get()) { 
-      router.push("/login"); 
-      return; 
+    if (!Token.get()) {
+      router.push("/login");
+      return;
     }
     loadData();
   }, [router]);
 
+  const activeContractorsCount = allContractors.filter(c => c.projects && c.projects.some(p => p.status === 'In Progress' || p.status === 'Assigned')).length;
+  const flaggedContractorsCount = data?.flaggedContractors?.length || 0;
+  const totalContractorsCount = allContractors.length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium">Loading contractors...</p>
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
+          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Contractors...</p>
         </div>
       </div>
     );
@@ -52,9 +61,9 @@ export default function AdminContractorsPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button onClick={loadData} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+        <div className="text-center p-8 bg-white rounded-xl shadow-md border border-slate-200">
+          <p className="text-red-600 mb-4 font-bold">{error}</p>
+          <button onClick={loadData} className="px-6 py-2 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition">
             Retry
           </button>
         </div>
@@ -65,31 +74,32 @@ export default function AdminContractorsPage() {
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-      
+
       <Sidebar />
 
-      <main className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300">
-        {/* Contractors Header */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <Users className="text-emerald-600" size={24} />
+      <main className="flex-1 px-4 sm:px-6 lg:px-10 pb-12 pt-32 lg:pt-36 relative z-10 overflow-y-auto w-full transition-all duration-300">
+        {/* Consistent Header Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] to-[#f97316]"></div>
+          <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-md border border-emerald-100">
+                <Users size={28} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Contractor Management</h1>
-                <p className="text-slate-600">Monitor contractor performance and compliance</p>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Contractor Management</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Oversee Vendors & Compliance</p>
               </div>
             </div>
             <div className="flex gap-3">
               <ContractorManagement onContractorCreated={loadData} />
               <Link href="/contractors">
-                <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
+                <button className="px-4 py-2 bg-slate-50 text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-100 transition shadow-sm">
                   View All
                 </button>
               </Link>
-              <button onClick={loadData} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
-                <RefreshCcw size={16} />
+              <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
+                <RefreshCcw size={18} />
               </button>
             </div>
           </div>
@@ -97,70 +107,80 @@ export default function AdminContractorsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Stats Cards */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="text-blue-600" size={16} />
+              <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center border border-blue-100">
+                <Users size={16} />
               </div>
-              <h3 className="font-bold text-slate-900">Total Contractors</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Total Contractors</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">{(data?.flaggedContractors?.length || 0) + 10}</div>
-            <p className="text-sm text-slate-600">Registered in system</p>
+            <div className="text-3xl font-black text-[#111827] mb-1">{totalContractorsCount}</div>
+            <p className="text-xs text-slate-500 font-medium">Registered in system</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="text-emerald-600" size={16} />
+              <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100">
+                <CheckCircle size={16} />
               </div>
-              <h3 className="font-bold text-slate-900">Active</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Active</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">{Math.max(0, ((data?.flaggedContractors?.length || 0) + 10) - (data?.flaggedContractors?.length || 0))}</div>
-            <p className="text-sm text-slate-600">Currently working</p>
+            <div className="text-3xl font-black text-[#111827] mb-1">{activeContractorsCount}</div>
+            <p className="text-xs text-slate-500 font-medium">Currently working</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="text-red-600" size={16} />
+              <div className="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center border border-red-100">
+                <AlertTriangle size={16} />
               </div>
-              <h3 className="font-bold text-slate-900">Flagged</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Flagged</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">{data?.flaggedContractors?.length || 0}</div>
-            <p className="text-sm text-slate-600">Need attention</p>
+            <div className="text-3xl font-black text-[#111827] mb-1">{flaggedContractorsCount}</div>
+            <p className="text-xs text-slate-500 font-medium">Need administrative attention</p>
           </div>
         </div>
 
-        <GlassCard title="Contractor Performance" icon={Users}>
-          <div className="overflow-x-auto">
+        {/* Solid Card for Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center">
+              <Users size={20} />
+            </div>
+            <h2 className="text-xl font-black text-[#111827] uppercase tracking-tight">Contractor Performance</h2>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-sm">
-              <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 text-left rounded-tl-lg">Company</th>
-                  <th className="px-4 py-3 text-left">License</th>
-                  <th className="px-4 py-3 text-left">Rating</th>
-                  <th className="px-4 py-3 text-left">Projects</th>
-                  <th className="px-4 py-3 text-left rounded-tr-lg">Status</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Company</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">License No.</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Rating</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Active Projects</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {data?.flaggedContractors?.map((c, i) => (
                   <tr key={i} className="hover:bg-slate-50 transition">
-                    <td className="px-4 py-3">
-                      <Link href={`/contractors/${c.id}`} className="font-semibold text-slate-900 hover:text-blue-600 transition">
+                    <td className="px-6 py-4">
+                      <Link href={`/contractors/${c.id}`} className="font-bold text-[#1e3a8a] hover:underline transition">
                         {c.companyName}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-mono text-slate-600">{c.licenseNo}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <span className="font-bold text-slate-900">{c.avgRating.toFixed(1)}</span>
-                        <Star className="text-yellow-500" size={14} />
+                    <td className="px-6 py-4 font-mono text-slate-600 font-medium">{c.licenseNo}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded w-fit border border-yellow-100">
+                        <span className="font-bold">{c.avgRating.toFixed(1)}</span>
+                        <Star className="text-yellow-500 fill-yellow-500" size={12} />
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">2</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold border border-red-200">
+                    <td className="px-6 py-4 text-slate-700 font-bold">
+                      {/* Calculate active projects for this flagged contractor if possible, else default to 'Check' */}
+                      <Link href={`/contractors/${c.id}`} className="text-blue-600 hover:underline text-xs">View Details</Link>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase tracking-wide border border-red-200">
                         Flagged
                       </span>
                     </td>
@@ -169,29 +189,15 @@ export default function AdminContractorsPage() {
               </tbody>
             </table>
             {(!data?.flaggedContractors?.length) && (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-16 text-slate-400 bg-slate-50/50">
                 <Users className="mx-auto mb-3 opacity-50" size={48} />
-                <p className="font-medium">No contractors currently flagged</p>
-                <p className="text-sm mt-1">All contractors are performing well</p>
+                <p className="font-bold text-lg">No flagged contractors</p>
+                <p className="text-sm mt-1 max-w-sm mx-auto">All registered contractors are operating within normal compliance parameters.</p>
               </div>
             )}
           </div>
-        </GlassCard>
-      </main>
-    </div>
-  );
-}
-
-function GlassCard({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
-  return (
-    <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon className="text-blue-600" size={20} />
         </div>
-        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      </div>
-      {children}
+      </main>
     </div>
   );
 }

@@ -76,6 +76,7 @@ export default function Sidebar() {
   const effectiveRole = role;
 
   const citizenNav = [
+    { label: "Home", href: "/", icon: Home },
     { label: "Dashboard", href: "/dashboard/citizen", icon: LayoutDashboard },
     { label: "My Reports", href: "/dashboard/citizen/reports", icon: ClipboardList },
     { label: "History", href: "/dashboard/citizen/history", icon: Bell },
@@ -83,6 +84,7 @@ export default function Sidebar() {
     { label: "Analytics", href: "/dashboard/citizen/analytics", icon: BarChart3 },
     { label: "Report Issue", href: "/report", icon: FileEdit },
     { label: "Live Map", href: "/map", icon: Map },
+    { label: "Help Center", href: "/help", icon: HelpCircle },
   ];
 
   const adminNav = [
@@ -92,14 +94,21 @@ export default function Sidebar() {
     { label: "Tenders", href: "/dashboard/admin/tenders", icon: ClipboardList },
     { label: "Complaints", href: "/dashboard/admin/complaints", icon: Bell },
     { label: "Contractors", href: "/dashboard/admin/contractors", icon: Users },
+    { label: "My Reports", href: "/dashboard/citizen/reports", icon: ClipboardList },
+    { label: "Report Issue", href: "/report", icon: FileEdit },
     { label: "Live Map", href: "/map", icon: Map },
+    { label: "Help Center", href: "/help", icon: HelpCircle },
   ];
 
   const contractorNav = [
+    { label: "Home", href: "/", icon: Home },
     { label: "Dashboard", href: "/dashboard/contractor", icon: LayoutDashboard },
     { label: "Projects", href: "/dashboard/contractor/projects", icon: BarChart3 },
     { label: "Available Works", href: "/dashboard/contractor/available", icon: FileEdit },
+    { label: "My Reports", href: "/dashboard/citizen/reports", icon: ClipboardList },
+    { label: "Report Issue", href: "/report", icon: FileEdit },
     { label: "Live Map", href: "/map", icon: Map },
+    { label: "Help Center", href: "/help", icon: HelpCircle },
   ];
 
   const navItems =
@@ -168,12 +177,8 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        {/* Right Actions */}
         <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-slate-100 rounded-full transition-colors relative">
-            <Bell size={20} className="text-slate-600" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-          </button>
+
 
           <div className="flex items-center gap-3 px-3 py-1.5 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-slate-200">
             <div className="w-9 h-9 bg-[#1e3a8a] text-white rounded-full flex items-center justify-center font-bold shadow-md">

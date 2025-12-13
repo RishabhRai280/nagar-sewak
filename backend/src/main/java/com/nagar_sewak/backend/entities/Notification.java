@@ -43,6 +43,7 @@ public class Notification {
     @Column(name = "action_url", length = 500)
     private String actionUrl;
 
+    @Builder.Default
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 

@@ -63,4 +63,9 @@ public class TenderController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(tenderService.publishTenderOpportunity(complaintId, dto));
     }
+    // GET /tenders - Get all tenders (admin use)
+    @GetMapping
+    public ResponseEntity<List<TenderDTO>> getAllTenders() {
+        return ResponseEntity.ok(tenderService.getAllTenders());
+    }
 }

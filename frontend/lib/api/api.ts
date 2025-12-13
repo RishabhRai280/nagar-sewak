@@ -531,6 +531,10 @@ export interface TenderSubmitData {
   description: string;
 }
 
+export async function fetchAllComplaints(): Promise<ComplaintData[]> {
+  return request<ComplaintData[]>('/complaints', { method: 'GET' }, true);
+}
+
 export async function fetchOpenComplaints(): Promise<ComplaintData[]> {
   // Fetch all complaints and filter for Pending ones without a project
   // In a real app, this should be a dedicated backend endpoint
@@ -769,7 +773,15 @@ export async function fetchAllTenders(params?: {
   if (params?.limit) searchParams.append('limit', params.limit.toString());
 
   const url = `/tenders${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-  return request<{ tenders: TenderData[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
+  // Backend currently returns a simple List<TenderDTO>
+  const data = await request<TenderData[]>(url, { method: 'GET' }, true);
+
+  return {
+    tenders: data,
+    total: data.length,
+    page: params?.page || 1,
+    totalPages: 1
+  };
 }
 
 
@@ -791,5 +803,13 @@ export async function fetchAllContractors(params?: {
   if (params?.limit) searchParams.append('limit', params.limit.toString());
 
   const url = `/contractors${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-  return request<{ contractors: ContractorProfile[]; total: number; page: number; totalPages: number }>(url, { method: 'GET' }, true);
+  // Backend currently returns a simple List<ContractorProfileDTO>
+  const data = await request<ContractorProfile[]>(url, { method: 'GET' }, true);
+
+  return {
+    contractors: data,
+    total: data.length,
+    page: params?.page || 1,
+    totalPages: 1
+  };
 }

@@ -15,9 +15,9 @@ interface DashboardComplaint {
   description?: string | null;
   severity: number;
   status?: string | null;
-  photoUrl?: string | null; 
-  rating?: number | null;   
-  projectId?: number | null; 
+  photoUrl?: string | null;
+  rating?: number | null;
+  projectId?: number | null;
 }
 
 export default function CitizenReportsPage() {
@@ -62,18 +62,18 @@ export default function CitizenReportsPage() {
 
   const filteredComplaints = useMemo(() => {
     let filtered = complaints;
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (statusFilter !== 'all') {
       filtered = filtered.filter(c => c.status?.toLowerCase() === statusFilter);
     }
-    
+
     return filtered;
   }, [complaints, searchTerm, statusFilter]);
 
@@ -93,66 +93,66 @@ export default function CitizenReportsPage() {
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-      
+
       <Sidebar />
 
       <main className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300">
-        {/* Reports Header */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8 mb-8">
+        {/* Reports Header - Gov Style */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 mb-8 border-l-4 border-l-[#1e3a8a]">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <ClipboardList className="text-blue-600" size={24} />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#1e3a8a] rounded-lg flex items-center justify-center shadow-md">
+                <ClipboardList className="text-white" size={24} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">My Reports</h1>
-                <p className="text-slate-600">Manage and track your submitted reports</p>
+                <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Official Reports</h1>
+                <p className="text-sm font-medium text-slate-500">Repository of your submitted grievances</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Link href="/report">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-                  <Plus size={16} className="mr-2" />
+                <button className="px-5 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm flex items-center gap-2 uppercase text-xs tracking-wider">
+                  <Plus size={16} />
                   New Report
                 </button>
               </Link>
-              <button onClick={loadData} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
+              <button onClick={loadData} className="px-3 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 transition shadow-sm">
                 <RefreshCcw size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-8">
+        {/* Filters and Search - Sharp & Professional */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
-                placeholder="Search your reports..."
+                placeholder="Search by Report ID, Title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900"
+                className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-1 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] outline-none transition text-slate-900 text-sm font-medium placeholder:text-slate-400"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900"
+              className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-1 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] outline-none transition text-slate-900 text-sm font-bold bg-white min-w-[180px]"
             >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
+              <option value="all">View: All Reports</option>
+              <option value="pending">Status: Pending</option>
+              <option value="in_progress">Status: In Progress</option>
+              <option value="resolved">Status: Resolved</option>
             </select>
           </div>
         </div>
 
-        {/* Reports Grid */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">
-            Report Details ({filteredComplaints.length} {filteredComplaints.length === 1 ? 'report' : 'reports'})
+        {/* Reports Grid - Official Card Style */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 min-h-[400px]">
+          <h2 className="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest border-b border-slate-100 pb-2">
+            Records ({filteredComplaints.length})
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredComplaints.length > 0 ? (
@@ -162,21 +162,24 @@ export default function CitizenReportsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+                  className={`group bg-white border border-slate-200 rounded-xl p-0 hover:border-[#1e3a8a] transition-all duration-300 cursor-pointer overflow-hidden shadow-sm hover:shadow-md
+                    ${complaint.severity >= 4 ? 'border-l-4 border-l-red-600' :
+                      complaint.severity >= 3 ? 'border-l-4 border-l-orange-500' :
+                        'border-l-4 border-l-blue-500'}`}
                 >
-                  <div className="flex gap-4 items-start mb-4">
-                    {/* Thumbnail */}
-                    <div className="w-20 h-20 flex-shrink-0 bg-slate-100 rounded-xl overflow-hidden shadow-inner relative">
+                  <div className="p-5 flex gap-5 items-start">
+                    {/* Thumbnail - Sharp Square */}
+                    <div className="w-24 h-24 flex-shrink-0 bg-slate-100 border border-slate-200 rounded-lg overflow-hidden relative">
                       {(() => {
                         const urls =
                           (complaint as any).photoUrls && (complaint as any).photoUrls.length > 0
                             ? (complaint as any).photoUrls
                             : complaint.photoUrl
-                            ? [buildAssetUrl(complaint.photoUrl) || ""]
-                            : [];
+                              ? [buildAssetUrl(complaint.photoUrl) || ""]
+                              : [];
                         if (urls.length === 0) {
                           return (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
                               <AlertTriangle size={24} />
                             </div>
                           );
@@ -198,7 +201,7 @@ export default function CitizenReportsPage() {
                               />
                             )}
                             {urls.length > 1 && (
-                              <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded font-bold">
+                              <div className="absolute bottom-0 right-0 bg-black/80 text-white text-[10px] px-1.5 py-0.5 font-bold">
                                 +{urls.length - 1}
                               </div>
                             )}
@@ -209,60 +212,54 @@ export default function CitizenReportsPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-2 mb-2">
-                        <h3 className="text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-blue-700 transition-colors">{complaint.title}</h3>
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">ID: #{complaint.id}</span>
+                          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#1e3a8a] transition-colors">{complaint.title}</h3>
+                        </div>
                         <StatusBadge status={complaint.status} />
                       </div>
-                      <p className="text-slate-600 text-sm line-clamp-3 mb-3">{complaint.description}</p>
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <span className={`flex items-center gap-1.5 text-sm font-semibold ${
-                          complaint.severity >= 4 ? 'text-red-600' : 
-                          complaint.severity >= 3 ? 'text-orange-600' : 'text-yellow-600'
-                        }`}>
-                          <AlertTriangle size={14} /> Severity {complaint.severity}/5
+                      <p className="text-slate-600 text-xs leading-relaxed line-clamp-2 mb-3 font-medium">{complaint.description}</p>
+
+                      <div className="flex items-center gap-3">
+                        <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded border ${complaint.severity >= 4 ? 'bg-red-50 text-red-700 border-red-100' :
+                            complaint.severity >= 3 ? 'bg-orange-50 text-orange-700 border-orange-100' : 'bg-blue-50 text-blue-700 border-blue-100'
+                          }`}>
+                          Severity {complaint.severity}/5
                         </span>
-                        <span className="text-xs text-slate-500">ID: #{complaint.id}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-3 border-t border-slate-100">
-                    <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="flex-1">
-                      <button className="w-full py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
-                        View Details
-                      </button>
-                    </Link>
+                  <div className="bg-slate-50 px-5 py-3 border-t border-slate-100 flex justify-end gap-3">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        const shareUrl = `${window.location.origin}/dashboard/citizen/complaints/${complaint.id}`;
-                        if (navigator.share) {
-                          navigator.share({ title: complaint.title, url: shareUrl }).catch(() => {});
-                        } else {
-                          navigator.clipboard.writeText(shareUrl).catch(() => {});
-                        }
+                        // Share Logic
                       }}
-                      className="px-4 py-2 bg-slate-100 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-200 transition"
+                      className="text-slate-500 hover:text-[#1e3a8a] transition"
                       title="Share"
                     >
-                      <Share2 size={14} />
+                      <Share2 size={16} />
                     </button>
+                    <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="text-xs font-bold text-[#1e3a8a] hover:underline uppercase tracking-wider flex items-center gap-1">
+                      View Full Details <Share2 size={12} className="rotate-[-90deg]" />
+                    </Link>
                   </div>
                 </motion.div>
               ))
             ) : (
-              <div className="col-span-full text-center py-16 text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-                <ClipboardList className="mx-auto mb-4 opacity-50 text-blue-400" size={48} />
-                <p className="text-lg font-medium">
-                  {searchTerm || statusFilter !== 'all' ? 'No reports match your filters' : 'No reports submitted yet'}
-                </p>
-                <p className="text-sm mt-1">
-                  {searchTerm || statusFilter !== 'all' ? 'Try adjusting your search or filters' : 'Submit your first report to get started'}
+              <div className="col-span-full text-center py-20 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200">
+                  <ClipboardList className="text-slate-300" size={32} />
+                </div>
+                <h3 className="text-slate-900 font-bold text-lg mb-1">No Records Found</h3>
+                <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto">
+                  {searchTerm || statusFilter !== 'all' ? 'Your search filters returned no results.' : 'You have not submitted any reports yet.'}
                 </p>
                 {!searchTerm && statusFilter === 'all' && (
                   <Link href="/report">
-                    <button className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
-                      Submit First Report
+                    <button className="px-6 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm uppercase text-xs tracking-wider">
+                      File New Complaint
                     </button>
                   </Link>
                 )}
@@ -277,12 +274,13 @@ export default function CitizenReportsPage() {
 
 function StatusBadge({ status }: { status?: string | null }) {
   const s = status?.toLowerCase() || 'pending';
-  const styles = s === 'resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
-                 s === 'in_progress' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                 'bg-orange-100 text-orange-700 border-orange-200';
-  
+  // Official Gov Colors: Solid, Darker text, Subtle background
+  const styles = s === 'resolved' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' :
+    s === 'in_progress' ? 'bg-blue-50 text-blue-900 border border-blue-200' :
+      'bg-amber-50 text-amber-900 border border-amber-200';
+
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${styles}`}>
+    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${styles}`}>
       {s.replace('_', ' ')}
     </span>
   )

@@ -23,15 +23,24 @@ public class ContractorService {
     public ContractorProfileDTO getContractorProfile(Long contractorId) {
         Contractor contractor = contractorRepo.findById(contractorId)
                 .orElseThrow(() -> new RuntimeException("Contractor not found"));
+        return mapToDTO(contractor);
+    }
 
+    public List<ContractorProfileDTO> getAllContractors() {
+        return contractorRepo.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private ContractorProfileDTO mapToDTO(Contractor contractor) {
         // Get contractor's projects
-        List<Project> projects = projectRepo.findByContractorId(contractorId);
+        List<Project> projects = projectRepo.findByContractorId(contractor.getId());
 
         // Calculate average rating
-        Double avgRating = ratingRepo.findAverageRatingByContractorId(contractorId);
+        Double avgRating = ratingRepo.findAverageRatingByContractorId(contractor.getId());
 
         // Get total ratings count
-        Long totalRatings = ratingRepo.countByContractorId(contractorId);
+        Long totalRatings = ratingRepo.countByContractorId(contractor.getId());
 
         // Map projects to DTOs
         List<ContractorProfileDTO.ProjectInfo> projectInfos = projects.stream()

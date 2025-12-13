@@ -5,6 +5,7 @@ import com.nagar_sewak.backend.services.ContractorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,5 +23,9 @@ public class ContractorController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping
+    public ResponseEntity<List<ContractorProfileDTO>> getAllContractors() {
+        return ResponseEntity.ok(contractorService.getAllContractors());
     }
 }

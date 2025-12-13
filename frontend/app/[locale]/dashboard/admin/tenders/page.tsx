@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from "framer-motion";
-import { fetchAdminDashboard, AdminDashboardData, Token } from "@/lib/api/api";
+import { fetchAdminDashboard, Token, fetchAllTenders, TenderData } from "@/lib/api/api";
 import { ClipboardList, Clock, FileText, CheckCircle, RefreshCcw } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
@@ -12,20 +12,20 @@ import { useSidebar } from "@/app/contexts/SidebarContext";
 export default function AdminTendersPage() {
   const router = useRouter();
   const { collapsed } = useSidebar();
-  const [data, setData] = useState<AdminDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tenders, setTenders] = useState<TenderData[]>([]);
   const [pendingComplaints, setPendingComplaints] = useState<any[]>([]);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [res, pending] = await Promise.all([
-        fetchAdminDashboard(),
+      const [tendersRes, pending] = await Promise.all([
+        fetchAllTenders({ limit: 100 }), // Get all tenders for stats
         import('@/lib/api/api').then(mod => mod.fetchOpenComplaints())
       ]);
-      setData(res);
+      setTenders(tendersRes.tenders);
       setPendingComplaints(pending);
     } catch (err: any) {
       console.error(err);
@@ -36,19 +36,22 @@ export default function AdminTendersPage() {
   };
 
   useEffect(() => {
-    if (!Token.get()) { 
-      router.push("/login"); 
-      return; 
+    if (!Token.get()) {
+      router.push("/login");
+      return;
     }
     loadData();
   }, [router]);
 
+  const activeTendersCount = tenders.filter(t => t.status.toLowerCase() === 'open' || t.status.toLowerCase() === 'in progress').length;
+  const completedTendersCount = tenders.filter(t => t.status.toLowerCase() === 'awarded' || t.status.toLowerCase() === 'completed').length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium">Loading tenders...</p>
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
+          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Tenders...</p>
         </div>
       </div>
     );
@@ -57,9 +60,9 @@ export default function AdminTendersPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button onClick={loadData} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+        <div className="text-center p-8 bg-white rounded-xl shadow-md border border-slate-200">
+          <p className="text-red-600 mb-4 font-bold">{error}</p>
+          <button onClick={loadData} className="px-6 py-2 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition">
             Retry
           </button>
         </div>
@@ -70,79 +73,85 @@ export default function AdminTendersPage() {
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-      
+
       <Sidebar />
 
-      <main className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300">
-        {/* Tenders Header */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <ClipboardList className="text-purple-600" size={24} />
+      <main className="flex-1 px-4 sm:px-6 lg:px-10 pb-12 pt-32 lg:pt-36 relative z-10 overflow-y-auto w-full transition-all duration-300">
+
+        {/* Consistent Header Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] to-[#f97316]"></div>
+          <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shadow-md border border-purple-100">
+                <ClipboardList size={28} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Tender Management</h1>
-                <p className="text-slate-600">Review and manage tender submissions</p>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Tender Management</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Manage Bids & Allocations</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Link href="/tenders/create">
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition">
-                  Create Tender
+                <button className="px-5 py-2.5 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 transition shadow-sm">
+                  + Create Tender
                 </button>
               </Link>
               <Link href="/tenders">
-                <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
+                <button className="px-4 py-2 bg-slate-50 text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-100 transition shadow-sm">
                   View All
                 </button>
               </Link>
-              <button onClick={loadData} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
-                <RefreshCcw size={16} />
+              <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
+                <RefreshCcw size={18} />
               </button>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Pending Review */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Clock className="text-orange-600" size={16} />
+              <div className="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center border border-orange-100">
+                <Clock size={16} />
               </div>
-              <h3 className="font-bold text-slate-900">Pending Review</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Pending Review</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">{pendingComplaints.length}</div>
-            <p className="text-sm text-slate-600">Complaints awaiting tender review</p>
+            <div className="text-3xl font-black text-[#111827] mb-1">{pendingComplaints.length}</div>
+            <p className="text-xs text-slate-500 font-medium">Complaints awaiting tender decision</p>
           </div>
 
-          {/* Active Tenders */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FileText className="text-blue-600" size={16} />
+              <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center border border-blue-100">
+                <FileText size={16} />
               </div>
-              <h3 className="font-bold text-slate-900">Active Tenders</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Active Tenders</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">12</div>
-            <p className="text-sm text-slate-600">Currently open for bidding</p>
+            <div className="text-3xl font-black text-[#111827] mb-1">{activeTendersCount}</div>
+            <p className="text-xs text-slate-500 font-medium">Currently open for bidding</p>
           </div>
 
-          {/* Completed */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="text-emerald-600" size={16} />
+              <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100">
+                <CheckCircle size={16} />
               </div>
-              <h3 className="font-bold text-slate-900">Completed</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Completed</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">45</div>
-            <p className="text-sm text-slate-600">Successfully awarded</p>
+            <div className="text-3xl font-black text-[#111827] mb-1">{completedTendersCount}</div>
+            <p className="text-xs text-slate-500 font-medium">Successfully awarded</p>
           </div>
         </div>
 
-        <GlassCard title="Recent Tender Activities" icon={FileText}>
+        {/* Solid Card for Activities */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center">
+              <FileText size={20} />
+            </div>
+            <h2 className="text-xl font-black text-[#111827] uppercase tracking-tight">Recent Tender Activities</h2>
+          </div>
           <div className="space-y-4">
             {pendingComplaints.length > 0 ? (
               pendingComplaints.slice(0, 5).map((c, i) => (
@@ -153,26 +162,24 @@ export default function AdminTendersPage() {
                   transition={{ delay: i * 0.05 }}
                 >
                   <Link href={`/complaints/${c.id}/tenders`}>
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-slate-50 transition group cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <FileText className="text-purple-600" size={16} />
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-[#1e3a8a] bg-white hover:shadow-md transition group cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center border border-purple-100 group-hover:bg-[#1e3a8a] group-hover:text-white transition">
+                          <FileText size={20} />
                         </div>
                         <div className="flex-1">
-                          <p className="font-semibold text-slate-900 group-hover:text-blue-600 transition">{c.title}</p>
+                          <p className="font-bold text-[#111827] group-hover:text-[#1e3a8a] transition text-sm">{c.title}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-slate-500">Severity: {c.severity}/5</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              c.severity >= 4 ? 'bg-red-100 text-red-700' :
-                              c.severity >= 3 ? 'bg-orange-100 text-orange-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {c.severity >= 4 ? 'HIGH' : c.severity >= 3 ? 'MEDIUM' : 'LOW'}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${c.severity >= 4 ? 'bg-red-50 text-red-700 border-red-200' :
+                                c.severity >= 3 ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                  'bg-yellow-50 text-yellow-700 border-yellow-200'
+                              }`}>
+                              Severity {c.severity}/5
                             </span>
                           </div>
                         </div>
                       </div>
-                      <button className="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">
+                      <button className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold rounded-lg group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:border-[#1e3a8a] transition uppercase">
                         Review
                       </button>
                     </div>
@@ -180,29 +187,15 @@ export default function AdminTendersPage() {
                 </motion.div>
               ))
             ) : (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-16 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <FileText className="mx-auto mb-3 opacity-50" size={48} />
-                <p className="font-medium">No pending tender reviews</p>
-                <p className="text-sm mt-1">All complaints are either resolved or in progress.</p>
+                <p className="font-bold text-lg">No pending reviews</p>
+                <p className="text-sm mt-1">All complaints have been processed.</p>
               </div>
             )}
           </div>
-        </GlassCard>
-      </main>
-    </div>
-  );
-}
-
-function GlassCard({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
-  return (
-    <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon className="text-blue-600" size={20} />
         </div>
-        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      </div>
-      {children}
+      </main>
     </div>
   );
 }

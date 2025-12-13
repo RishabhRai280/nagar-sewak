@@ -162,6 +162,12 @@ public class TenderService {
         complaintRepo.save(complaint);
     }
 
+    public List<TenderDTO> getAllTenders() {
+        return tenderRepo.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
     private TenderDTO mapToDTO(Tender tender) {
         TenderDTO dto = new TenderDTO();
         dto.setId(tender.getId());

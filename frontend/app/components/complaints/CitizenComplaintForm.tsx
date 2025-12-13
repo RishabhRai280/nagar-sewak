@@ -197,41 +197,50 @@ export default function CitizenComplaintForm() {
               </div>
             </div>
 
-            {/* --- NEW: Middle Content - Live Stats Card --- */}
-            <div className="flex-1 flex flex-col justify-center py-6">
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 opacity-20">
-                  <Building size={64} />
-                </div>
+            {/* --- Process Visualization --- */}
+            <div className="flex-1 flex flex-col justify-center py-8">
+              <div className="space-y-8 relative">
+                {/* Connecting Line */}
+                <div className="absolute left-[19px] top-2 bottom-8 w-0.5 bg-blue-400/30"></div>
 
-                <div className="relative z-10 space-y-4">
-                  <div className="border-b border-white/10 pb-2 mb-2">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-blue-200">City Pulse</h4>
+                {/* Step 1 */}
+                <div className="relative flex gap-4 group">
+                  <div className="relative z-10 w-10 h-10 rounded-full bg-blue-600 border-4 border-[#1e3a8a] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <FileText size={18} className="text-blue-200" />
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-                      <CheckCircle size={20} className="text-emerald-400" />
-                    </div>
-                    <div>
-                      <div className="text-2xl font-black text-white">1,240+</div>
-                      <div className="text-[10px] uppercase font-bold text-blue-200">Issues Resolved</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
-                      <AlertTriangle size={20} className="text-amber-400" />
-                    </div>
-                    <div>
-                      <div className="text-2xl font-black text-white">24h</div>
-                      <div className="text-[10px] uppercase font-bold text-blue-200">Avg. Response Time</div>
-                    </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">Report Filed</h4>
+                    <p className="text-blue-200/80 text-xs leading-relaxed max-w-[200px]">
+                      Instant ID generation & AI-based categorization routed to the correct department.
+                    </p>
                   </div>
                 </div>
 
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                {/* Step 2 */}
+                <div className="relative flex gap-4 group">
+                  <div className="relative z-10 w-10 h-10 rounded-full bg-blue-600 border-4 border-[#1e3a8a] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 delay-100">
+                    <Navigation size={18} className="text-blue-200" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">Officer On-Site</h4>
+                    <p className="text-blue-200/80 text-xs leading-relaxed max-w-[200px]">
+                      Field officer dispatched to the geotagged location for verification.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="relative flex gap-4 group">
+                  <div className="relative z-10 w-10 h-10 rounded-full bg-emerald-500 border-4 border-[#1e3a8a] flex items-center justify-center shadow-lg shadow-emerald-900/50 group-hover:scale-110 transition-transform duration-300 delay-200">
+                    <CheckCircle size={18} className="text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">Resolution</h4>
+                    <p className="text-blue-200/80 text-xs leading-relaxed max-w-[200px]">
+                      Issue resolved with photo evidence & updated status on your dashboard.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

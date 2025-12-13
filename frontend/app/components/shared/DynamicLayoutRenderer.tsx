@@ -14,8 +14,8 @@ export default function DynamicLayoutRenderer({
   const isDashboardPage = pathname.includes("/dashboard");
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
-  // Hide header ONLY on dashboard pages
-  const shouldHideHeader = isDashboardPage;
+  // Hide header ONLY on dashboard pages and Help pages (since Help uses Sidebar layout)
+  const shouldHideHeader = isDashboardPage || pathname.includes("/help");
 
   // Hide footer on dashboard AND map pages
   const shouldHideFooter = isDashboardPage || isMapPage;

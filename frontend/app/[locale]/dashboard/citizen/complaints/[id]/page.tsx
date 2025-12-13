@@ -54,14 +54,14 @@ export default function ComplaintDetailPage() {
   if (error || !complaint) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 shadow-xl max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
             <AlertCircle className="text-red-600" size={32} />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Error</h2>
           <p className="text-slate-600 mb-6">{error || "Complaint not found"}</p>
           <Link href="/dashboard/citizen">
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+            <button className="px-6 py-3 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition">
               Back to Dashboard
             </button>
           </Link>
@@ -72,54 +72,44 @@ export default function ComplaintDetailPage() {
 
   const statusColor =
     complaint.status?.toLowerCase() === "resolved"
-      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+      ? "bg-emerald-50 text-emerald-900 border-emerald-200"
       : complaint.status?.toLowerCase() === "in_progress"
-      ? "bg-blue-100 text-blue-700 border-blue-200"
-      : "bg-orange-100 text-orange-700 border-orange-200";
+        ? "bg-blue-50 text-blue-900 border-blue-200"
+        : "bg-amber-50 text-amber-900 border-amber-200";
 
   const mediaItems = complaint.photoUrls && complaint.photoUrls.length > 0 ? complaint.photoUrls : complaint.photoUrl ? [complaint.photoUrl] : [];
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
-          transition={{ duration: 20, repeat: Infinity }}
-          className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-200 rounded-full blur-[120px] opacity-40"
-        />
-      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 lg:pt-28">
         {/* Back Button */}
         <Link href="/dashboard/citizen">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="mb-4 lg:mb-6 flex items-center gap-2 px-4 py-2.5 bg-white/70 backdrop-blur-md rounded-xl text-slate-700 font-bold hover:bg-white transition shadow-sm text-sm"
+          <button
+            className="mb-6 flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-600 font-bold hover:bg-slate-50 hover:text-[#1e3a8a] transition shadow-sm text-sm"
           >
-            <ArrowLeft size={18} /> Back to Dashboard
-          </motion.button>
+            <ArrowLeft size={16} /> Back to Dashboard
+          </button>
         </Link>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Images & Map */}
           <div className="lg:col-span-2 space-y-6">
             {/* Media */}
             {mediaItems.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
+                className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
               >
-                <h3 className="text-base lg:text-lg font-bold text-slate-900 mb-3 lg:mb-4 flex items-center gap-2">
-                  <CheckCircle size={18} className="text-emerald-500" />
-                  Evidence ({mediaItems.length})
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <CheckCircle size={14} className="text-[#1e3a8a]" />
+                  Evidence Gallery ({mediaItems.length})
                 </h3>
 
                 {/* Main Media */}
-                <div className="relative rounded-xl lg:rounded-2xl overflow-hidden shadow-lg mb-3 lg:mb-4 bg-slate-100">
+                <div className="relative rounded-lg overflow-hidden border border-slate-200 mb-4 bg-slate-100">
                   {(() => {
                     const media = mediaItems[selectedMediaIndex];
                     const isVideo = /\.(mp4|webm|ogg)$/i.test(media);
@@ -128,7 +118,7 @@ export default function ComplaintDetailPage() {
                         <video
                           src={media}
                           controls
-                          className="w-full h-64 lg:h-96 bg-black object-contain"
+                          className="w-full h-64 lg:h-[400px] bg-black object-contain"
                         />
                       );
                     }
@@ -136,7 +126,7 @@ export default function ComplaintDetailPage() {
                       <img
                         src={media}
                         alt={`Evidence ${selectedMediaIndex + 1}`}
-                        className="w-full h-64 lg:h-96 object-contain"
+                        className="w-full h-64 lg:h-[400px] object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = `https://placehold.co/800x600/e2e8f0/64748b?text=Media+${selectedMediaIndex + 1}`;
                         }}
@@ -144,7 +134,7 @@ export default function ComplaintDetailPage() {
                     );
                   })()}
                   {mediaItems.length > 1 && (
-                    <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    <div className="absolute top-4 right-4 bg-black/80 text-white px-3 py-1 rounded text-xs font-bold">
                       {selectedMediaIndex + 1} / {mediaItems.length}
                     </div>
                   )}
@@ -152,32 +142,31 @@ export default function ComplaintDetailPage() {
 
                 {/* Thumbnail Grid */}
                 {mediaItems.length > 1 && (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 lg:gap-3">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                     {mediaItems.map((img, index) => {
                       const isVideo = /\.(mp4|webm|ogg)$/i.test(img);
                       return (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedMediaIndex(index)}
-                        className={`relative rounded-lg lg:rounded-xl overflow-hidden border-2 transition-all ${
-                          selectedMediaIndex === index
-                            ? "border-blue-500 shadow-lg scale-105"
-                            : "border-transparent hover:border-slate-300"
-                        }`}
-                      >
-                        {isVideo ? (
-                          <video src={img} className="w-full h-16 lg:h-20 object-cover bg-black" />
-                        ) : (
-                          <img
-                            src={img}
-                            alt={`Thumbnail ${index + 1}`}
-                            className="w-full h-16 lg:h-20 object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = `https://placehold.co/200/e2e8f0/64748b?text=${index + 1}`;
-                            }}
-                          />
-                        )}
-                      </button>
+                        <button
+                          key={index}
+                          onClick={() => setSelectedMediaIndex(index)}
+                          className={`relative rounded-md overflow-hidden border-2 transition-all aspect-square ${selectedMediaIndex === index
+                              ? "border-[#1e3a8a] ring-1 ring-[#1e3a8a]"
+                              : "border-slate-100 hover:border-slate-300"
+                            }`}
+                        >
+                          {isVideo ? (
+                            <video src={img} className="w-full h-full object-cover bg-slate-900" />
+                          ) : (
+                            <img
+                              src={img}
+                              alt={`Thumbnail ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://placehold.co/200/e2e8f0/64748b?text=${index + 1}`;
+                              }}
+                            />
+                          )}
+                        </button>
                       );
                     })}
                   </div>
@@ -187,24 +176,24 @@ export default function ComplaintDetailPage() {
 
             {/* Map */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
+              className="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
             >
-              <div className="flex items-center justify-between mb-3 lg:mb-4">
-                <h3 className="text-base lg:text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <MapPin size={18} className="text-blue-500" />
-                  Location
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <MapPin size={14} className="text-[#1e3a8a]" />
+                  Geolocated Data
                 </h3>
                 <Link href={`/map?complaintId=${complaint.id}`} target="_blank">
-                  <button className="flex items-center gap-1 text-xs lg:text-sm text-blue-600 font-bold hover:underline">
-                    View on Main Map <ExternalLink size={12} />
+                  <button className="flex items-center gap-1 text-xs text-[#1e3a8a] font-bold hover:underline uppercase tracking-wide">
+                    View Full Map <ExternalLink size={12} />
                   </button>
                 </Link>
               </div>
 
-              <div className="rounded-xl lg:rounded-2xl overflow-hidden shadow-lg h-48 lg:h-64 bg-slate-100">
+              <div className="rounded-lg overflow-hidden border border-slate-200 h-48 lg:h-64 bg-slate-100 shadow-inner">
                 {complaint.lat && complaint.lng ? (
                   <MiniMap lat={complaint.lat} lng={complaint.lng} />
                 ) : (
@@ -214,92 +203,86 @@ export default function ComplaintDetailPage() {
                 )}
               </div>
 
-              <div className="mt-3 lg:mt-4 text-xs lg:text-sm text-slate-600 font-mono bg-slate-50 p-2.5 lg:p-3 rounded-lg lg:rounded-xl">
-                <span className="font-bold">Coordinates:</span> {complaint.lat?.toFixed(6)}, {complaint.lng?.toFixed(6)}
+              <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 font-mono bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <MapPin size={12} />
+                <span className="font-bold text-slate-700">Coordinates:</span>
+                {complaint.lat?.toFixed(6)}, {complaint.lng?.toFixed(6)}
               </div>
             </motion.div>
 
-            {/* Voting Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
-            >
+            {/* Voting Section - Wrapped */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <CheckCircle size={14} className="text-[#1e3a8a]" /> Community Consensus
+              </h3>
               <ComplaintVoting complaintId={complaint.id} />
-            </motion.div>
+            </div>
 
-            {/* Comments Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
-            >
+            {/* Comments Section - Wrapped */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <EnhancedComplaintComments complaintId={complaint.id} />
-            </motion.div>
+            </div>
           </div>
 
           {/* Right Column - Details */}
           <div className="space-y-6">
             <ShareBar title={`Complaint #${complaint.id}`} summary={complaint.title} />
+
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white/70 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-xl border border-white/60"
+              className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#1e3a8a]"
             >
-              <div className="space-y-3 lg:space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${statusColor} uppercase`}>
-                    {complaint.status}
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Complaint Status</h4>
+                  <span className={`inline-block px-3 py-1 rounded text-xs font-bold border uppercase tracking-wide ${statusColor}`}>
+                    {complaint.status?.replace('_', ' ')}
                   </span>
                 </div>
 
-                <h1 className="text-xl lg:text-2xl font-extrabold text-slate-900 leading-tight">{complaint.title}</h1>
-
-                <div className="flex items-center gap-2">
-                  <div className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-lg border text-xs lg:text-sm ${
-                    complaint.severity >= 4
+                <div>
+                  <h1 className="text-xl font-bold text-slate-900 leading-snug mb-2">{complaint.title}</h1>
+                  <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-bold uppercase ${complaint.severity >= 4
                       ? "bg-red-50 text-red-700 border-red-200"
-                      : "bg-yellow-50 text-yellow-700 border-yellow-200"
-                  }`}>
-                    <AlertCircle size={14} />
-                    <span className="font-bold">Severity: {complaint.severity}/5</span>
+                      : complaint.severity >= 3 ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-blue-50 text-blue-700 border-blue-200"
+                    }`}>
+                    <AlertCircle size={12} />
+                    Severity {complaint.severity}/5
                   </div>
                 </div>
 
-                <div className="pt-3 lg:pt-4 border-t border-slate-200">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Description</h4>
-                  <p className="text-slate-700 leading-relaxed text-sm lg:text-base">{complaint.description}</p>
+                <div className="pt-6 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Detailed Description</h4>
+                  <p className="text-slate-700 text-sm leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">{complaint.description}</p>
                 </div>
 
-                <div className="pt-3 lg:pt-4 border-t border-slate-200 space-y-2 lg:space-y-3">
+                <div className="pt-6 border-t border-slate-100 space-y-4">
                   {complaint.userFullName && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <User size={16} className="text-slate-400" />
-                      <span className="text-slate-600">Reported by:</span>
-                      <span className="font-bold text-slate-900">{complaint.userFullName}</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500 font-medium">Reported by</span>
+                      <div className="flex items-center gap-2 font-bold text-slate-900">
+                        <User size={14} className="text-slate-400" /> {complaint.userFullName}
+                      </div>
                     </div>
                   )}
 
                   {complaint.createdAt && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar size={16} className="text-slate-400" />
-                      <span className="text-slate-600">Created:</span>
-                      <span className="font-bold text-slate-900">
-                        {new Date(complaint.createdAt).toLocaleDateString()}
-                      </span>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500 font-medium">Date Filed</span>
+                      <div className="flex items-center gap-2 font-bold text-slate-900">
+                        <Calendar size={14} className="text-slate-400" /> {new Date(complaint.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
                   )}
 
                   {complaint.resolvedAt && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle size={16} className="text-emerald-500" />
-                      <span className="text-slate-600">Resolved:</span>
-                      <span className="font-bold text-slate-900">
-                        {new Date(complaint.resolvedAt).toLocaleDateString()}
-                      </span>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500 font-medium">Resolution Date</span>
+                      <div className="flex items-center gap-2 font-bold text-emerald-700">
+                        <CheckCircle size={14} className="text-emerald-500" /> {new Date(complaint.resolvedAt).toLocaleDateString()}
+                      </div>
                     </div>
                   )}
                 </div>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from "framer-motion";
 import { fetchAdminDashboard, AdminDashboardData, Token } from "@/lib/api/api";
-import { BarChart3, Activity, MapPin, RefreshCcw } from 'lucide-react';
+import { BarChart3, Activity, MapPin, RefreshCcw, ArrowRight, Construction } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
 
@@ -31,9 +31,9 @@ export default function AdminProjectsPage() {
   };
 
   useEffect(() => {
-    if (!Token.get()) { 
-      router.push("/login"); 
-      return; 
+    if (!Token.get()) {
+      router.push("/login");
+      return;
     }
     loadData();
   }, [router]);
@@ -41,9 +41,9 @@ export default function AdminProjectsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium">Loading projects...</p>
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
+          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Projects...</p>
         </div>
       </div>
     );
@@ -52,9 +52,9 @@ export default function AdminProjectsPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button onClick={loadData} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+        <div className="text-center p-8 bg-white rounded-xl shadow-md border border-slate-200">
+          <p className="text-red-600 mb-4 font-bold">{error}</p>
+          <button onClick={loadData} className="px-6 py-2 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition">
             Retry
           </button>
         </div>
@@ -65,42 +65,48 @@ export default function AdminProjectsPage() {
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-      
+
       <Sidebar />
 
-      <main className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300">
-        {/* Projects Header */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <BarChart3 className="text-blue-600" size={24} />
+      <main className="flex-1 px-4 sm:px-6 lg:px-10 pb-12 pt-32 lg:pt-36 relative z-10 overflow-y-auto w-full transition-all duration-300">
+
+        {/* Consistent Header Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] to-[#f97316]"></div>
+          <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-[#1e3a8a] rounded-xl flex items-center justify-center shadow-md">
+                <Construction className="text-white" size={28} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Projects Management</h1>
-                <p className="text-slate-600">Monitor and manage all ongoing projects</p>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Projects Management</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Oversee Infrastructure Development</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Link href="/projects/new">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-                  New Project
+                <button className="px-5 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm">
+                  + New Project
                 </button>
               </Link>
-              <Link href="/projects">
-                <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
-                  View All
-                </button>
-              </Link>
-              <button onClick={loadData} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
-                <RefreshCcw size={16} />
+              <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
+                <RefreshCcw size={18} />
               </button>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <GlassCard title="Project Status Overview" icon={Activity}>
+
+          {/* Project Status Overview */}
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+              <div className="w-10 h-10 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center">
+                <Activity size={20} />
+              </div>
+              <h2 className="text-lg font-black text-[#111827] uppercase tracking-tight">Status Overview</h2>
+            </div>
+
             <div className="space-y-4">
               {data?.projectStatusBreakdown?.map((entry, i) => {
                 const statusSlug = entry.status.toLowerCase().replace(/ /g, '-');
@@ -108,49 +114,57 @@ export default function AdminProjectsPage() {
                   <Link key={i} href={`/projects/status/${statusSlug}`}>
                     <div className="group cursor-pointer hover:bg-slate-50 p-4 rounded-xl transition-all border border-slate-100 hover:border-blue-200">
                       <div className="flex justify-between items-center mb-3">
-                        <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition">{entry.status}</span>
-                        <span className="text-2xl font-bold text-slate-900">{entry.projectCount}</span>
+                        <span className="font-bold text-slate-800 uppercase tracking-wide text-sm group-hover:text-[#1e3a8a] transition">{entry.status}</span>
+                        <span className="text-2xl font-black text-slate-900">{entry.projectCount}</span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-2">
+                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-2">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${(entry.projectCount / (data.totalProjects || 1)) * 100}%` }}
-                          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full group-hover:from-blue-600 group-hover:to-indigo-600 transition"
+                          className="h-full bg-[#1e3a8a] rounded-full"
                         />
                       </div>
-                      <p className="text-sm text-slate-600">Budget: ₹{Number(entry.totalBudget).toLocaleString()}</p>
+                      <div className="flex justify-between items-center text-xs text-slate-500 font-medium">
+                        <span>Total Budget</span>
+                        <span>₹{Number(entry.totalBudget).toLocaleString()}</span>
+                      </div>
                     </div>
                   </Link>
                 );
               })}
               {!data?.projectStatusBreakdown?.length && (
-                <div className="text-center py-8 text-slate-500">
+                <div className="text-center py-12 text-slate-400">
                   <BarChart3 className="mx-auto mb-2 opacity-50" size={32} />
-                  <p>No project data found.</p>
+                  <p className="font-medium text-sm">No project data found.</p>
                 </div>
               )}
             </div>
-          </GlassCard>
+          </div>
 
-          <GlassCard title="Ward Activity Hotspots" icon={MapPin}>
+          {/* Ward Activity Hotspots */}
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+              <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
+                <MapPin size={20} />
+              </div>
+              <h2 className="text-lg font-black text-[#111827] uppercase tracking-tight">Ward Hotspots</h2>
+            </div>
             <div className="space-y-4">
               {data?.wardComplaintHeatmap?.slice(0, 5).map((ward, i) => (
                 <Link key={i} href={`/map?ward=${ward.wardName}`}>
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-slate-50 transition cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <MapPin className="text-blue-600" size={16} />
-                      </div>
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-[#1e3a8a] hover:bg-slate-50 transition cursor-pointer group">
+                    <div className="flex items-center gap-4">
+                      <div className="font-bold text-slate-400 text-sm">#{i + 1}</div>
                       <div>
-                        <p className="font-semibold text-slate-900 group-hover:text-blue-600 transition">{ward.wardName}</p>
-                        <p className="text-xs text-slate-500">{ward.zone} Zone</p>
+                        <p className="font-bold text-slate-900 group-hover:text-[#1e3a8a] transition">{ward.wardName}</p>
+                        <p className="text-xs text-slate-500 font-bold uppercase">{ward.zone} Zone</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-md border border-red-100">
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100 uppercase">
                         {ward.complaintCount} Issues
                       </span>
-                      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
+                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 uppercase">
                         {ward.projectCount} Projects
                       </span>
                     </div>
@@ -158,29 +172,15 @@ export default function AdminProjectsPage() {
                 </Link>
               ))}
               {!data?.wardComplaintHeatmap?.length && (
-                <div className="text-center py-8 text-slate-500">
+                <div className="text-center py-12 text-slate-400">
                   <MapPin className="mx-auto mb-2 opacity-50" size={32} />
-                  <p>No ward activity data.</p>
+                  <p className="font-medium text-sm">No ward activity data available.</p>
                 </div>
               )}
             </div>
-          </GlassCard>
+          </div>
         </div>
       </main>
-    </div>
-  );
-}
-
-function GlassCard({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
-  return (
-    <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon className="text-blue-600" size={20} />
-        </div>
-        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      </div>
-      {children}
     </div>
   );
 }

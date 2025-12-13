@@ -1,53 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, BarChart3, Users, FileText, Settings, CheckCircle, Clock, Star, ArrowRight, HelpCircle, Shield, Briefcase, MapPin, AlertTriangle } from 'lucide-react';
+import { ChevronRight, BarChart3, Users, FileText, Settings, CheckCircle, Clock, Star, ArrowRight, HelpCircle, Shield, Briefcase, MapPin, AlertTriangle, TrendingUp } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { Token, fetchCurrentUserProfile, UserStore } from "@/lib/api/api";
+import { useRouter } from "next/navigation";
 
 export default function AdminGuidePage() {
   const { collapsed } = useSidebar();
   const [activeSection, setActiveSection] = useState<'overview' | 'management' | 'monitoring' | 'contractors' | 'analytics'>('overview');
+  const [authorized, setAuthorized] = useState(false);
+  const router = useRouter();
+
+
+  useEffect(() => {
+    const checkRole = async () => {
+      let role = "citizen";
+      const cached = UserStore.get();
+      if (cached) {
+        role = deriveRole(cached.roles);
+      } else if (Token.get()) {
+        try {
+          const profile = await fetchCurrentUserProfile();
+          role = deriveRole(profile.roles);
+        } catch (e) { console.error(e); }
+      }
+
+      if (role !== "admin") {
+        router.replace("/help"); // Redirect unauthorized
+      } else {
+        setAuthorized(true);
+      }
+    };
+    checkRole();
+  }, [router]);
+
+  const deriveRole = (roles?: string[]) => {
+    if (!roles) return "citizen";
+    if (roles.includes("ADMIN") || roles.includes("SUPER_ADMIN")) return "admin";
+    if (roles.includes("CONTRACTOR")) return "contractor";
+    return "citizen";
+  }
+
+  if (!authorized) return null; // Or a loading spinner
 
   const sections = [
     { id: 'overview', title: 'Admin Overview', icon: HelpCircle },
     { id: 'management', title: 'Issue Management', icon: FileText },
     { id: 'monitoring', title: 'System Monitoring', icon: BarChart3 },
-    { id: 'contractors', title: 'Contractor Management', icon: Users },
-    { id: 'analytics', title: 'Analytics & Reports', icon: Star },
+    { id: 'contractors', title: 'Contractors', icon: Users },
+    { id: 'analytics', title: 'Analytics', icon: TrendingUp },
   ];
 
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
-      
+
       <Sidebar />
 
-      <main className="flex-1 px-6 pb-12 pt-24 lg:px-10 lg:pb-16 lg:pt-28 relative z-10 overflow-y-auto w-full transition-all duration-300">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8 mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Shield className="text-blue-600" size={24} />
+      <main className="flex-1 px-4 sm:px-6 lg:px-10 pb-12 pt-32 lg:pt-36 relative z-10 overflow-y-auto w-full transition-all duration-300">
+        {/* Header - Aligned to Citizen Dashboard Style */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] to-[#f97316]"></div>
+          <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-[#1e3a8a] rounded-xl flex items-center justify-center shadow-md">
+                <Shield className="text-white" size={28} />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Admin User Guide</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">System Administration</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">Admin User Guide</h1>
-              <p className="text-slate-600">Complete guide for managing the municipal system and overseeing operations</p>
-            </div>
+            <Link href="/help" className="text-sm font-bold text-[#1e3a8a] hover:underline flex items-center gap-1 uppercase tracking-wide">
+              <ArrowRight className="rotate-180" size={16} /> Back to Help Center
+            </Link>
           </div>
-          
+
           {/* Navigation */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mt-8 border-t border-slate-100 pt-6">
             {sections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
-                  activeSection === section.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wide transition-all ${activeSection === section.id
+                    ? 'bg-[#1e3a8a] text-white shadow-md'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
               >
                 <section.icon size={16} />
                 {section.title}
@@ -59,82 +100,55 @@ export default function AdminGuidePage() {
         {/* Overview Section */}
         {activeSection === 'overview' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Admin Dashboard Overview</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-900">Core Responsibilities</h3>
-                  <ul className="space-y-3">
+            <div className="bg-white rounded-xl shadow-md border border-slate-200 p-6 lg:p-8">
+              <h2 className="text-xl font-black text-[#111827] mb-6 uppercase tracking-wide border-b border-slate-100 pb-4">Welcome to Administration</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-bold text-[#1e3a8a]">Primary Functions</h3>
+                  <ul className="space-y-4">
                     <li className="flex items-start gap-3">
-                      <CheckCircle className="text-emerald-600 mt-0.5" size={16} />
-                      <span className="text-slate-700">Review and prioritize citizen reports</span>
+                      <div className="mt-1 p-1 bg-emerald-100 rounded-full text-emerald-700"><CheckCircle size={14} /></div>
+                      <div>
+                        <strong className="block text-slate-900 text-sm mb-1">Issue Resolution</strong>
+                        <span className="text-slate-600 text-sm">Review incoming citizen reports, verify severity, and assign them to qualified contractors.</span>
+                      </div>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle className="text-emerald-600 mt-0.5" size={16} />
-                      <span className="text-slate-700">Assign issues to appropriate contractors</span>
+                      <div className="mt-1 p-1 bg-emerald-100 rounded-full text-emerald-700"><CheckCircle size={14} /></div>
+                      <div>
+                        <strong className="block text-slate-900 text-sm mb-1">Resource Allocation</strong>
+                        <span className="text-slate-600 text-sm">Manage municipal budgets, approve tenders, and oversee project expenditures.</span>
+                      </div>
                     </li>
                     <li className="flex items-start gap-3">
-                      <CheckCircle className="text-emerald-600 mt-0.5" size={16} />
-                      <span className="text-slate-700">Monitor project progress and budgets</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="text-emerald-600 mt-0.5" size={16} />
-                      <span className="text-slate-700">Generate reports and analytics</span>
+                      <div className="mt-1 p-1 bg-emerald-100 rounded-full text-emerald-700"><CheckCircle size={14} /></div>
+                      <div>
+                        <strong className="block text-slate-900 text-sm mb-1">System Oversight</strong>
+                        <span className="text-slate-600 text-sm">Monitor overall system health, contractor performance ratings, and response time metrics.</span>
+                      </div>
                     </li>
                   </ul>
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-900">Key Features</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                      <BarChart3 className="text-blue-600" size={20} />
-                      <span className="font-medium text-slate-900">Real-time Dashboard</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
-                      <Users className="text-emerald-600" size={20} />
-                      <span className="font-medium text-slate-900">Contractor Management</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                      <FileText className="text-purple-600" size={20} />
-                      <span className="font-medium text-slate-900">Issue Tracking</span>
-                    </div>
+                <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
+                  <h3 className="text-lg font-bold text-[#111827] mb-4 uppercase tracking-wide">Quick Shortcuts</h3>
+                  <div className="space-y-3">
+                    <Link href="/dashboard/admin#complaints" className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:border-[#1e3a8a] hover:shadow-md transition group">
+                      <div className="p-2 bg-blue-50 text-[#1e3a8a] rounded-lg group-hover:bg-[#1e3a8a] group-hover:text-white transition-colors"><FileText size={20} /></div>
+                      <span className="font-bold text-slate-700 group-hover:text-[#1e3a8a] transition-colors">Pending Issues</span>
+                      <ArrowRight className="text-slate-300 ml-auto group-hover:text-[#1e3a8a]" size={16} />
+                    </Link>
+                    <Link href="/dashboard/admin#contractors" className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:border-emerald-600 hover:shadow-md transition group">
+                      <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors"><Users size={20} /></div>
+                      <span className="font-bold text-slate-700 group-hover:text-emerald-600 transition-colors">Contractor Stats</span>
+                      <ArrowRight className="text-slate-300 ml-auto group-hover:text-emerald-600" size={16} />
+                    </Link>
+                    <Link href="/dashboard/admin#projects" className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:border-purple-600 hover:shadow-md transition group">
+                      <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors"><Briefcase size={20} /></div>
+                      <span className="font-bold text-slate-700 group-hover:text-purple-600 transition-colors">Active Projects</span>
+                      <ArrowRight className="text-slate-300 ml-auto group-hover:text-purple-600" size={16} />
+                    </Link>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <AlertTriangle className="text-blue-600" size={24} />
-                  <h3 className="text-lg font-semibold text-slate-900">Issue Management</h3>
-                </div>
-                <p className="text-slate-700 text-sm mb-4">Review, prioritize, and assign citizen reports to contractors</p>
-                <Link href="/dashboard/admin#complaints" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                  Manage Issues →
-                </Link>
-              </div>
-
-              <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <Briefcase className="text-emerald-600" size={24} />
-                  <h3 className="text-lg font-semibold text-slate-900">Project Oversight</h3>
-                </div>
-                <p className="text-slate-700 text-sm mb-4">Monitor active projects, budgets, and contractor performance</p>
-                <Link href="/dashboard/admin#projects" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-                  View Projects →
-                </Link>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <BarChart3 className="text-purple-600" size={24} />
-                  <h3 className="text-lg font-semibold text-slate-900">Analytics</h3>
-                </div>
-                <p className="text-slate-700 text-sm mb-4">Generate reports and analyze system performance metrics</p>
-                <Link href="/dashboard/admin" className="text-purple-600 hover:text-purple-700 font-medium text-sm">
-                  View Analytics →
-                </Link>
               </div>
             </div>
           </div>
@@ -143,70 +157,40 @@ export default function AdminGuidePage() {
         {/* Management Section */}
         {activeSection === 'management' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Issue Management Workflow</h2>
-              
-              <div className="space-y-6">
-                <div className="border-l-4 border-blue-500 pl-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-3">Step 1: Review New Reports</h3>
-                  <p className="text-slate-700 mb-3">Monitor incoming citizen reports and assess their validity and priority.</p>
-                  <ul className="space-y-2 text-slate-600">
-                    <li>• Check report details and evidence</li>
-                    <li>• Verify location accuracy</li>
-                    <li>• Assess severity and urgency</li>
-                    <li>• Flag duplicate or invalid reports</li>
-                  </ul>
+            <div className="bg-white rounded-xl shadow-md border border-slate-200 p-6 lg:p-8">
+              <h2 className="text-xl font-black text-[#111827] mb-8 uppercase tracking-wide border-b border-slate-100 pb-4">Issue Management Workflow</h2>
+
+              <div className="relative border-l-2 border-slate-200 ml-4 space-y-12">
+                <div className="relative pl-8">
+                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#1e3a8a] border-4 border-slate-50"></div>
+                  <h3 className="text-lg font-bold text-[#1e3a8a] mb-2 uppercase tracking-wide">Step 1: Triage & Verification</h3>
+                  <p className="text-slate-600 text-sm mb-4">Validate incoming citizen reports. Check evidence media and geolocation.</p>
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-800 flex items-center gap-2">
+                    <AlertTriangle size={16} />
+                    <strong>Action:</strong> Mark invalid/duplicate reports immediately to declutter the queue.
+                  </div>
                 </div>
 
-                <div className="border-l-4 border-emerald-500 pl-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-3">Step 2: Categorize & Prioritize</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                      <h4 className="font-semibold text-red-900 mb-2">High Priority</h4>
-                      <p className="text-sm text-red-700">Safety hazards, infrastructure failures, emergency repairs</p>
+                <div className="relative pl-8">
+                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-600 border-4 border-slate-50"></div>
+                  <h3 className="text-lg font-bold text-[#111827] mb-2 uppercase tracking-wide">Step 2: Prioritization & Budgeting</h3>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                    <div className="flex gap-3">
+                      <CheckCircle size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-slate-700"><strong>Severity High:</strong> 24-48hr TAT. Safety critical (e.g. open manhole).</p>
                     </div>
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <h4 className="font-semibold text-yellow-900 mb-2">Medium Priority</h4>
-                      <p className="text-sm text-yellow-700">Maintenance issues, quality of life improvements</p>
-                    </div>
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <h4 className="font-semibold text-green-900 mb-2">Low Priority</h4>
-                      <p className="text-sm text-green-700">Cosmetic issues, long-term improvements</p>
-                    </div>
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <h4 className="font-semibold text-blue-900 mb-2">Scheduled</h4>
-                      <p className="text-sm text-blue-700">Routine maintenance, planned upgrades</p>
+                    <div className="flex gap-3">
+                      <CheckCircle size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-slate-700"><strong>Severity Low:</strong> Scheduled maintenance. Budget approval required.</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="border-l-4 border-purple-500 pl-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-3">Step 3: Assign to Contractors</h3>
-                  <p className="text-slate-700 mb-3">Match issues with qualified contractors based on expertise and availability.</p>
-                  <ul className="space-y-2 text-slate-600">
-                    <li>• Review contractor specializations</li>
-                    <li>• Check current workload and capacity</li>
-                    <li>• Consider location and travel time</li>
-                    <li>• Set deadlines and budget constraints</li>
-                  </ul>
-                </div>
-
-                <div className="border-l-4 border-orange-500 pl-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-3">Step 4: Monitor Progress</h3>
-                  <p className="text-slate-700 mb-3">Track project status and ensure timely completion.</p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-2">
-                      <Clock className="text-orange-600" size={16} />
-                      <span>Track deadlines</span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <CheckCircle className="text-emerald-600" size={16} />
-                      <span>Verify completion</span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <Star className="text-purple-600" size={16} />
-                      <span>Rate performance</span>
-                    </span>
+                <div className="relative pl-8">
+                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-900 border-4 border-slate-50"></div>
+                  <h3 className="text-lg font-bold text-[#111827] mb-2 uppercase tracking-wide">Step 3: Tender & Assignment</h3>
+                  <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <p className="text-xs text-slate-500">Create a tender for the work or directly assign to an empanelled contractor if urgent. Monitor the contractor's acceptance.</p>
                   </div>
                 </div>
               </div>
@@ -217,66 +201,37 @@ export default function AdminGuidePage() {
         {/* Monitoring Section */}
         {activeSection === 'monitoring' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">System Monitoring</h2>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Key Metrics to Monitor</h3>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center gap-3 mb-2">
-                        <BarChart3 className="text-blue-600" size={20} />
-                        <h4 className="font-semibold text-slate-900">Report Volume</h4>
-                      </div>
-                      <p className="text-sm text-slate-700">Track daily/weekly report submissions and identify trends</p>
+            <div className="bg-white rounded-xl shadow-md border border-slate-200 p-6 lg:p-8">
+              <h2 className="text-xl font-black text-[#111827] mb-6 uppercase tracking-wide border-b border-slate-100 pb-4">Real-Time System Monitoring</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BarChart3 className="text-blue-600" size={20} />
+                      <h3 className="font-bold text-[#111827] uppercase tracking-wide text-sm">Volume Metrics</h3>
                     </div>
-                    
-                    <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CheckCircle className="text-emerald-600" size={20} />
-                        <h4 className="font-semibold text-slate-900">Resolution Rate</h4>
-                      </div>
-                      <p className="text-sm text-slate-700">Monitor percentage of issues resolved within target timeframes</p>
+                    <p className="text-sm text-slate-600">Track the daily/weekly volume of incoming reports to identify spikes in specific wards.</p>
+                  </div>
+                  <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Clock className="text-orange-600" size={20} />
+                      <h3 className="font-bold text-[#111827] uppercase tracking-wide text-sm">Resolution Time</h3>
                     </div>
-                    
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Users className="text-purple-600" size={20} />
-                        <h4 className="font-semibold text-slate-900">Contractor Performance</h4>
-                      </div>
-                      <p className="text-sm text-slate-700">Evaluate contractor efficiency, quality, and reliability</p>
-                    </div>
+                    <p className="text-sm text-slate-600">Monitor adherence to SLA. Alerts are triggered when resolution time exceeds standard limits.</p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Alert System</h3>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <AlertTriangle className="text-red-600" size={16} />
-                        <span className="font-semibold text-red-900">Critical Issues</span>
-                      </div>
-                      <p className="text-sm text-red-700">High-severity reports requiring immediate attention</p>
-                    </div>
-                    
-                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Clock className="text-yellow-600" size={16} />
-                        <span className="font-semibold text-yellow-900">Overdue Projects</span>
-                      </div>
-                      <p className="text-sm text-yellow-700">Projects exceeding their deadline</p>
-                    </div>
-                    
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <BarChart3 className="text-blue-600" size={16} />
-                        <span className="font-semibold text-blue-900">Budget Alerts</span>
-                      </div>
-                      <p className="text-sm text-blue-700">Projects approaching or exceeding budget limits</p>
-                    </div>
-                  </div>
+                <div className="p-5 bg-[#1f2937] border border-slate-700 rounded-xl text-white">
+                  <h3 className="font-bold text-white mb-4 uppercase tracking-wide text-sm flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-400" />
+                    Critical Alerts Logic
+                  </h3>
+                  <ul className="text-sm text-slate-300 space-y-3">
+                    <li className="flex gap-2"><span className="text-red-400">●</span> Rapid increase in "Water" complaints = Potential Pipeline Burst.</li>
+                    <li className="flex gap-2"><span className="text-red-400">●</span> Contractor inactivity &gt; 3 days on Active Project.</li>
+                    <li className="flex gap-2"><span className="text-red-400">●</span> Budget over-utilization warnings.</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -286,68 +241,24 @@ export default function AdminGuidePage() {
         {/* Contractors Section */}
         {activeSection === 'contractors' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Contractor Management</h2>
-              
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 bg-blue-50 rounded-2xl border border-blue-200">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Onboarding New Contractors</h3>
-                    <ul className="space-y-2 text-slate-700">
-                      <li>• Verify licenses and certifications</li>
-                      <li>• Review insurance coverage</li>
-                      <li>• Assess specialization areas</li>
-                      <li>• Set up system access and permissions</li>
-                      <li>• Establish communication protocols</li>
-                    </ul>
+            <div className="bg-white rounded-xl shadow-md border border-slate-200 p-6 lg:p-8">
+              <h2 className="text-xl font-black text-[#111827] mb-6 uppercase tracking-wide border-b border-slate-100 pb-4">Contractor Oversight</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 rounded-xl border border-slate-200 hover:shadow-lg transition bg-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Users size={20} /></div>
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Onboarding</h3>
                   </div>
-                  
-                  <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-200">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Performance Evaluation</h3>
-                    <ul className="space-y-2 text-slate-700">
-                      <li>• Track completion times</li>
-                      <li>• Monitor quality ratings</li>
-                      <li>• Review citizen feedback</li>
-                      <li>• Assess budget adherence</li>
-                      <li>• Evaluate communication effectiveness</li>
-                    </ul>
-                  </div>
+                  <p className="text-sm text-slate-600 mb-3">Verify licenses, insurance, and past performance history before enabling platform access.</p>
+                  <Link href="/contractors" className="text-xs font-bold text-emerald-600 uppercase tracking-wider hover:underline">Manage Contractors →</Link>
                 </div>
 
-                <div className="p-6 bg-purple-50 rounded-2xl border border-purple-200">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Contractor Categories</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-white rounded-lg border border-purple-300">
-                      <h4 className="font-semibold text-slate-900 mb-2">Infrastructure</h4>
-                      <p className="text-sm text-slate-600">Roads, bridges, utilities, drainage systems</p>
-                    </div>
-                    <div className="p-4 bg-white rounded-lg border border-purple-300">
-                      <h4 className="font-semibold text-slate-900 mb-2">Maintenance</h4>
-                      <p className="text-sm text-slate-600">Parks, lighting, signage, cleaning services</p>
-                    </div>
-                    <div className="p-4 bg-white rounded-lg border border-purple-300">
-                      <h4 className="font-semibold text-slate-900 mb-2">Emergency</h4>
-                      <p className="text-sm text-slate-600">24/7 response, safety hazards, urgent repairs</p>
-                    </div>
+                <div className="p-6 rounded-xl border border-slate-200 hover:shadow-lg transition bg-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Star size={20} /></div>
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Performance Review</h3>
                   </div>
-                </div>
-
-                <div className="p-6 bg-orange-50 rounded-2xl border border-orange-200">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Best Practices</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ul className="space-y-2 text-slate-700">
-                      <li>• Maintain diverse contractor pool</li>
-                      <li>• Regular performance reviews</li>
-                      <li>• Clear communication channels</li>
-                      <li>• Fair workload distribution</li>
-                    </ul>
-                    <ul className="space-y-2 text-slate-700">
-                      <li>• Competitive bidding processes</li>
-                      <li>• Quality assurance protocols</li>
-                      <li>• Timely payment processing</li>
-                      <li>• Continuous improvement feedback</li>
-                    </ul>
-                  </div>
+                  <p className="text-sm text-slate-600 mb-3">Contractors are rated automatically based on timeliness and quality. Use these ratings for future project allocations.</p>
                 </div>
               </div>
             </div>
@@ -357,71 +268,32 @@ export default function AdminGuidePage() {
         {/* Analytics Section */}
         {activeSection === 'analytics' && (
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 lg:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Analytics & Reporting</h2>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Report Types</h3>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <h4 className="font-semibold text-slate-900 mb-2">Operational Reports</h4>
-                      <ul className="text-sm text-slate-700 space-y-1">
-                        <li>• Daily/weekly activity summaries</li>
-                        <li>• Issue resolution statistics</li>
-                        <li>• Contractor performance metrics</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <h4 className="font-semibold text-slate-900 mb-2">Financial Reports</h4>
-                      <ul className="text-sm text-slate-700 space-y-1">
-                        <li>• Budget utilization analysis</li>
-                        <li>• Cost per resolution tracking</li>
-                        <li>• Contractor payment summaries</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                      <h4 className="font-semibold text-slate-900 mb-2">Strategic Reports</h4>
-                      <ul className="text-sm text-slate-700 space-y-1">
-                        <li>• Long-term trend analysis</li>
-                        <li>• Resource allocation insights</li>
-                        <li>• Community satisfaction metrics</li>
-                      </ul>
-                    </div>
+            <div className="bg-white rounded-xl shadow-md border border-slate-200 p-6 lg:p-8">
+              <h2 className="text-xl font-black text-[#111827] mb-6 uppercase tracking-wide border-b border-slate-100 pb-4">Reports & Data</h2>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-6 bg-blue-50 border border-blue-200 rounded-xl text-center">
+                    <h3 className="font-black text-slate-900 uppercase text-3xl mb-1">94%</h3>
+                    <p className="text-xs text-slate-600 font-bold uppercase">Resolution Efficiency</p>
+                  </div>
+                  <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+                    <h3 className="font-black text-slate-900 uppercase text-3xl mb-1">4.2/5</h3>
+                    <p className="text-xs text-slate-600 font-bold uppercase">Citizen Satisfaction</p>
+                  </div>
+                  <div className="p-6 bg-purple-50 border border-purple-200 rounded-xl text-center">
+                    <h3 className="font-black text-slate-900 uppercase text-3xl mb-1">Avg 3d</h3>
+                    <p className="text-xs text-slate-600 font-bold uppercase">Turnaround Time</p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Key Performance Indicators</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="font-medium text-slate-900">Average Resolution Time</span>
-                      <span className="text-blue-600 font-bold">3.2 days</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="font-medium text-slate-900">Citizen Satisfaction</span>
-                      <span className="text-emerald-600 font-bold">4.6/5.0</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="font-medium text-slate-900">Budget Efficiency</span>
-                      <span className="text-purple-600 font-bold">92%</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="font-medium text-slate-900">Contractor Reliability</span>
-                      <span className="text-orange-600 font-bold">88%</span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <h4 className="font-semibold text-slate-900 mb-2">Export Options</h4>
-                    <p className="text-sm text-slate-700 mb-3">Generate reports in multiple formats:</p>
-                    <div className="flex gap-2">
-                      <span className="px-2 py-1 bg-white rounded text-xs font-medium">PDF</span>
-                      <span className="px-2 py-1 bg-white rounded text-xs font-medium">Excel</span>
-                      <span className="px-2 py-1 bg-white rounded text-xs font-medium">CSV</span>
-                    </div>
+                <div className="p-6 border border-slate-200 rounded-xl bg-slate-50">
+                  <h4 className="font-bold text-slate-900 mb-2 uppercase tracking-wide text-sm flex items-center gap-2">
+                    <FileText size={16} /> Export Options
+                  </h4>
+                  <div className="flex gap-3">
+                    <button className="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-bold text-slate-700 hover:border-[#1e3a8a] hover:text-[#1e3a8a]">Download PDF Report</button>
+                    <button className="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-bold text-slate-700 hover:border-[#1e3a8a] hover:text-[#1e3a8a]">Export Raw CSV</button>
                   </div>
                 </div>
               </div>
