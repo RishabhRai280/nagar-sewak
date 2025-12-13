@@ -11,10 +11,10 @@ export default function Footer() {
 
   // Official Government Links for Footer
   const govLinks = [
-    { name: 'National Portal of India', href: 'https://india.gov.in' },
-    { name: 'Digital India', href: 'https://digitalindia.gov.in' },
-    { name: 'MyGov', href: 'https://mygov.in' },
-    { name: 'Data.gov.in', href: 'https://data.gov.in' },
+    { key: 'indiaGov', href: 'https://india.gov.in' },
+    { key: 'digitalIndia', href: 'https://digitalindia.gov.in' },
+    { key: 'myGov', href: 'https://mygov.in' },
+    { key: 'dataGov', href: 'https://data.gov.in' },
   ];
 
   return (
@@ -27,10 +27,10 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1">
             <div className="flex flex-col gap-2 mb-4">
               <span className="text-2xl font-bold text-white tracking-tight">NagarSewak</span>
-              <span className="text-xs uppercase tracking-widest text-slate-400">Citizen Engagement Portal</span>
+              <span className="text-xs uppercase tracking-widest text-slate-400">{t('brandSubtitle')}</span>
             </div>
             <p className="text-slate-400 leading-relaxed text-xs">
-              Empowering citizens with direct access to local governance, reporting, and civic tracking. A step towards transparent and efficient administration.
+              {t('description')}
             </p>
             <div className="flex gap-4 mt-6">
               <a href="#" className="text-slate-400 hover:text-white transition"><Twitter size={18} /></a>
@@ -41,7 +41,7 @@ export default function Footer() {
 
           {/* Column 2: Quick Links */}
           <div>
-            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">Quick Links</h3>
+            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">{t('quickLinks')}</h3>
             <ul className="space-y-2">
               <li><Link href="/" className="hover:text-blue-400 transition">{tNav('home')}</Link></li>
               <li><Link href="/map" className="hover:text-blue-400 transition">{tNav('map')}</Link></li>
@@ -52,12 +52,12 @@ export default function Footer() {
 
           {/* Column 3: Important External Links */}
           <div>
-            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">Government</h3>
+            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">{t('government')}</h3>
             <ul className="space-y-2">
               {govLinks.map(link => (
-                <li key={link.name}>
+                <li key={link.key}>
                   <a href={link.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-orange-400 transition">
-                    {link.name} <ExternalLink size={10} />
+                    {t(`govLinks.${link.key}`)} <ExternalLink size={10} />
                   </a>
                 </li>
               ))}
@@ -66,11 +66,11 @@ export default function Footer() {
 
           {/* Column 4: Contact */}
           <div>
-            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">Contact Us</h3>
+            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">{t('contactUs')}</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin size={16} className="text-orange-500 mt-0.5" />
-                <span>Ministry of Urban Affairs,<br />Nirman Bhawan, New Delhi</span>
+                <span className="whitespace-pre-line">{t('address')}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={16} className="text-orange-500" />
@@ -86,11 +86,11 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-slate-800 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
-          <p>© {currentYear} NagarSewak. All Content Owned by Government of India.</p>
+          <p>{t('copyright')} {t('allContentOwned')}</p>
           <div className="flex gap-4 mt-2 md:mt-0">
-            <Link href="#" className="hover:text-white transition">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white transition">Terms of Use</Link>
-            <Link href="#" className="hover:text-white transition">Accessibility Statement</Link>
+            <Link href="#" className="hover:text-white transition">{t('privacy')}</Link>
+            <Link href="#" className="hover:text-white transition">{t('terms')}</Link>
+            <Link href="#" className="hover:text-white transition">{t('accessibility')}</Link>
           </div>
         </div>
 

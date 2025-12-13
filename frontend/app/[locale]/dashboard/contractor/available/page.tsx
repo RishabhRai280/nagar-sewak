@@ -6,8 +6,10 @@ import { Token, fetchContractorDashboard, ContractorDashboardData } from "@/lib/
 import { Construction, AlertTriangle, RefreshCcw, Search, ChevronRight } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 export default function ContractorAvailablePage() {
+    const t = useTranslations('dashboard.contractor.availablePage');
     const router = useRouter();
     const { collapsed } = useSidebar();
     const [data, setData] = useState<ContractorDashboardData | null>(null);
@@ -62,7 +64,7 @@ export default function ContractorAvailablePage() {
             <div className="flex items-center justify-center min-h-screen bg-slate-50">
                 <div className="flex flex-col items-center gap-6">
                     <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
-                    <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Jobs...</p>
+                    <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">{t('loading')}</p>
                 </div>
             </div>
         );
@@ -97,8 +99,8 @@ export default function ContractorAvailablePage() {
                                 <Search size={28} />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Available Works</h1>
-                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Browse & Bid on Projects</p>
+                                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">{t('title')}</h1>
+                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{t('subtitle')}</p>
                             </div>
                         </div>
 
@@ -109,10 +111,10 @@ export default function ContractorAvailablePage() {
                                     onChange={(e) => setFilterSeverity(e.target.value ? Number(e.target.value) : null)}
                                     className="pl-4 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] uppercase cursor-pointer hover:bg-slate-100 transition appearance-none"
                                 >
-                                    <option value="">All Severity</option>
-                                    <option value="4">High Priority</option>
-                                    <option value="3">Medium Priority</option>
-                                    <option value="1">Low Priority</option>
+                                    <option value="">{t('filters.allSeverity')}</option>
+                                    <option value="4">{t('filters.high')}</option>
+                                    <option value="3">{t('filters.medium')}</option>
+                                    <option value="1">{t('filters.low')}</option>
                                 </select>
                                 <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" size={12} />
                             </div>
@@ -123,8 +125,8 @@ export default function ContractorAvailablePage() {
                                     onChange={(e) => setSortBy(e.target.value as 'severity' | 'recent')}
                                     className="pl-4 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] uppercase cursor-pointer hover:bg-slate-100 transition appearance-none"
                                 >
-                                    <option value="recent">Most Recent</option>
-                                    <option value="severity">Highest Severity</option>
+                                    <option value="recent">{t('filters.mostRecent')}</option>
+                                    <option value="severity">{t('filters.highestSeverity')}</option>
                                 </select>
                                 <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" size={12} />
                             </div>
@@ -138,7 +140,7 @@ export default function ContractorAvailablePage() {
 
                 <div className="flex items-center gap-2 mb-6">
                     <span className="text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1.5 rounded border border-blue-100 uppercase tracking-wide">
-                        {filteredComplaints.length} Opportunities Found
+                        {t('opportunitiesFound', { count: filteredComplaints.length })}
                     </span>
                 </div>
 
@@ -146,14 +148,14 @@ export default function ContractorAvailablePage() {
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8">
                     <h2 className="text-xl font-black text-[#111827] mb-6 uppercase tracking-tight flex items-center gap-2">
                         <AlertTriangle className="text-orange-600" size={24} />
-                        Open Tenders
+                        {t('openTenders')}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredComplaints.length > 0 ? (
                             filteredComplaints.map(c => (
                                 <div key={c.id} className="p-6 bg-white rounded-xl border border-slate-200 hover:shadow-lg hover:border-[#1e3a8a] transition flex flex-col group">
                                     <div className="flex justify-between items-start mb-4">
-                                        <span className="text-[10px] font-bold bg-orange-50 text-orange-700 px-2 py-1 rounded border border-orange-100 uppercase tracking-wide">Pending Bid</span>
+                                        <span className="text-[10px] font-bold bg-orange-50 text-orange-700 px-2 py-1 rounded border border-orange-100 uppercase tracking-wide">{t('card.pendingBid')}</span>
                                         <span className="text-[10px] font-bold text-slate-400">#{c.id}</span>
                                     </div>
                                     <h3 className="font-bold text-[#111827] text-lg mb-2 line-clamp-1 group-hover:text-[#1e3a8a] transition">{c.title}</h3>
@@ -161,22 +163,22 @@ export default function ContractorAvailablePage() {
 
                                     <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-6 bg-slate-50 p-2 rounded border border-slate-100">
                                         <AlertTriangle size={14} className={c.severity >= 4 ? "text-red-500" : "text-amber-500"} />
-                                        <span className="uppercase font-bold text-slate-700">Severity Level: {c.severity}/5</span>
+                                        <span className="uppercase font-bold text-slate-700">{t('card.severityLevel')}: {c.severity}/5</span>
                                     </div>
 
                                     <button
                                         onClick={() => setSelectedComplaint(c)}
                                         className="w-full py-3 bg-[#1e3a8a] text-white font-bold text-xs uppercase rounded-lg hover:bg-blue-900 transition flex items-center justify-center gap-2 shadow-sm shadow-blue-900/20"
                                     >
-                                        Place Tender
+                                        {t('card.placeTender')}
                                     </button>
                                 </div>
                             ))
                         ) : (
                             <div className="col-span-full text-center py-16 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-300">
                                 <Construction className="mx-auto mb-4 opacity-50 text-blue-400" size={48} />
-                                <p className="text-lg font-bold">No open opportunities found</p>
-                                <p className="text-sm mt-1">Check back later for new tenders.</p>
+                                <p className="text-lg font-bold">{t('empty.title')}</p>
+                                <p className="text-sm mt-1">{t('empty.desc')}</p>
                             </div>
                         )}
                     </div>

@@ -50,7 +50,7 @@ export default function CitizenComplaintForm() {
     );
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setValidationErrors([]);
@@ -216,7 +216,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <div className="relative h-full min-h-[160px]">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
                     required
                     disabled={loading}
@@ -243,8 +243,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         <div className="w-14 h-14 bg-white/60 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform text-slate-400 group-hover:text-blue-500">
                           <Upload size={24} />
                         </div>
-                        <p className="font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Upload Photo</p>
-                        <p className="text-xs text-slate-400 mt-1 font-medium">JPG, PNG (Max 10MB)</p>
+                        <p className="font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Upload Evidence</p>
+                        <p className="text-xs text-slate-400 mt-1 font-medium">Images & Videos (Max 50MB)</p>
                       </div>
                     )}
                   </label>

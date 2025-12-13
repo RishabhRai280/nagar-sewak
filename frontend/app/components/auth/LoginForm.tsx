@@ -196,6 +196,7 @@ export default function LoginForm() {
           </button>
         </div>
 
+
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -207,12 +208,12 @@ export default function LoginForm() {
           {isGoogleLoading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              Signing in...
+              {t('googleSigningIn')}
             </>
           ) : (
             <>
               <Chrome size={20} />
-              Continue with Google
+              {t('googleSignIn')}
             </>
           )}
         </motion.button>
@@ -225,12 +226,12 @@ export default function LoginForm() {
         className="mt-8 text-center"
       >
         <p className="text-slate-600 font-medium">
-          Don't have an account?{' '}
+          {t('noAccount')}{' '}
           <Link href="/register" className="text-blue-700 font-bold hover:underline transition-all">
-            Register Here
+            {t('registerLink')}
           </Link>
         </p>
       </motion.div>
-    </div>
+    </div >
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Token, fetchContractorDashboard, ContractorDashboardData, UserStore } from "@/lib/api/api";
 import { Construction, AlertTriangle, CheckCircle, Star, RefreshCcw, LogOut, DollarSign, Clock, FileText, TrendingUp, MapPin, Search, ChevronRight } from 'lucide-react';
 import Link from "next/link";
@@ -9,6 +10,7 @@ import Sidebar from "../Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
 
 export default function ContractorDashboardComponent() {
+    const t = useTranslations('dashboard.contractor');
     const router = useRouter();
     const { collapsed } = useSidebar();
     const [data, setData] = useState<ContractorDashboardData | null>(null);
@@ -98,7 +100,7 @@ export default function ContractorDashboardComponent() {
             <div className="flex items-center justify-center min-h-screen bg-slate-50">
                 <div className="flex flex-col items-center gap-6">
                     <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
-                    <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Workspace...</p>
+                    <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">{t('loading')}</p>
                 </div>
             </div>
         );
@@ -108,14 +110,14 @@ export default function ContractorDashboardComponent() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6 text-center">
                 <AlertTriangle className="text-red-600 mb-4" size={48} />
-                <h3 className="text-xl font-black text-slate-900 mb-2 uppercase">Dashboard Error</h3>
+                <h3 className="text-xl font-black text-slate-900 mb-2 uppercase">{t('error')}</h3>
                 <p className="text-slate-600 mb-6 max-w-md mx-auto">{error}</p>
                 <div className="flex gap-4">
                     <button onClick={loadData} className="flex items-center gap-2 px-6 py-3 bg-[#1e3a8a] text-white rounded-xl font-bold hover:bg-blue-900 transition shadow-lg">
-                        <RefreshCcw size={18} /> Retry
+                        <RefreshCcw size={18} /> {t('retry')}
                     </button>
                     <button onClick={handleLogout} className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-300 rounded-xl font-bold hover:bg-slate-50 transition">
-                        <LogOut size={18} /> Sign Out
+                        <LogOut size={18} /> {t('signOut')}
                     </button>
                 </div>
             </div>
@@ -150,20 +152,20 @@ export default function ContractorDashboardComponent() {
                                         <Construction className="text-white" size={28} />
                                     </div>
                                     <div>
-                                        <h1 className="text-3xl font-black text-[#111827] tracking-tight uppercase">Contractor Portal</h1>
+                                        <h1 className="text-3xl font-black text-[#111827] tracking-tight uppercase">{t('subtitle')}</h1>
                                         <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">
-                                            {data?.profile?.companyName || "Authorized Contractor"}
+                                            {data?.profile?.companyName || t('authorized')}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-wrap gap-3 justify-end items-center">
-                                <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm" title="Refresh Data">
+                                <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm" title={t('refresh')}>
                                     <RefreshCcw size={18} />
                                 </button>
                                 <div className="h-8 w-px bg-slate-200 mx-1"></div>
                                 <button onClick={handleLogout} className="px-4 py-2 bg-slate-100 text-slate-700 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg font-bold transition flex items-center gap-2">
-                                    <LogOut size={18} /> <span className="hidden sm:inline">Sign Out</span>
+                                    <LogOut size={18} /> <span className="hidden sm:inline">{t('signOut')}</span>
                                 </button>
                             </div>
                         </div>
@@ -171,23 +173,23 @@ export default function ContractorDashboardComponent() {
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <StatCard label="Active Projects" value={kpis?.active} icon={Construction} color="blue" />
-                        <StatCard label="Available Works" value={openComplaints.length} icon={AlertTriangle} color="orange" />
-                        <StatCard label="Completed Projects" value={kpis?.completed} icon={CheckCircle} color="emerald" />
-                        <StatCard label="Company Rating" value={kpis?.rating?.toFixed(1)} icon={Star} color="yellow" suffix="★" />
+                        <StatCard label={t('activeProjects')} value={kpis?.active} icon={Construction} color="blue" />
+                        <StatCard label={t('availableWorks')} value={openComplaints.length} icon={AlertTriangle} color="orange" />
+                        <StatCard label={t('completedProjects')} value={kpis?.completed} icon={CheckCircle} color="emerald" />
+                        <StatCard label={t('companyRating')} value={kpis?.rating?.toFixed(1)} icon={Star} color="yellow" suffix="★" />
                     </div>
 
                     {/* Quick Actions */}
                     <div className="bg-white rounded-xl shadow-md border border-slate-200 p-6 lg:p-8">
-                        <h2 className="text-lg font-extrabold text-[#111827] uppercase tracking-wider mb-6 border-b border-slate-100 pb-2">Operational Actions</h2>
+                        <h2 className="text-lg font-extrabold text-[#111827] uppercase tracking-wider mb-6 border-b border-slate-100 pb-2">{t('operationalActions')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <button onClick={() => navigateToSection('available')} className="group flex items-center gap-4 p-4 bg-white border border-slate-200 hover:border-[#1e3a8a] rounded-xl hover:shadow-lg transition-all duration-300">
                                 <div className="w-12 h-12 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center group-hover:bg-[#1e3a8a] group-hover:text-white transition-colors">
                                     <Search size={24} />
                                 </div>
                                 <div className="text-left">
-                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-[#1e3a8a]">Find Work</h3>
-                                    <p className="text-xs text-slate-500 font-medium">Browse opportunities</p>
+                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-[#1e3a8a]">{t('findWork')}</h3>
+                                    <p className="text-xs text-slate-500 font-medium">{t('browseOpp')}</p>
                                 </div>
                             </button>
 
@@ -196,8 +198,8 @@ export default function ContractorDashboardComponent() {
                                     <FileText size={24} />
                                 </div>
                                 <div className="text-left">
-                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-emerald-600">My Tenders</h3>
-                                    <p className="text-xs text-slate-500 font-medium">Track submissions</p>
+                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-emerald-600">{t('myTenders')}</h3>
+                                    <p className="text-xs text-slate-500 font-medium">{t('trackSub')}</p>
                                 </div>
                             </button>
 
@@ -206,8 +208,8 @@ export default function ContractorDashboardComponent() {
                                     <Construction size={24} />
                                 </div>
                                 <div className="text-left">
-                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-purple-600">Active Projects</h3>
-                                    <p className="text-xs text-slate-500 font-medium">Manage ongoing work</p>
+                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-purple-600">{t('activeProjects')}</h3>
+                                    <p className="text-xs text-slate-500 font-medium">{t('manageOngoing')}</p>
                                 </div>
                             </button>
 
@@ -216,8 +218,8 @@ export default function ContractorDashboardComponent() {
                                     <MapPin size={24} />
                                 </div>
                                 <div className="text-left">
-                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-orange-600">Live Map</h3>
-                                    <p className="text-xs text-slate-500 font-medium">Geospatial view</p>
+                                    <h3 className="font-bold text-[#111827] text-sm uppercase tracking-wide group-hover:text-orange-600">{t('liveMap')}</h3>
+                                    <p className="text-xs text-slate-500 font-medium">{t('geoView')}</p>
                                 </div>
                             </Link>
                         </div>
@@ -230,9 +232,9 @@ export default function ContractorDashboardComponent() {
                             <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
                                 <h2 className="text-xl font-black text-[#111827] flex items-center gap-3 uppercase tracking-tight">
                                     <Construction className="text-[#1e3a8a]" size={20} />
-                                    Recent Projects
+                                    {t('recentProjects')}
                                 </h2>
-                                <button onClick={() => navigateToSection('projects')} className="text-[#1e3a8a] text-xs font-bold uppercase tracking-wider hover:underline">View All</button>
+                                <button onClick={() => navigateToSection('projects')} className="text-[#1e3a8a] text-xs font-bold uppercase tracking-wider hover:underline">{t('viewAll')}</button>
                             </div>
                             <div className="space-y-4 flex-1">
                                 {assignedProjects.slice(0, 3).map(p => {
@@ -252,7 +254,7 @@ export default function ContractorDashboardComponent() {
                                 })}
                                 {assignedProjects.length === 0 && (
                                     <div className="text-center py-12 text-slate-400">
-                                        <p className="font-bold text-sm">No active projects</p>
+                                        <p className="font-bold text-sm">{t('noActiveProjects')}</p>
                                     </div>
                                 )}
                             </div>
@@ -263,9 +265,9 @@ export default function ContractorDashboardComponent() {
                             <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
                                 <h2 className="text-xl font-black text-[#111827] flex items-center gap-3 uppercase tracking-tight">
                                     <AlertTriangle className="text-orange-600" size={20} />
-                                    New Tenders
+                                    {t('newTenders')}
                                 </h2>
-                                <button onClick={() => navigateToSection('available')} className="text-[#1e3a8a] text-xs font-bold uppercase tracking-wider hover:underline">View All</button>
+                                <button onClick={() => navigateToSection('available')} className="text-[#1e3a8a] text-xs font-bold uppercase tracking-wider hover:underline">{t('viewAll')}</button>
                             </div>
                             <div className="space-y-4 flex-1">
                                 {openComplaints.slice(0, 3).map(c => (
@@ -276,14 +278,14 @@ export default function ContractorDashboardComponent() {
                                         </div>
                                         <div className="flex items-center justify-between mt-3">
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${c.severity >= 4 ? 'bg-red-50 text-red-700 border-red-200' : 'bg-orange-50 text-orange-700 border-orange-200'
-                                                }`}>SEVERITY {c.severity}</span>
-                                            <button className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">Bid Now</button>
+                                                }`}>{t('severity')} {c.severity}</span>
+                                            <button className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">{t('bidNow')}</button>
                                         </div>
                                     </div>
                                 ))}
                                 {openComplaints.length === 0 && (
                                     <div className="text-center py-12 text-slate-400">
-                                        <p className="font-bold text-sm">No chances available</p>
+                                        <p className="font-bold text-sm">{t('noChances')}</p>
                                     </div>
                                 )}
                             </div>
@@ -297,7 +299,7 @@ export default function ContractorDashboardComponent() {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-black text-[#111827] flex items-center gap-3 uppercase tracking-tight">
                                 <Construction className="text-[#1e3a8a]" size={24} />
-                                My Projects
+                                {t('myProjects')}
                             </h2>
                             <button onClick={loadData} className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50"><RefreshCcw size={16} /></button>
                         </div>
@@ -317,10 +319,10 @@ export default function ContractorDashboardComponent() {
                                         <div className="bg-[#1e3a8a] h-2 rounded-full" style={{ width: `${p.progressPercentage || 0}%` }}></div>
                                     </div>
                                     <Link href={`/projects/${p.id}`} className="block w-full text-center py-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase hover:bg-[#1e3a8a] hover:text-white hover:border-[#1e3a8a] transition rounded-lg">
-                                        Manage Project
+                                        {t('manageProject')}
                                     </Link>
                                 </div>
-                            )) : <div className="text-center col-span-3 py-12 text-slate-500">No active projects found.</div>}
+                            )) : <div className="text-center col-span-3 py-12 text-slate-500">{t('noActiveFound')}</div>}
                         </div>
                     </div>
                 </section>
@@ -331,12 +333,12 @@ export default function ContractorDashboardComponent() {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-black text-[#111827] flex items-center gap-3 uppercase tracking-tight">
                                 <Search className="text-[#1e3a8a]" size={24} />
-                                Available Works
+                                {t('availableWorks')}
                             </h2>
                             <div className="flex gap-2">
                                 <select className="text-xs font-bold border border-slate-200 rounded px-2 py-1" value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
-                                    <option value="recent">Recent</option>
-                                    <option value="severity">Priority</option>
+                                    <option value="recent">{t('recent')}</option>
+                                    <option value="severity">{t('priority')}</option>
                                 </select>
                             </div>
                         </div>
@@ -345,16 +347,16 @@ export default function ContractorDashboardComponent() {
                                 <div key={c.id} className="border border-slate-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition flex flex-col">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
-                                            <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded text-white ${c.severity >= 4 ? 'bg-red-600' : 'bg-amber-500'}`}>Severity {c.severity}</span>
+                                            <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded text-white ${c.severity >= 4 ? 'bg-red-600' : 'bg-amber-500'}`}>{t('severity')} {c.severity}</span>
                                         </div>
                                     </div>
                                     <h3 className="font-bold text-lg text-slate-900 mb-2">{c.title}</h3>
                                     <p className="text-sm text-slate-500 mb-4 line-clamp-3 flex-1">{c.description}</p>
                                     <button className="block w-full text-center py-2 bg-[#1e3a8a] text-white font-bold text-xs uppercase hover:bg-blue-900 transition rounded-lg shadow-lg shadow-blue-900/20">
-                                        Submit Tender
+                                        {t('submitTender')}
                                     </button>
                                 </div>
-                            )) : <div className="text-center col-span-3 py-12 text-slate-500">No available work found.</div>}
+                            )) : <div className="text-center col-span-3 py-12 text-slate-500">{t('noAvailableFound')}</div>}
                         </div>
                     </div>
                 </section>
@@ -365,7 +367,7 @@ export default function ContractorDashboardComponent() {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-black text-[#111827] flex items-center gap-3 uppercase tracking-tight">
                                 <FileText className="text-[#1e3a8a]" size={24} />
-                                My Submissions
+                                {t('mySubmissions')}
                             </h2>
                         </div>
                         <div className="space-y-4">
@@ -373,14 +375,14 @@ export default function ContractorDashboardComponent() {
                                 <div key={t.id} className="border border-slate-200 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50">
                                     <div>
                                         <h4 className="font-bold text-slate-900 text-sm">Tender #{t.id}</h4>
-                                        <p className="text-xs text-slate-500">Submitted on {new Date(t.createdAt || Date.now()).toLocaleDateString()}</p>
+                                        <p className="text-xs text-slate-500">{t('submittedOn')} {new Date(t.createdAt || Date.now()).toLocaleDateString()}</p>
                                     </div>
                                     <span className={`text-[10px] uppercase font-bold px-3 py-1 rounded border ${t.status === 'ACCEPTED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                                         t.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' :
                                             'bg-blue-50 text-blue-700 border-blue-200'
                                         }`}>{t.status}</span>
                                 </div>
-                            )) : <div className="text-center py-12 text-slate-500">No tenders found.</div>}
+                            )) : <div className="text-center py-12 text-slate-500">{t('noTendersFound')}</div>}
                         </div>
                     </div>
                 </section>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from 'next/navigation';
+import { useTranslations } from "next-intl";
 import Sidebar from "../shared/Sidebar";
 import Link from "next/link";
 import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api/api";
@@ -22,6 +23,7 @@ interface DashboardComplaint {
 }
 
 export default function CitizenDashboardComponent() {
+  const t = useTranslations('dashboard.citizen');
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [userData, setUserData] = useState<UserProfile | null>(null);
@@ -89,7 +91,7 @@ export default function CitizenDashboardComponent() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium">Loading your dashboard...</p>
+          <p className="text-slate-500 font-medium">{t('loading')}</p>
         </div>
       </div>
     );
@@ -126,11 +128,11 @@ export default function CitizenDashboardComponent() {
                     <LayoutDashboard className="text-[#1e3a8a]" size={24} />
                   </div>
                   <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Citizen Dashboard</h1>
-                    <p className="text-slate-600">Welcome back, {userData.fullName || userData.username}</p>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">{t('title')}</h1>
+                    <p className="text-slate-600">{t('welcome')}, {userData.fullName || userData.username}</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-500 max-w-lg">Your contributions help build a better city. Track your reports and see the impact.</p>
+                <p className="text-sm text-slate-500 max-w-lg">{t('subtitle')}</p>
               </div>
               <div className="flex flex-wrap gap-3 justify-end">
                 <NotificationWrapper />
@@ -139,7 +141,7 @@ export default function CitizenDashboardComponent() {
                 </button>
                 <Link href="/report">
                   <button className="inline-flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-lg font-bold shadow-md transition-all duration-300 text-sm lg:text-base">
-                    <Plus size={18} /> New Report
+                    <Plus size={18} /> {t('newReport')}
                   </button>
                 </Link>
               </div>
@@ -148,16 +150,16 @@ export default function CitizenDashboardComponent() {
 
           {/* Stats Cards - Gov Colors */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-6">
-            <StatCard label="Total Reports" value={stats.total} icon={AlertCircle} color="blue" delay={0.1} />
-            <StatCard label="Pending" value={stats.pending} icon={Clock} color="orange" delay={0.2} />
-            <StatCard label="In Progress" value={stats.inProgress} icon={TrendingUp} color="purple" delay={0.25} />
-            <StatCard label="Resolved" value={stats.resolved} icon={CheckCircle} color="blue" delay={0.3} />
+            <StatCard label={t('totalReports')} value={stats.total} icon={AlertCircle} color="blue" delay={0.1} />
+            <StatCard label={t('pending')} value={stats.pending} icon={Clock} color="orange" delay={0.2} />
+            <StatCard label={t('inProgress')} value={stats.inProgress} icon={TrendingUp} color="purple" delay={0.25} />
+            <StatCard label={t('resolved')} value={stats.resolved} icon={CheckCircle} color="blue" delay={0.3} />
           </div>
 
           {/* Quick Actions - Official Blue Theme */}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8">
             <h2 className="text-lg font-bold text-slate-900 mb-6 uppercase tracking-wider flex items-center gap-2">
-              <LayoutDashboard size={20} className="text-slate-400" /> Quick Access
+              <LayoutDashboard size={20} className="text-slate-400" /> {t('quickAccess')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link href="/report">
@@ -166,8 +168,8 @@ export default function CitizenDashboardComponent() {
                   <div className="w-12 h-12 bg-[#1e3a8a] text-white rounded-lg flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
                     <FileEdit size={24} />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">Report Issue</h3>
-                  <p className="text-sm text-slate-500 mt-1">Submit a new grievance</p>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">{t('reportIssue')}</h3>
+                  <p className="text-sm text-slate-500 mt-1">{t('reportDesc')}</p>
                 </button>
               </Link>
 
@@ -177,8 +179,8 @@ export default function CitizenDashboardComponent() {
                   <div className="w-12 h-12 bg-indigo-600 text-white rounded-lg flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
                     <Map size={24} />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">Live Map</h3>
-                  <p className="text-sm text-slate-500 mt-1">View community issues</p>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">{t('liveMap')}</h3>
+                  <p className="text-sm text-slate-500 mt-1">{t('mapDesc')}</p>
                 </button>
               </Link>
 
@@ -188,8 +190,8 @@ export default function CitizenDashboardComponent() {
                   <div className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
                     <ClipboardList size={24} />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">My Reports</h3>
-                  <p className="text-sm text-slate-500 mt-1">Track status & history</p>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">{t('myReports')}</h3>
+                  <p className="text-sm text-slate-500 mt-1">{t('reportsDesc')}</p>
                 </button>
               </Link>
 
@@ -199,8 +201,8 @@ export default function CitizenDashboardComponent() {
                   <div className="w-12 h-12 bg-slate-600 text-white rounded-lg flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
                     <User size={24} />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">Profile</h3>
-                  <p className="text-sm text-slate-500 mt-1">Manage your account</p>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">{t('profile')}</h3>
+                  <p className="text-sm text-slate-500 mt-1">{t('profileDesc')}</p>
                 </button>
               </Link>
             </div>
@@ -213,10 +215,10 @@ export default function CitizenDashboardComponent() {
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <ClipboardList className="text-slate-400" size={20} />
-                  Recent Submissions
+                  {t('recentSubmissions')}
                 </h2>
                 <Link href="/dashboard/citizen/reports" className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-full transition">
-                  View All
+                  {t('viewAll')}
                 </Link>
               </div>
               <div className="space-y-4">
@@ -229,10 +231,10 @@ export default function CitizenDashboardComponent() {
                     <p className="text-sm text-slate-500 line-clamp-2 mb-3">{complaint.description}</p>
                     <div className="flex items-center gap-3 text-xs font-medium text-slate-400">
                       <span className={`flex items-center gap-1 ${complaint.severity >= 4 ? 'text-red-600' : complaint.severity >= 3 ? 'text-amber-600' : 'text-slate-500'}`}>
-                        <AlertCircle size={12} /> Severity {complaint.severity}/5
+                        <AlertCircle size={12} /> {t('severity')} {complaint.severity}/5
                       </span>
                       <span>•</span>
-                      <span>Click to view details</span>
+                      <span>{t('viewDetails')}</span>
                     </div>
                   </div>
                 ))}
@@ -241,8 +243,8 @@ export default function CitizenDashboardComponent() {
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <ClipboardList className="text-slate-300" size={32} />
                     </div>
-                    <p className="text-slate-500 font-medium">No reports submitted yet</p>
-                    <Link href="/report" className="text-[#1e3a8a] font-bold text-sm mt-2 inline-block hover:underline">Start your first report</Link>
+                    <p className="text-slate-500 font-medium">{t('noReports')}</p>
+                    <Link href="/report" className="text-[#1e3a8a] font-bold text-sm mt-2 inline-block hover:underline">{t('startReport')}</Link>
                   </div>
                 )}
               </div>
@@ -252,10 +254,10 @@ export default function CitizenDashboardComponent() {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-0 overflow-hidden flex flex-col">
               <div className="p-6 pb-4 border-b border-slate-100 flex justify-between items-center bg-white">
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <TrendingUp className="text-slate-400" size={20} /> Impact Score
+                  <TrendingUp className="text-slate-400" size={20} /> {t('impactScore')}
                 </h2>
                 <Link href="/dashboard/citizen/analytics" className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-full transition">
-                  Full Analytics
+                  {t('fullAnalytics')}
                 </Link>
               </div>
 
@@ -272,18 +274,18 @@ export default function CitizenDashboardComponent() {
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-5xl font-black text-slate-900">{Math.min(100, stats.total * 10 + stats.resolved * 15)}</span>
-                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Points</span>
+                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{t('points')}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 w-full px-4">
                   <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
                     <div className="text-[#1e3a8a] font-black text-2xl">{stats.resolved}</div>
-                    <div className="text-xs text-slate-500 font-bold uppercase mt-1">Solved</div>
+                    <div className="text-xs text-slate-500 font-bold uppercase mt-1">{t('solved')}</div>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
                     <div className="text-slate-700 font-black text-2xl">{stats.total}</div>
-                    <div className="text-xs text-slate-500 font-bold uppercase mt-1">Total</div>
+                    <div className="text-xs text-slate-500 font-bold uppercase mt-1">{t('total')}</div>
                   </div>
                 </div>
               </div>

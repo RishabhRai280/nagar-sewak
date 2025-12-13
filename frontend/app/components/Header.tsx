@@ -150,7 +150,7 @@ export default function Header() {
                     <div className="text-right hidden lg:block">
                       <p className="text-xs font-bold text-slate-700 leading-none">{user.username}</p>
                       <p className="text-[10px] text-slate-500 leading-none mt-1 uppercase tracking-wider">
-                        {hasAdminAccess ? 'Admin' : isContractor ? 'Contractor' : 'Citizen'}
+                        {hasAdminAccess ? tCommon('admin') : isContractor ? tCommon('contractor') : tCommon('citizen')}
                       </p>
                     </div>
                     <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold shadow-md group-hover:shadow-lg transition-all">

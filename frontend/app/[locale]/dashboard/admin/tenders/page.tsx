@@ -8,8 +8,10 @@ import { fetchAdminDashboard, Token, fetchAllTenders, TenderData } from "@/lib/a
 import { ClipboardList, Clock, FileText, CheckCircle, RefreshCcw } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 export default function AdminTendersPage() {
+  const t = useTranslations('dashboard.admin.tendersPage');
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ export default function AdminTendersPage() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-6">
           <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
-          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Tenders...</p>
+          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">{t('loading')}</p>
         </div>
       </div>
     );
@@ -87,19 +89,19 @@ export default function AdminTendersPage() {
                 <ClipboardList size={28} />
               </div>
               <div>
-                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Tender Management</h1>
-                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Manage Bids & Allocations</p>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">{t('title')}</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{t('subtitle')}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Link href="/tenders/create">
                 <button className="px-5 py-2.5 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 transition shadow-sm">
-                  + Create Tender
+                  {t('create')}
                 </button>
               </Link>
               <Link href="/tenders">
                 <button className="px-4 py-2 bg-slate-50 text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-100 transition shadow-sm">
-                  View All
+                  {t('viewAll')}
                 </button>
               </Link>
               <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
@@ -115,10 +117,10 @@ export default function AdminTendersPage() {
               <div className="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center border border-orange-100">
                 <Clock size={16} />
               </div>
-              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Pending Review</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.pending')}</h3>
             </div>
             <div className="text-3xl font-black text-[#111827] mb-1">{pendingComplaints.length}</div>
-            <p className="text-xs text-slate-500 font-medium">Complaints awaiting tender decision</p>
+            <p className="text-xs text-slate-500 font-medium">{t('stats.pendingDesc')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -126,10 +128,10 @@ export default function AdminTendersPage() {
               <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center border border-blue-100">
                 <FileText size={16} />
               </div>
-              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Active Tenders</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.active')}</h3>
             </div>
             <div className="text-3xl font-black text-[#111827] mb-1">{activeTendersCount}</div>
-            <p className="text-xs text-slate-500 font-medium">Currently open for bidding</p>
+            <p className="text-xs text-slate-500 font-medium">{t('stats.activeDesc')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -137,10 +139,10 @@ export default function AdminTendersPage() {
               <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100">
                 <CheckCircle size={16} />
               </div>
-              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Completed</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.completed')}</h3>
             </div>
             <div className="text-3xl font-black text-[#111827] mb-1">{completedTendersCount}</div>
-            <p className="text-xs text-slate-500 font-medium">Successfully awarded</p>
+            <p className="text-xs text-slate-500 font-medium">{t('stats.completedDesc')}</p>
           </div>
         </div>
 
@@ -150,7 +152,7 @@ export default function AdminTendersPage() {
             <div className="w-10 h-10 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center">
               <FileText size={20} />
             </div>
-            <h2 className="text-xl font-black text-[#111827] uppercase tracking-tight">Recent Tender Activities</h2>
+            <h2 className="text-xl font-black text-[#111827] uppercase tracking-tight">{t('activities.title')}</h2>
           </div>
           <div className="space-y-4">
             {pendingComplaints.length > 0 ? (
@@ -171,16 +173,16 @@ export default function AdminTendersPage() {
                           <p className="font-bold text-[#111827] group-hover:text-[#1e3a8a] transition text-sm">{c.title}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${c.severity >= 4 ? 'bg-red-50 text-red-700 border-red-200' :
-                                c.severity >= 3 ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                                  'bg-yellow-50 text-yellow-700 border-yellow-200'
+                              c.severity >= 3 ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                'bg-yellow-50 text-yellow-700 border-yellow-200'
                               }`}>
-                              Severity {c.severity}/5
+                              {t('activities.severity')} {c.severity}/5
                             </span>
                           </div>
                         </div>
                       </div>
                       <button className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold rounded-lg group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:border-[#1e3a8a] transition uppercase">
-                        Review
+                        {t('activities.review')}
                       </button>
                     </div>
                   </Link>
@@ -189,8 +191,8 @@ export default function AdminTendersPage() {
             ) : (
               <div className="text-center py-16 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                 <FileText className="mx-auto mb-3 opacity-50" size={48} />
-                <p className="font-bold text-lg">No pending reviews</p>
-                <p className="text-sm mt-1">All complaints have been processed.</p>
+                <p className="font-bold text-lg">{t('activities.noPending')}</p>
+                <p className="text-sm mt-1">{t('activities.noPendingDesc')}</p>
               </div>
             )}
           </div>

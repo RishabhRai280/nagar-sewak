@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
 import {
   LayoutDashboard,
@@ -27,6 +28,7 @@ import TopBar from "./shared/TopBar";
 type SidebarRole = "citizen" | "admin" | "contractor";
 
 export default function Sidebar() {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const router = useRouter();
   const { collapsed, toggleCollapsed } = useSidebar();
@@ -76,39 +78,39 @@ export default function Sidebar() {
   const effectiveRole = role;
 
   const citizenNav = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Dashboard", href: "/dashboard/citizen", icon: LayoutDashboard },
-    { label: "My Reports", href: "/dashboard/citizen/reports", icon: ClipboardList },
-    { label: "History", href: "/dashboard/citizen/history", icon: Bell },
-    { label: "Profile", href: "/dashboard/citizen/profile", icon: User },
-    { label: "Analytics", href: "/dashboard/citizen/analytics", icon: BarChart3 },
-    { label: "Report Issue", href: "/report", icon: FileEdit },
-    { label: "Live Map", href: "/map", icon: Map },
-    { label: "Help Center", href: "/help", icon: HelpCircle },
+    { label: t('home'), href: "/", icon: Home },
+    { label: t('dashboard'), href: "/dashboard/citizen", icon: LayoutDashboard },
+    { label: t('myReports'), href: "/dashboard/citizen/reports", icon: ClipboardList },
+    { label: t('history'), href: "/dashboard/citizen/history", icon: Bell },
+    { label: t('profile'), href: "/dashboard/citizen/profile", icon: User },
+    { label: t('analytics'), href: "/dashboard/citizen/analytics", icon: BarChart3 },
+    { label: t('reportIssue'), href: "/report", icon: FileEdit },
+    { label: t('liveMap'), href: "/map", icon: Map },
+    { label: t('helpCenter'), href: "/help", icon: HelpCircle },
   ];
 
   const adminNav = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
-    { label: "Projects", href: "/dashboard/admin/projects", icon: BarChart3 },
-    { label: "Tenders", href: "/dashboard/admin/tenders", icon: ClipboardList },
-    { label: "Complaints", href: "/dashboard/admin/complaints", icon: Bell },
-    { label: "Contractors", href: "/dashboard/admin/contractors", icon: Users },
-    { label: "My Reports", href: "/dashboard/citizen/reports", icon: ClipboardList },
-    { label: "Report Issue", href: "/report", icon: FileEdit },
-    { label: "Live Map", href: "/map", icon: Map },
-    { label: "Help Center", href: "/help", icon: HelpCircle },
+    { label: t('home'), href: "/", icon: Home },
+    { label: t('dashboard'), href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: t('projects'), href: "/dashboard/admin/projects", icon: BarChart3 },
+    { label: t('tenders'), href: "/dashboard/admin/tenders", icon: ClipboardList },
+    { label: t('complaints'), href: "/dashboard/admin/complaints", icon: Bell },
+    { label: t('contractors'), href: "/dashboard/admin/contractors", icon: Users },
+    { label: t('myReports'), href: "/dashboard/citizen/reports", icon: ClipboardList },
+    { label: t('reportIssue'), href: "/report", icon: FileEdit },
+    { label: t('liveMap'), href: "/map", icon: Map },
+    { label: t('helpCenter'), href: "/help", icon: HelpCircle },
   ];
 
   const contractorNav = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Dashboard", href: "/dashboard/contractor", icon: LayoutDashboard },
-    { label: "Projects", href: "/dashboard/contractor/projects", icon: BarChart3 },
-    { label: "Available Works", href: "/dashboard/contractor/available", icon: FileEdit },
-    { label: "My Reports", href: "/dashboard/citizen/reports", icon: ClipboardList },
-    { label: "Report Issue", href: "/report", icon: FileEdit },
-    { label: "Live Map", href: "/map", icon: Map },
-    { label: "Help Center", href: "/help", icon: HelpCircle },
+    { label: t('home'), href: "/", icon: Home },
+    { label: t('dashboard'), href: "/dashboard/contractor", icon: LayoutDashboard },
+    { label: t('projects'), href: "/dashboard/contractor/projects", icon: BarChart3 },
+    { label: t('availableWorks'), href: "/dashboard/contractor/available", icon: FileEdit },
+    { label: t('myReports'), href: "/dashboard/citizen/reports", icon: ClipboardList },
+    { label: t('reportIssue'), href: "/report", icon: FileEdit },
+    { label: t('liveMap'), href: "/map", icon: Map },
+    { label: t('helpCenter'), href: "/help", icon: HelpCircle },
   ];
 
   const navItems =
@@ -172,7 +174,7 @@ export default function Sidebar() {
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="flex flex-col">
               <span className="font-bold text-slate-900 text-lg leading-none">Nagar Sewak</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Citizen Portal</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">{t('citizenPortal')}</span>
             </div>
           </Link>
         </div>
@@ -185,7 +187,7 @@ export default function Sidebar() {
               <User size={16} />
             </div>
             <div className="hidden md:block text-left">
-              <div className="text-sm font-bold text-slate-900">User Profile</div>
+              <div className="text-sm font-bold text-slate-900">{t('userProfile')}</div>
               <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">{effectiveRole}</div>
             </div>
           </div>
@@ -207,7 +209,7 @@ export default function Sidebar() {
         {/* Menu Label */}
         {!collapsed && (
           <div className="px-6 py-2">
-            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest opacity-80">Main Menu</span>
+            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest opacity-80">{t('mainMenu')}</span>
           </div>
         )}
 
@@ -274,7 +276,7 @@ export default function Sidebar() {
             className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-4"} py-2.5 w-full text-blue-200 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 font-medium text-sm group`}
           >
             <LogOut size={18} className="group-hover:-translate-x-1 transition-transform text-blue-300" />
-            {!collapsed && "Sign Out"}
+            {!collapsed && t('signOut')}
           </button>
         </div>
       </aside>

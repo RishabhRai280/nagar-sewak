@@ -10,10 +10,12 @@ import Link from "next/link";
 import ComplaintVoting from "@/app/components/complaints/ComplaintVoting";
 import EnhancedComplaintComments from "@/app/components/complaints/EnhancedComplaintComments";
 import ShareBar from "@/app/components/shared/ShareBar";
+import { useTranslations } from "next-intl";
 
 const MiniMap = dynamic(() => import("@/app/components/shared/MiniMap"), { ssr: false });
 
 export default function ComplaintDetailPage() {
+  const t = useTranslations('dashboard.citizen.complaintDetail');
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
@@ -46,7 +48,7 @@ export default function ComplaintDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600 font-medium">Loading complaint details...</div>
+        <div className="text-slate-600 font-medium">{t('loading')}</div>
       </div>
     );
   }
@@ -58,11 +60,11 @@ export default function ComplaintDetailPage() {
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
             <AlertCircle className="text-red-600" size={32} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Error</h2>
-          <p className="text-slate-600 mb-6">{error || "Complaint not found"}</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">{t('errorTitle')}</h2>
+          <p className="text-slate-600 mb-6">{error || t('errorMessage')}</p>
           <Link href="/dashboard/citizen">
             <button className="px-6 py-3 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition">
-              Back to Dashboard
+              {t('backToDashboard')}
             </button>
           </Link>
         </div>
@@ -88,7 +90,7 @@ export default function ComplaintDetailPage() {
           <button
             className="mb-6 flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-600 font-bold hover:bg-slate-50 hover:text-[#1e3a8a] transition shadow-sm text-sm"
           >
-            <ArrowLeft size={16} /> Back to Dashboard
+            <ArrowLeft size={16} /> {t('backToDashboard')}
           </button>
         </Link>
 
@@ -105,7 +107,7 @@ export default function ComplaintDetailPage() {
               >
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <CheckCircle size={14} className="text-[#1e3a8a]" />
-                  Evidence Gallery ({mediaItems.length})
+                  {t('evidenceGallery')} ({mediaItems.length})
                 </h3>
 
                 {/* Main Media */}
@@ -150,8 +152,8 @@ export default function ComplaintDetailPage() {
                           key={index}
                           onClick={() => setSelectedMediaIndex(index)}
                           className={`relative rounded-md overflow-hidden border-2 transition-all aspect-square ${selectedMediaIndex === index
-                              ? "border-[#1e3a8a] ring-1 ring-[#1e3a8a]"
-                              : "border-slate-100 hover:border-slate-300"
+                            ? "border-[#1e3a8a] ring-1 ring-[#1e3a8a]"
+                            : "border-slate-100 hover:border-slate-300"
                             }`}
                         >
                           {isVideo ? (
@@ -184,11 +186,11 @@ export default function ComplaintDetailPage() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <MapPin size={14} className="text-[#1e3a8a]" />
-                  Geolocated Data
+                  {t('geolocatedData')}
                 </h3>
                 <Link href={`/map?complaintId=${complaint.id}`} target="_blank">
                   <button className="flex items-center gap-1 text-xs text-[#1e3a8a] font-bold hover:underline uppercase tracking-wide">
-                    View Full Map <ExternalLink size={12} />
+                    {t('viewFullMap')} <ExternalLink size={12} />
                   </button>
                 </Link>
               </div>
@@ -205,7 +207,7 @@ export default function ComplaintDetailPage() {
 
               <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 font-mono bg-slate-50 p-3 rounded-lg border border-slate-100">
                 <MapPin size={12} />
-                <span className="font-bold text-slate-700">Coordinates:</span>
+                <span className="font-bold text-slate-700">{t('coordinates')}:</span>
                 {complaint.lat?.toFixed(6)}, {complaint.lng?.toFixed(6)}
               </div>
             </motion.div>
@@ -213,7 +215,7 @@ export default function ComplaintDetailPage() {
             {/* Voting Section - Wrapped */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <CheckCircle size={14} className="text-[#1e3a8a]" /> Community Consensus
+                <CheckCircle size={14} className="text-[#1e3a8a]" /> {t('communityConsensus')}
               </h3>
               <ComplaintVoting complaintId={complaint.id} />
             </div>
@@ -236,7 +238,7 @@ export default function ComplaintDetailPage() {
             >
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Complaint Status</h4>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{t('complaintStatus')}</h4>
                   <span className={`inline-block px-3 py-1 rounded text-xs font-bold border uppercase tracking-wide ${statusColor}`}>
                     {complaint.status?.replace('_', ' ')}
                   </span>
@@ -245,23 +247,23 @@ export default function ComplaintDetailPage() {
                 <div>
                   <h1 className="text-xl font-bold text-slate-900 leading-snug mb-2">{complaint.title}</h1>
                   <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-bold uppercase ${complaint.severity >= 4
-                      ? "bg-red-50 text-red-700 border-red-200"
-                      : complaint.severity >= 3 ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-blue-50 text-blue-700 border-blue-200"
+                    ? "bg-red-50 text-red-700 border-red-200"
+                    : complaint.severity >= 3 ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-blue-50 text-blue-700 border-blue-200"
                     }`}>
                     <AlertCircle size={12} />
-                    Severity {complaint.severity}/5
+                    {t('severity')} {complaint.severity}/5
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Detailed Description</h4>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t('detailedDescription')}</h4>
                   <p className="text-slate-700 text-sm leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">{complaint.description}</p>
                 </div>
 
                 <div className="pt-6 border-t border-slate-100 space-y-4">
                   {complaint.userFullName && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 font-medium">Reported by</span>
+                      <span className="text-slate-500 font-medium">{t('reportedBy')}</span>
                       <div className="flex items-center gap-2 font-bold text-slate-900">
                         <User size={14} className="text-slate-400" /> {complaint.userFullName}
                       </div>
@@ -270,7 +272,7 @@ export default function ComplaintDetailPage() {
 
                   {complaint.createdAt && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 font-medium">Date Filed</span>
+                      <span className="text-slate-500 font-medium">{t('dateFiled')}</span>
                       <div className="flex items-center gap-2 font-bold text-slate-900">
                         <Calendar size={14} className="text-slate-400" /> {new Date(complaint.createdAt).toLocaleDateString()}
                       </div>
@@ -279,7 +281,7 @@ export default function ComplaintDetailPage() {
 
                   {complaint.resolvedAt && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 font-medium">Resolution Date</span>
+                      <span className="text-slate-500 font-medium">{t('resolutionDate')}</span>
                       <div className="flex items-center gap-2 font-bold text-emerald-700">
                         <CheckCircle size={14} className="text-emerald-500" /> {new Date(complaint.resolvedAt).toLocaleDateString()}
                       </div>

@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitComplaint, Token } from "@/lib/api/api";
 import { validateComplaint, sanitizeInput } from "@/lib/utils/validation";
+import { useTranslations } from "next-intl";
 import {
   MapPin, Upload, AlertCircle, Loader, CheckCircle,
   FileText, Shield, X, ChevronRight, Image as ImageIcon,
@@ -16,6 +17,8 @@ const MiniMap = dynamic(() => import("../shared/MiniMap"), { ssr: false });
 const LocationPicker = dynamic(() => import("../shared/LocationPicker"), { ssr: false });
 
 export default function CitizenComplaintForm() {
+  const t = useTranslations('report');
+  const tGlobal = useTranslations();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +46,7 @@ export default function CitizenComplaintForm() {
 
   const getLocation = () => {
     if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
+      setError(t('messages.geoUnsupported'));
       setLocationStatus("error");
       return;
     }
@@ -58,19 +61,19 @@ export default function CitizenComplaintForm() {
         setError(null);
       },
       (err) => {
-        let errorMessage = "Unable to get your location. ";
+        let errorMessage = t('messages.geoError') + " ";
         switch (err.code) {
           case err.PERMISSION_DENIED:
-            errorMessage += "Please allow location access.";
+            errorMessage = t('messages.geoPermission');
             break;
           case err.POSITION_UNAVAILABLE:
-            errorMessage += "Location unavailable.";
+            errorMessage = t('messages.geoUnavailable');
             break;
           case err.TIMEOUT:
-            errorMessage += "Request timed out.";
+            errorMessage = t('messages.geoTimeout');
             break;
           default:
-            errorMessage += "Unknown error.";
+            errorMessage = t('messages.geoError');
         }
         setError(errorMessage);
         setLocationStatus("error");
@@ -93,7 +96,7 @@ export default function CitizenComplaintForm() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + selectedFiles.length > 6) {
-      setError("Maximum 6 media files allowed");
+      setError(t('messages.maxFiles'));
       return;
     }
     setSelectedFiles([...selectedFiles, ...files]);
@@ -119,16 +122,18 @@ export default function CitizenComplaintForm() {
       lat: latitude,
       lng: longitude,
       file: selectedFiles.length > 0 ? selectedFiles[0] : null,
-    });
+    }, tGlobal);
 
     if (!validation.valid) {
+      // Note: validation.errors might still be hardcoded strings from the validation util.
+      // Ideally we should internationalize validation util too, but for now we set a generic error message.
       setValidationErrors(validation.errors);
-      setError("Please fill in all required fields marked with *");
+      setError(t('messages.requiredFields'));
       return;
     }
 
     if (selectedFiles.length === 0) {
-      setError("At least one evidence photo/video is required for verification.");
+      setError(t('messages.evidenceRequired'));
       return;
     }
 
@@ -147,7 +152,7 @@ export default function CitizenComplaintForm() {
 
       router.push("/dashboard/citizen?submission=success");
     } catch (err: any) {
-      const errorMessage = err?.message || err?.toString() || "Failed to submit. Please try again.";
+      const errorMessage = err?.message || err?.toString() || t('messages.submitError');
       setError(errorMessage);
       setValidationErrors([errorMessage]);
     } finally {
@@ -193,7 +198,7 @@ export default function CitizenComplaintForm() {
               </div>
               <div>
                 <h3 className="font-extrabold text-2xl tracking-tight leading-none">NAGAR<br />SEWAK</h3>
-                <p className="text-[10px] font-medium tracking-widest opacity-70 mt-1 uppercase">Official Citizen Portal</p>
+                <p className="text-[10px] font-medium tracking-widest opacity-70 mt-1 uppercase">{t('banner.portalName')}</p>
               </div>
             </div>
 
@@ -209,9 +214,9 @@ export default function CitizenComplaintForm() {
                     <FileText size={18} className="text-blue-200" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">Report Filed</h4>
+                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">{t('banner.steps.filed.title')}</h4>
                     <p className="text-blue-200/80 text-xs leading-relaxed max-w-[200px]">
-                      Instant ID generation & AI-based categorization routed to the correct department.
+                      {t('banner.steps.filed.desc')}
                     </p>
                   </div>
                 </div>
@@ -222,9 +227,9 @@ export default function CitizenComplaintForm() {
                     <Navigation size={18} className="text-blue-200" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">Officer On-Site</h4>
+                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">{t('banner.steps.onsite.title')}</h4>
                     <p className="text-blue-200/80 text-xs leading-relaxed max-w-[200px]">
-                      Field officer dispatched to the geotagged location for verification.
+                      {t('banner.steps.onsite.desc')}
                     </p>
                   </div>
                 </div>
@@ -235,9 +240,9 @@ export default function CitizenComplaintForm() {
                     <CheckCircle size={18} className="text-white" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">Resolution</h4>
+                    <h4 className="text-white font-bold text-sm mb-1 uppercase tracking-wide">{t('banner.steps.resolution.title')}</h4>
                     <p className="text-blue-200/80 text-xs leading-relaxed max-w-[200px]">
-                      Issue resolved with photo evidence & updated status on your dashboard.
+                      {t('banner.steps.resolution.desc')}
                     </p>
                   </div>
                 </div>
@@ -245,27 +250,26 @@ export default function CitizenComplaintForm() {
             </div>
 
             <div className="mt-auto mb-12">
-              <h2 className="text-3xl font-black leading-tight mb-4">
-                Your Voice,<br />
-                Our Action.
+              <h2 className="text-3xl font-black leading-tight mb-4 whitespace-pre-line">
+                {t('banner.slogan.title')}
               </h2>
               <p className="text-blue-100 text-sm leading-relaxed opacity-90">
-                Together, we build a cleaner, safer, and smarter city. Report issues directly to the administration and track real-time progress.
+                {t('banner.slogan.desc')}
               </p>
             </div>
 
             <div className="space-y-4 text-xs font-medium text-blue-200">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-blue-700/50 flex items-center justify-center"><CheckCircle size={12} /></div>
-                <span>Geo-Tagged Reports</span>
+                <span>{t('banner.features.geo')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-blue-700/50 flex items-center justify-center"><CheckCircle size={12} /></div>
-                <span>Direct Escalation</span>
+                <span>{t('banner.features.escalation')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-blue-700/50 flex items-center justify-center"><CheckCircle size={12} /></div>
-                <span>Transparent Tracking</span>
+                <span>{t('banner.features.tracking')}</span>
               </div>
             </div>
           </div>
@@ -283,8 +287,8 @@ export default function CitizenComplaintForm() {
           <form onSubmit={handleSubmit} className="p-6 md:p-8 h-full overflow-y-auto custom-scrollbar">
 
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-slate-900 mb-1">New Grievance Report</h1>
-              <p className="text-slate-500 text-sm">Fill in the details below to file an official complaint.</p>
+              <h1 className="text-2xl font-bold text-slate-900 mb-1">{t('form.header')}</h1>
+              <p className="text-slate-500 text-sm">{t('form.subHeader')}</p>
             </div>
 
             {/* Error Notification */}
@@ -292,7 +296,7 @@ export default function CitizenComplaintForm() {
               <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-md flex items-start gap-3 animate-pulse">
                 <AlertCircle className="text-red-600 mt-0.5" size={20} />
                 <div>
-                  <h4 className="text-red-800 font-bold text-sm">Submission Failed</h4>
+                  <h4 className="text-red-800 font-bold text-sm">{t('form.failed')}</h4>
                   <p className="text-red-700 text-sm mt-1">{error}</p>
                   {validationErrors.length > 0 && (
                     <ul className="list-disc list-inside text-red-700 text-xs mt-2 pl-1">
@@ -307,33 +311,33 @@ export default function CitizenComplaintForm() {
               {/* INPUTS */}
               <div className="space-y-6">
                 <div className="relative group">
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">Subject <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">{t('form.subject')} <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
                     <input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 placeholder:text-slate-400 font-bold text-sm shadow-sm"
-                      placeholder="e.g. Water Leakage in Sector 4"
+                      placeholder={t('form.subjectPlaceholder')}
                       disabled={loading}
                     />
                   </div>
                 </div>
 
                 <div className="relative">
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">Description <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">{t('form.description')} <span className="text-red-500">*</span></label>
                   <textarea
                     rows={4}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400 shadow-sm leading-relaxed"
-                    placeholder="Provide detailed information about the issue..."
+                    placeholder={t('form.descriptionPlaceholder')}
                     disabled={loading}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-3 block tracking-wide">Urgency Level</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase mb-3 block tracking-wide">{t('form.urgency')}</label>
                   <div className="flex gap-3">
                     {[1, 2, 3, 4, 5].map((lvl) => (
                       <button
@@ -352,8 +356,8 @@ export default function CitizenComplaintForm() {
                     ))}
                   </div>
                   <div className="flex justify-between mt-2 text-[10px] text-slate-400 font-bold uppercase px-1">
-                    <span>Routine Check</span>
-                    <span>Immediate Action</span>
+                    <span>{t('form.routine')}</span>
+                    <span>{t('form.immediate')}</span>
                   </div>
                 </div>
               </div>
@@ -364,8 +368,8 @@ export default function CitizenComplaintForm() {
                 {/* Location - Full Width */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
-                    <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">Location Details</label>
-                    {latitude && <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1"><CheckCircle size={10} /> GPS Locked</span>}
+                    <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">{t('form.location.label')}</label>
+                    {latitude && <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1"><CheckCircle size={10} /> {t('form.location.gpsLocked')}</span>}
                   </div>
 
                   <div className="relative h-40 bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-100 group cursor-pointer shadow-inner" onClick={() => setShowMapPicker(true)}>
@@ -374,7 +378,7 @@ export default function CitizenComplaintForm() {
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
                         <MapPin size={32} className="mb-2 opacity-50" />
-                        <span className="text-sm font-bold text-slate-500">Tap map to set location</span>
+                        <span className="text-sm font-bold text-slate-500">{t('form.location.tapToSet')}</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
@@ -382,17 +386,17 @@ export default function CitizenComplaintForm() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <button type="button" onClick={getLocation} className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider">
-                      <Navigation size={14} /> Detect My Location
+                      <Navigation size={14} /> {t('form.location.detect')}
                     </button>
                     <button type="button" onClick={() => setShowMapPicker(true)} className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider">
-                      <MapPin size={14} /> Pin on Map
+                      <MapPin size={14} /> {t('form.location.pin')}
                     </button>
                   </div>
                 </div>
 
                 {/* File Upload - Adaptive sizing */}
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">Evidence Upload ({selectedFiles.length}/6)</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">{t('form.evidence.label')} ({selectedFiles.length}/6)</label>
 
                   <div className={selectedFiles.length > 0 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "block"}>
                     {/* Dropzone - Resizes based on state */}
@@ -407,10 +411,10 @@ export default function CitizenComplaintForm() {
                         <Upload className="text-slate-400 group-hover:text-blue-600" size={selectedFiles.length === 0 ? 32 : 20} />
                       </div>
                       <span className={`font-bold text-slate-500 group-hover:text-blue-700 uppercase ${selectedFiles.length === 0 ? "text-lg" : "text-xs"}`}>
-                        {selectedFiles.length === 0 ? "Click to Upload Evidence" : "Add More"}
+                        {selectedFiles.length === 0 ? t('form.evidence.clickToUpload') : t('form.evidence.addMore')}
                       </span>
                       {selectedFiles.length === 0 && (
-                        <p className="text-slate-400 text-xs mt-2">Supports JPG, PNG, MP4</p>
+                        <p className="text-slate-400 text-xs mt-2">{t('form.evidence.supports')}</p>
                       )}
                       <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleFileChange} />
                     </label>
@@ -452,7 +456,7 @@ export default function CitizenComplaintForm() {
                 disabled={loading}
                 className="w-full py-4 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale"
               >
-                {loading ? <Loader className="animate-spin" size={18} /> : <>Submit Report <ChevronRight size={18} /></>}
+                {loading ? <Loader className="animate-spin" size={18} /> : <>{t('form.submit')} <ChevronRight size={18} /></>}
               </button>
             </div>
           </form>
@@ -477,7 +481,7 @@ export default function CitizenComplaintForm() {
               className="bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200"
             >
               <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wide">Pinpoint Location</h3>
+                <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wide">{t('form.location.modalTitle')}</h3>
                 <button
                   onClick={() => setShowMapPicker(false)}
                   className="w-8 h-8 rounded hover:bg-slate-200 flex items-center justify-center transition-colors text-slate-500"
@@ -498,7 +502,7 @@ export default function CitizenComplaintForm() {
                   onClick={() => setShowMapPicker(false)}
                   className="px-6 py-2 bg-slate-800 text-white text-xs font-bold uppercase rounded hover:bg-slate-900 transition"
                 >
-                  Confirm Coordinates
+                  {t('form.location.confirm')}
                 </button>
               </div>
             </motion.div>

@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle, Clock, Plus, Share2, ClipboardList, AlertTriangle, RefreshCcw, Search } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 interface DashboardComplaint {
   id: number;
@@ -21,6 +22,7 @@ interface DashboardComplaint {
 }
 
 export default function CitizenReportsPage() {
+  const t = useTranslations('dashboard.citizen.reportsPage');
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [userData, setUserData] = useState<UserProfile | null>(null);
@@ -82,7 +84,7 @@ export default function CitizenReportsPage() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium">Loading your reports...</p>
+          <p className="text-slate-500 font-medium">{t('loading')}</p>
         </div>
       </div>
     );
@@ -105,15 +107,15 @@ export default function CitizenReportsPage() {
                 <ClipboardList className="text-white" size={24} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Official Reports</h1>
-                <p className="text-sm font-medium text-slate-500">Repository of your submitted grievances</p>
+                <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">{t('title')}</h1>
+                <p className="text-sm font-medium text-slate-500">{t('subtitle')}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Link href="/report">
                 <button className="px-5 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm flex items-center gap-2 uppercase text-xs tracking-wider">
                   <Plus size={16} />
-                  New Report
+                  {t('newReport')}
                 </button>
               </Link>
               <button onClick={loadData} className="px-3 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 transition shadow-sm">
@@ -130,7 +132,7 @@ export default function CitizenReportsPage() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
-                placeholder="Search by Report ID, Title..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-1 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] outline-none transition text-slate-900 text-sm font-medium placeholder:text-slate-400"
@@ -141,10 +143,10 @@ export default function CitizenReportsPage() {
               onChange={(e) => setStatusFilter(e.target.value as any)}
               className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-1 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] outline-none transition text-slate-900 text-sm font-bold bg-white min-w-[180px]"
             >
-              <option value="all">View: All Reports</option>
-              <option value="pending">Status: Pending</option>
-              <option value="in_progress">Status: In Progress</option>
-              <option value="resolved">Status: Resolved</option>
+              <option value="all">{t('filterAll')}</option>
+              <option value="pending">{t('filterPending')}</option>
+              <option value="in_progress">{t('filterInProgress')}</option>
+              <option value="resolved">{t('filterResolved')}</option>
             </select>
           </div>
         </div>
@@ -152,7 +154,7 @@ export default function CitizenReportsPage() {
         {/* Reports Grid - Official Card Style */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 min-h-[400px]">
           <h2 className="text-sm font-bold text-slate-500 mb-6 uppercase tracking-widest border-b border-slate-100 pb-2">
-            Records ({filteredComplaints.length})
+            {t('records')} ({filteredComplaints.length})
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredComplaints.length > 0 ? (
@@ -222,9 +224,9 @@ export default function CitizenReportsPage() {
 
                       <div className="flex items-center gap-3">
                         <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded border ${complaint.severity >= 4 ? 'bg-red-50 text-red-700 border-red-100' :
-                            complaint.severity >= 3 ? 'bg-orange-50 text-orange-700 border-orange-100' : 'bg-blue-50 text-blue-700 border-blue-100'
+                          complaint.severity >= 3 ? 'bg-orange-50 text-orange-700 border-orange-100' : 'bg-blue-50 text-blue-700 border-blue-100'
                           }`}>
-                          Severity {complaint.severity}/5
+                          {t('severity')} {complaint.severity}/5
                         </span>
                       </div>
                     </div>
@@ -242,7 +244,7 @@ export default function CitizenReportsPage() {
                       <Share2 size={16} />
                     </button>
                     <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="text-xs font-bold text-[#1e3a8a] hover:underline uppercase tracking-wider flex items-center gap-1">
-                      View Full Details <Share2 size={12} className="rotate-[-90deg]" />
+                      {t('viewDetails')} <Share2 size={12} className="rotate-[-90deg]" />
                     </Link>
                   </div>
                 </motion.div>
@@ -252,14 +254,14 @@ export default function CitizenReportsPage() {
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200">
                   <ClipboardList className="text-slate-300" size={32} />
                 </div>
-                <h3 className="text-slate-900 font-bold text-lg mb-1">No Records Found</h3>
+                <h3 className="text-slate-900 font-bold text-lg mb-1">{t('noRecords')}</h3>
                 <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto">
-                  {searchTerm || statusFilter !== 'all' ? 'Your search filters returned no results.' : 'You have not submitted any reports yet.'}
+                  {searchTerm || statusFilter !== 'all' ? t('noResultsDesc') : t('noReportsDesc')}
                 </p>
                 {!searchTerm && statusFilter === 'all' && (
                   <Link href="/report">
                     <button className="px-6 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm uppercase text-xs tracking-wider">
-                      File New Complaint
+                      {t('fileNew')}
                     </button>
                   </Link>
                 )}

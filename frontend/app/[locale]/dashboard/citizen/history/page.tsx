@@ -7,6 +7,7 @@ import { Token, fetchCurrentUserProfile, UserProfile } from "@/lib/api/api";
 import { Calendar } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 interface DashboardComplaint {
   id: number;
@@ -20,6 +21,7 @@ interface DashboardComplaint {
 }
 
 export default function CitizenHistoryPage() {
+  const t = useTranslations('dashboard.citizen.historyPage');
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [userData, setUserData] = useState<UserProfile | null>(null);
@@ -50,7 +52,7 @@ export default function CitizenHistoryPage() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-slate-500 font-medium">Loading your history...</p>
+          <p className="text-slate-500 font-medium">{t('loading')}</p>
         </div>
       </div>
     );
@@ -73,8 +75,8 @@ export default function CitizenHistoryPage() {
                 <Calendar className="text-white" size={24} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Activity Log</h1>
-                <p className="text-sm font-medium text-slate-500">Timeline of your interactions and submissions</p>
+                <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">{t('title')}</h1>
+                <p className="text-sm font-medium text-slate-500">{t('subtitle')}</p>
               </div>
             </div>
           </div>
@@ -82,7 +84,7 @@ export default function CitizenHistoryPage() {
 
         {/* Timeline View - Clean & Structured */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8 min-h-[500px]">
-          <h2 className="text-sm font-bold text-slate-500 mb-8 uppercase tracking-widest border-b border-slate-100 pb-2">Chronological History</h2>
+          <h2 className="text-sm font-bold text-slate-500 mb-8 uppercase tracking-widest border-b border-slate-100 pb-2">{t('chronologicalHistory')}</h2>
 
           {complaints.length > 0 ? (
             <div className="space-y-0 relative">
@@ -105,14 +107,14 @@ export default function CitizenHistoryPage() {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h3 className="text-base font-bold text-slate-900 group-hover:text-[#1e3a8a] transition-colors">{complaint.title}</h3>
-                          <span className="text-xs text-slate-500 font-medium">Recorded ID: #{complaint.id}</span>
+                          <span className="text-xs text-slate-500 font-medium">{t('recordedId')}: #{complaint.id}</span>
                         </div>
                         <StatusBadge status={complaint.status} />
                       </div>
                       <p className="text-slate-600 text-sm leading-relaxed line-clamp-2 mb-3">{complaint.description}</p>
                       <div className="flex items-center gap-4 border-t border-slate-200 pt-3 mt-2">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Severity: {complaint.severity}/5</span>
-                        <span className="text-xs font-bold text-[#1e3a8a] uppercase tracking-wide hover:underline">View Details &rarr;</span>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">{t('severity')}: {complaint.severity}/5</span>
+                        <span className="text-xs font-bold text-[#1e3a8a] uppercase tracking-wide hover:underline">{t('viewDetails')} &rarr;</span>
                       </div>
                     </div>
                   </div>
@@ -124,11 +126,11 @@ export default function CitizenHistoryPage() {
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200">
                 <Calendar className="text-slate-300" size={32} />
               </div>
-              <h3 className="text-slate-900 font-bold text-lg mb-1">No Activity Found</h3>
-              <p className="text-slate-500 text-sm mb-6">Your submission history is empty.</p>
+              <h3 className="text-slate-900 font-bold text-lg mb-1">{t('noActivity')}</h3>
+              <p className="text-slate-500 text-sm mb-6">{t('noActivityDesc')}</p>
               <Link href="/report">
                 <button className="px-6 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm uppercase text-xs tracking-wider">
-                  Create First Report
+                  {t('createFirst')}
                 </button>
               </Link>
             </div>

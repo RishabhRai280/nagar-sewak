@@ -8,8 +8,10 @@ import { Users, CheckCircle, AlertTriangle, Star, RefreshCcw } from 'lucide-reac
 import ContractorManagement from '@/app/components/contractors/ContractorManagement';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 export default function AdminContractorsPage() {
+  const t = useTranslations('dashboard.admin.contractorsPage');
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [data, setData] = useState<AdminDashboardData | null>(null);
@@ -52,7 +54,7 @@ export default function AdminContractorsPage() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-6">
           <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
-          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Contractors...</p>
+          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">{t('loading')}</p>
         </div>
       </div>
     );
@@ -87,15 +89,15 @@ export default function AdminContractorsPage() {
                 <Users size={28} />
               </div>
               <div>
-                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Contractor Management</h1>
-                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Oversee Vendors & Compliance</p>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">{t('title')}</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{t('subtitle')}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <ContractorManagement onContractorCreated={loadData} />
               <Link href="/contractors">
                 <button className="px-4 py-2 bg-slate-50 text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-100 transition shadow-sm">
-                  View All
+                  {t('viewAll')}
                 </button>
               </Link>
               <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
@@ -112,10 +114,10 @@ export default function AdminContractorsPage() {
               <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center border border-blue-100">
                 <Users size={16} />
               </div>
-              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Total Contractors</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.total')}</h3>
             </div>
             <div className="text-3xl font-black text-[#111827] mb-1">{totalContractorsCount}</div>
-            <p className="text-xs text-slate-500 font-medium">Registered in system</p>
+            <p className="text-xs text-slate-500 font-medium">{t('stats.totalDesc')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -123,10 +125,10 @@ export default function AdminContractorsPage() {
               <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100">
                 <CheckCircle size={16} />
               </div>
-              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Active</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.active')}</h3>
             </div>
             <div className="text-3xl font-black text-[#111827] mb-1">{activeContractorsCount}</div>
-            <p className="text-xs text-slate-500 font-medium">Currently working</p>
+            <p className="text-xs text-slate-500 font-medium">{t('stats.activeDesc')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -134,10 +136,10 @@ export default function AdminContractorsPage() {
               <div className="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center border border-red-100">
                 <AlertTriangle size={16} />
               </div>
-              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Flagged</h3>
+              <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.flagged')}</h3>
             </div>
             <div className="text-3xl font-black text-[#111827] mb-1">{flaggedContractorsCount}</div>
-            <p className="text-xs text-slate-500 font-medium">Need administrative attention</p>
+            <p className="text-xs text-slate-500 font-medium">{t('stats.flaggedDesc')}</p>
           </div>
         </div>
 
@@ -147,17 +149,17 @@ export default function AdminContractorsPage() {
             <div className="w-10 h-10 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center">
               <Users size={20} />
             </div>
-            <h2 className="text-xl font-black text-[#111827] uppercase tracking-tight">Contractor Performance</h2>
+            <h2 className="text-xl font-black text-[#111827] uppercase tracking-tight">{t('performance')}</h2>
           </div>
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
                 <tr>
-                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Company</th>
-                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">License No.</th>
-                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Rating</th>
-                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Active Projects</th>
-                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">Status</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">{t('table.company')}</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">{t('table.license')}</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">{t('table.rating')}</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">{t('table.projects')}</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-xs">{t('table.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -177,11 +179,11 @@ export default function AdminContractorsPage() {
                     </td>
                     <td className="px-6 py-4 text-slate-700 font-bold">
                       {/* Calculate active projects for this flagged contractor if possible, else default to 'Check' */}
-                      <Link href={`/contractors/${c.id}`} className="text-blue-600 hover:underline text-xs">View Details</Link>
+                      <Link href={`/contractors/${c.id}`} className="text-blue-600 hover:underline text-xs">{t('viewDetails')}</Link>
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase tracking-wide border border-red-200">
-                        Flagged
+                        {t('stats.flagged')}
                       </span>
                     </td>
                   </tr>
@@ -191,8 +193,8 @@ export default function AdminContractorsPage() {
             {(!data?.flaggedContractors?.length) && (
               <div className="text-center py-16 text-slate-400 bg-slate-50/50">
                 <Users className="mx-auto mb-3 opacity-50" size={48} />
-                <p className="font-bold text-lg">No flagged contractors</p>
-                <p className="text-sm mt-1 max-w-sm mx-auto">All registered contractors are operating within normal compliance parameters.</p>
+                <p className="font-bold text-lg">{t('noFlagged')}</p>
+                <p className="text-sm mt-1 max-w-sm mx-auto">{t('noFlaggedDesc')}</p>
               </div>
             )}
           </div>

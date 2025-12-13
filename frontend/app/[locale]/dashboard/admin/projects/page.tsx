@@ -8,8 +8,11 @@ import { fetchAdminDashboard, AdminDashboardData, Token } from "@/lib/api/api";
 import { BarChart3, Activity, MapPin, RefreshCcw, ArrowRight, Construction } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 export default function AdminProjectsPage() {
+  const t = useTranslations('dashboard.admin.projectsPage');
+  const tCommon = useTranslations('dashboard.admin'); // For retry, etc if needed, but page specific is better
   const router = useRouter();
   const { collapsed } = useSidebar();
   const [data, setData] = useState<AdminDashboardData | null>(null);
@@ -43,7 +46,7 @@ export default function AdminProjectsPage() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-6">
           <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
-          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Projects...</p>
+          <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">{t('loading')}</p>
         </div>
       </div>
     );
@@ -79,14 +82,14 @@ export default function AdminProjectsPage() {
                 <Construction className="text-white" size={28} />
               </div>
               <div>
-                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Projects Management</h1>
-                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Oversee Infrastructure Development</p>
+                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">{t('title')}</h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{t('subtitle')}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Link href="/projects/new">
                 <button className="px-5 py-2.5 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition shadow-sm">
-                  + New Project
+                  {t('create')}
                 </button>
               </Link>
               <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
@@ -104,7 +107,7 @@ export default function AdminProjectsPage() {
               <div className="w-10 h-10 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center">
                 <Activity size={20} />
               </div>
-              <h2 className="text-lg font-black text-[#111827] uppercase tracking-tight">Status Overview</h2>
+              <h2 className="text-lg font-black text-[#111827] uppercase tracking-tight">{t('statusOverview')}</h2>
             </div>
 
             <div className="space-y-4">
@@ -125,7 +128,7 @@ export default function AdminProjectsPage() {
                         />
                       </div>
                       <div className="flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span>Total Budget</span>
+                        <span>{t('totalBudget')}</span>
                         <span>₹{Number(entry.totalBudget).toLocaleString()}</span>
                       </div>
                     </div>
@@ -135,7 +138,7 @@ export default function AdminProjectsPage() {
               {!data?.projectStatusBreakdown?.length && (
                 <div className="text-center py-12 text-slate-400">
                   <BarChart3 className="mx-auto mb-2 opacity-50" size={32} />
-                  <p className="font-medium text-sm">No project data found.</p>
+                  <p className="font-medium text-sm">{t('noProjectData')}</p>
                 </div>
               )}
             </div>
@@ -147,7 +150,7 @@ export default function AdminProjectsPage() {
               <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
                 <MapPin size={20} />
               </div>
-              <h2 className="text-lg font-black text-[#111827] uppercase tracking-tight">Ward Hotspots</h2>
+              <h2 className="text-lg font-black text-[#111827] uppercase tracking-tight">{t('wardHotspots')}</h2>
             </div>
             <div className="space-y-4">
               {data?.wardComplaintHeatmap?.slice(0, 5).map((ward, i) => (
@@ -162,10 +165,10 @@ export default function AdminProjectsPage() {
                     </div>
                     <div className="flex gap-2">
                       <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100 uppercase">
-                        {ward.complaintCount} Issues
+                        {ward.complaintCount} {t('issues')}
                       </span>
                       <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 uppercase">
-                        {ward.projectCount} Projects
+                        {ward.projectCount} {t('projects')}
                       </span>
                     </div>
                   </div>
@@ -174,7 +177,7 @@ export default function AdminProjectsPage() {
               {!data?.wardComplaintHeatmap?.length && (
                 <div className="text-center py-12 text-slate-400">
                   <MapPin className="mx-auto mb-2 opacity-50" size={32} />
-                  <p className="font-medium text-sm">No ward activity data available.</p>
+                  <p className="font-medium text-sm">{t('noWardData')}</p>
                 </div>
               )}
             </div>

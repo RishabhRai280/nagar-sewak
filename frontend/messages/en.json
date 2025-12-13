@@ -13,7 +13,31 @@
     "search": "Search",
     "filter": "Filter",
     "viewDetails": "View Details",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "admin": "Admin",
+    "contractor": "Contractor",
+    "citizen": "Citizen"
+  },
+  "validation": {
+    "title": {
+      "minLength": "Title must be at least {min} characters",
+      "maxLength": "Title must not exceed {max} characters",
+      "pattern": "Title must contain only letters, numbers, and basic punctuation"
+    },
+    "description": {
+      "minLength": "Description must be at least {min} characters",
+      "maxLength": "Description must not exceed {max} characters"
+    },
+    "severity": "Severity must be between 1 and 5",
+    "coordinates": "Invalid coordinates",
+    "file": {
+      "maxSize": "File must be less than {max}MB",
+      "allowedTypes": "File must be an image (JPEG, PNG, WebP, HEIC)"
+    },
+    "gpsRequired": "GPS location is required",
+    "gpsInvalidLat": "Invalid latitude",
+    "gpsInvalidLng": "Invalid longitude",
+    "photoRequired": "Photo evidence is required"
   },
   "nav": {
     "home": "Home",
@@ -24,7 +48,22 @@
     "register": "Register",
     "logout": "Logout",
     "profile": "Profile",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "projects": "Projects",
+    "tenders": "Tenders",
+    "contractors": "Contractors",
+    "complaints": "Complaints",
+    "availableWorks": "Available Works",
+    "myReports": "My Reports",
+    "history": "History",
+    "analytics": "Analytics",
+    "liveMap": "Live Map",
+    "helpCenter": "Help Center",
+    "reportIssue": "Report Issue",
+    "userProfile": "User Profile",
+    "mainMenu": "Main Menu",
+    "signOut": "Sign Out",
+    "citizenPortal": "Citizen Portal"
   },
   "landing": {
     "badge": "Civic Tech for Smart Cities",
@@ -93,6 +132,14 @@
         "title": "Real-Time Updates",
         "description": "Get instant notifications on complaint status, project progress, and resolution updates."
       },
+      "aiVerification": {
+        "title": "AI-Powered Verification",
+        "description": "Automatic categorization of issues using advanced image recognition."
+      },
+      "citizenRewards": {
+        "title": "Citizen Rewards",
+        "description": "Earn civic points for reporting and verifying community issues."
+      },
       "checkItems": {
         "realTimeTracking": "Real-time status tracking",
         "userFriendly": "User-friendly interface",
@@ -123,6 +170,44 @@
       "subtitle": "Join NagarSewak and contribute to building a more transparent and responsive local government.",
       "createAccount": "Create Account",
       "reportIssue": "Report an Issue"
+    },
+    "initiatives": {
+      "title": "Supported Initiatives"
+    },
+    "featuresGrid": {
+      "title": "Comprehensive",
+      "titleHighlight": "Platform Features"
+    },
+    "spotlight": {
+      "title": "Transforming",
+      "titleHighlight": "Urban Governance",
+      "subtitle": "Experience transparent, efficient, and accountable municipal management through next-gen technology.",
+      "transparency": {
+        "title": "Total Transparency",
+        "description": "Every complaint logged is tracked on an immutable public ledger. Citizens can verify the status of road repairs, sanitation drives, and budget allocation in real-time.",
+        "list": {
+          "audit": "Public Audit Trails",
+          "budget": "Budget Transparency",
+          "accountability": "Contractor Accountability"
+        }
+      },
+      "geo": {
+        "title": "Geo-Tagged Precision",
+        "description": "Pinpoint issues with customized GIS markers. Upload photos and videos that are automatically geo-stamped to prevent duplicate reports and ensure crews reach the exact spot.",
+        "list": {
+          "location": "Exact Location Data",
+          "evidence": "Visual Evidence Upload",
+          "cluster": "Cluster Analysis"
+        }
+      },
+      "contracts": {
+        "title": "Merit-Based Contracts",
+        "description": "Contractors are rated by citizens upon job completion. High-performing agencies get priority, while poor performers are flagged automatically by the smart system.",
+        "stats": {
+          "rating": "Avg Top Contractor",
+          "speed": "Fast Resolution"
+        }
+      }
     }
   },
   "home": {
@@ -151,40 +236,55 @@
   "report": {
     "title": "Report an Issue",
     "subtitle": "Submit a geo-tagged report to your local administration",
+    "banner": {
+      "portalName": "Official Citizen Portal",
+      "steps": {
+        "filed": { "title": "Report Filed", "desc": "Instant ID generation & AI-based categorization routed to the correct department." },
+        "onsite": { "title": "Officer On-Site", "desc": "Field officer dispatched to the geotagged location for verification." },
+        "resolution": { "title": "Resolution", "desc": "Issue resolved with photo evidence & updated status on your dashboard." }
+      },
+      "slogan": { "title": "Your Voice,\nOur Action.", "desc": "Together, we build a cleaner, safer, and smarter city. Report issues directly to the administration and track real-time progress." },
+      "features": { "geo": "Geo-Tagged Reports", "escalation": "Direct Escalation", "tracking": "Transparent Tracking" }
+    },
     "form": {
-      "title": "Issue Title",
-      "titlePlaceholder": "e.g. Large Pothole on Main St.",
+      "header": "New Grievance Report",
+      "subHeader": "Fill in the details below to file an official complaint.",
+      "subject": "Subject",
+      "subjectPlaceholder": "e.g. Water Leakage in Sector 4",
       "description": "Description",
-      "descriptionPlaceholder": "Provide details about the issue...",
+      "descriptionPlaceholder": "Provide detailed information about the issue...",
       "urgency": "Urgency Level",
-      "evidence": "Evidence",
-      "location": "Location",
-      "uploadPhoto": "Upload Photo",
-      "uploadPhotos": "Upload Photos",
-      "addMore": "Add More",
-      "tagLocation": "Tag Current Location",
-      "locationTagged": "Location Tagged",
-      "locating": "Locating...",
-      "gps": "GPS",
-      "pickOnMap": "Pick on Map",
-      "pickLocationOnMap": "Pick Location on Map",
-      "clickAnywhere": "Click anywhere on the map to set the location",
-      "selectedLocation": "Selected:",
-      "confirmLocation": "Confirm Location",
-      "clickToSelect": "Click on the map to select a location",
-      "submitReport": "Submit Report",
-      "processing": "Processing...",
-      "maxImages": "Up to 5 images (JPG, PNG)"
+      "routine": "Routine Check",
+      "immediate": "Immediate Action",
+      "location": {
+        "label": "Location Details",
+        "gpsLocked": "GPS Locked",
+        "tapToSet": "Tap map to set location",
+        "detect": "Detect My Location",
+        "pin": "Pin on Map",
+        "modalTitle": "Pinpoint Location",
+        "confirm": "Confirm Coordinates"
+      },
+      "evidence": {
+        "label": "Evidence Upload",
+        "clickToUpload": "Click to Upload Evidence",
+        "addMore": "Add More",
+        "supports": "Supports JPG, PNG, MP4"
+      },
+      "submit": "Submit Report",
+      "failed": "Submission Failed"
     },
-    "validation": {
-      "titleRequired": "Title is required",
-      "descriptionRequired": "Description is required",
-      "locationRequired": "Please tag your GPS location",
-      "photoRequired": "Photo evidence is required",
-      "maxImagesExceeded": "Maximum 5 images allowed"
-    },
-    "success": "Report submitted successfully!",
-    "error": "Failed to submit report. Please try again."
+    "messages": {
+      "geoUnsupported": "Geolocation is not supported by your browser.",
+      "geoError": "Unable to get your location.",
+      "geoPermission": "Please allow location access.",
+      "geoUnavailable": "Location unavailable.",
+      "geoTimeout": "Request timed out.",
+      "maxFiles": "Maximum 6 media files allowed",
+      "requiredFields": "Please fill in all required fields...",
+      "evidenceRequired": "At least one evidence photo/video is required for verification.",
+      "submitError": "Failed to submit. Please try again."
+    }
   },
     "map": {
       "title": "Interactive Map",
@@ -228,27 +328,350 @@
     },
   "dashboard": {
     "citizen": {
-      "title": "My Dashboard",
+      "title": "Citizen Dashboard",
+      "welcome": "Welcome back",
+      "subtitle": "Your contributions help build a better city. Track your reports and see the impact.",
+      "loading": "Loading your dashboard...",
+      "newReport": "New Report",
+      "totalReports": "Total Reports",
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "resolved": "Resolved",
+      "quickAccess": "Quick Access",
+      "reportIssue": "Report Issue",
+      "reportDesc": "Submit a new grievance",
+      "liveMap": "Live Map",
+      "mapDesc": "View community issues",
+      "myReports": "My Reports",
+      "reportsDesc": "Track status & history",
+      "profile": "Profile",
+      "profileDesc": "Manage your account",
+      "recentSubmissions": "Recent Submissions",
+      "viewAll": "View All",
+      "noReports": "No reports submitted yet",
+      "startReport": "Start your first report",
+      "impactScore": "Impact Score",
+      "fullAnalytics": "Full Analytics",
+      "points": "Points",
+      "solved": "Solved",
+      "total": "Total",
+      "severity": "Severity",
+      "viewDetails": "Click to view details",
       "myComplaints": "My Complaints",
       "statistics": "Statistics",
       "recentActivity": "Recent Activity",
       "noComplaints": "No complaints yet",
-      "submitFirst": "Submit your first complaint to get started"
+      "submitFirst": "Submit your first complaint to get started",
+      "reportsPage": {
+        "title": "Official Reports",
+        "subtitle": "Repository of your submitted grievances",
+        "newReport": "New Report",
+        "loading": "Loading your reports...",
+        "searchPlaceholder": "Search by Report ID, Title...",
+        "filterAll": "View: All Reports",
+        "filterPending": "Status: Pending",
+        "filterInProgress": "Status: In Progress",
+        "filterResolved": "Status: Resolved",
+        "records": "Records",
+        "severity": "Severity",
+        "viewDetails": "View Full Details",
+        "noRecords": "No Records Found",
+        "noResultsDesc": "Your search filters returned no results.",
+        "noReportsDesc": "You have not submitted any reports yet.",
+        "fileNew": "File New Complaint"
+      },
+      "historyPage": {
+        "title": "Activity Log",
+        "subtitle": "Timeline of your interactions and submissions",
+        "loading": "Loading your history...",
+        "chronologicalHistory": "Chronological History",
+        "recordedId": "Recorded ID",
+        "severity": "Severity",
+        "viewDetails": "View Details",
+        "noActivity": "No Activity Found",
+        "noActivityDesc": "Your submission history is empty.",
+        "createFirst": "Create First Report"
+      },
+      "profilePage": {
+        "title": "Citizen Profile",
+        "subtitle": "Manage your personal details and preferences",
+        "loading": "Loading your profile...",
+        "editInfo": "Edit Information",
+        "personalDetails": "Personal Details",
+        "fullName": "Full Name",
+        "username": "Username",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "address": "Residential Address",
+        "notProvided": "Not provided",
+        "impactSummary": "Impact Summary",
+        "totalReports": "Total Reports",
+        "submittedToDate": "Submitted to date",
+        "successRate": "Success Rate",
+        "resolutionEfficiency": "Resolution efficiency",
+        "badgeLevel": "Badge Level",
+        "communityStatus": "Community status",
+        "gold": "Gold",
+        "silver": "Silver",
+        "bronze": "Bronze",
+        "new": "New"
+      },
+      "analyticsPage": {
+        "title": "Analytics & Insights",
+        "subtitle": "Visualizing your contribution to a better city",
+        "loading": "Loading analytics...",
+        "totalReports": "Total Reports",
+        "pending": "Pending",
+        "inProgress": "In Progress",
+        "resolved": "Resolved",
+        "statusDistribution": "Report Status Distribution",
+        "performanceMetrics": "Performance Metrics",
+        "resolutionRate": "Resolution Rate",
+        "highPriorityIssues": "High Priority Issues",
+        "activePipeline": "Active Pipeline",
+        "criticalIssues": "Critical Issues",
+        "totalFiled": "Total Filed",
+        "knowYourData": "Know Your Data",
+        "civicScore": "Civic Score",
+        "resolutionRateDesc": "The percentage of your submitted complaints that have been successfully marked as 'Resolved' by the authorities.",
+        "civicScoreDesc": "A gamified score reflecting your engagement. Earn points for every report filed and verified resolution.",
+        "highPriorityDesc": "Issues marked with Severity 4 or 5. These are tracked for immediate attention due to their critical nature."
+      },
+      "complaintDetail": {
+        "loading": "Loading complaint details...",
+        "errorTitle": "Error",
+        "errorMessage": "Complaint not found",
+        "backToDashboard": "Back to Dashboard",
+        "evidenceGallery": "Evidence Gallery",
+        "geolocatedData": "Geolocated Data",
+        "viewFullMap": "View Full Map",
+        "coordinates": "Coordinates",
+        "communityConsensus": "Community Consensus",
+        "complaintStatus": "Complaint Status",
+        "severity": "Severity",
+        "detailedDescription": "Detailed Description",
+        "reportedBy": "Reported by",
+        "dateFiled": "Date Filed",
+        "resolutionDate": "Resolution Date"
+      }
     },
     "admin": {
       "title": "Admin Dashboard",
+      "subtitle": "Municipal Corporation of India",
+      "loading": "Loading Admin Dashboard...",
       "overview": "Overview",
       "totalComplaints": "Total Complaints",
       "resolved": "Resolved",
       "pending": "Pending",
       "avgResolutionTime": "Avg. Resolution Time",
-      "hours": "hours"
+      "hours": "hours",
+      "activeProjects": "Active Projects",
+      "pendingIssues": "Pending Issues",
+      "avgResolution": "Avg Resolution",
+      "sanctionedBudget": "Sanctioned Budget",
+      "administrativeActions": "Administrative Actions",
+      "newProject": "New Project",
+      "viewMap": "View Map",
+      "manageContractors": "Manage Contractors",
+      "latestReports": "Latest Reports",
+      "viewAll": "View All",
+      "submittedBy": "Submitted by Citizen",
+      "wardHotspots": "Ward Hotspots",
+      "issues": "Issues",
+      "liveOperations": "Live Operations",
+      "realTime": "REAL-TIME",
+      "noCriticalAlerts": "No critical alerts at this moment.",
+      "error": "Dashboard Error",
+      "retry": "Retry",
+      "signOut": "Sign Out",
+      "refresh": "Refresh Data",
+      "noRecentDocs": "No recent documents found.",
+      "noWardData": "No ward data available.",
+      "locationUnmapped": "Location Unmapped",
+      "contractorsPage": {
+        "title": "Contractor Management",
+        "subtitle": "Verified Contractor Registry",
+        "loading": "Loading Contractors...",
+        "performance": "Contractor Performance",
+        "viewDetails": "View Details",
+        "stats": {
+          "total": "Total Contractors",
+          "totalDesc": "Registered in system",
+          "active": "Active",
+          "activeDesc": "Currently working",
+          "flagged": "Flagged",
+          "flaggedDesc": "Need administrative attention"
+        },
+        "table": {
+          "company": "Company",
+          "license": "License No.",
+          "rating": "Rating",
+          "projects": "Active Projects",
+          "status": "Status"
+        },
+        "noFlagged": "No flagged contractors",
+        "noFlaggedDesc": "All registered contractors are operating within normal compliance parameters."
+      },
+      "tendersPage": {
+        "title": "Tender Management",
+        "subtitle": "Manage Bids & Allocations",
+        "create": "+ Create Tender",
+        "viewAll": "View All",
+        "loading": "Loading Tenders...",
+        "stats": {
+          "pending": "Pending Review",
+          "pendingDesc": "Complaints awaiting tender decision",
+          "active": "Active Tenders",
+          "activeDesc": "Currently open for bidding",
+          "completed": "Completed",
+          "completedDesc": "Successfully awarded"
+        },
+        "activities": {
+          "title": "Recent Tender Activities",
+          "review": "Review",
+          "severity": "Severity",
+          "noPending": "No pending reviews",
+          "noPendingDesc": "All complaints have been processed."
+        }
+      },
+      "complaintsPage": {
+        "title": "Complaint Management",
+        "subtitle": "Resolve Citizen Grievances",
+        "loading": "Loading Complaints...",
+        "recentComplaints": "Recent Complaints",
+        "viewMap": "View Map",
+        "details": "Details",
+        "map": "Map",
+        "tenders": "Tenders",
+        "severity": "Severity",
+        "ward": "Ward",
+        "noComplaints": "No complaints found",
+        "noComplaintsDesc": "Great job! All issues are resolved.",
+        "stats": {
+          "total": "Total Complaints",
+          "pending": "Pending",
+          "pendingDesc": "Awaiting action",
+          "inProgress": "In Progress",
+          "inProgressDesc": "Being resolved",
+          "resolved": "Resolved",
+          "resolvedDesc": "Successfully closed",
+          "highPriority": "High Priority",
+          "highPriorityDesc": "Urgent attention needed"
+        }
+      },
+      "projectsPage": {
+        "title": "Project Management",
+        "subtitle": "Track & Monitor",
+        "create": "+ Create Project",
+        "loading": "Loading Projects...",
+        "statusOverview": "Status Overview",
+        "wardHotspots": "Ward Hotspots",
+        "noProjectData": "No project data found.",
+        "noWardData": "No ward activity data available.",
+        "totalBudget": "Total Budget",
+        "issues": "Issues",
+        "projects": "Projects",
+        "stats": {
+          "total": "Total Projects",
+          "inProgress": "In Progress",
+          "completed": "Completed",
+          "delayed": "Delayed"
+        }
+      }
     },
     "contractor": {
       "title": "Contractor Dashboard",
+      "subtitle": "Contractor Portal",
+      "authorized": "Authorized Contractor",
       "assignedWork": "Assigned Work",
       "completedProjects": "Completed Projects",
-      "inProgress": "In Progress"
+      "inProgress": "In Progress",
+      "activeProjects": "Active Projects",
+      "availableWorks": "Available Works",
+      "companyRating": "Company Rating",
+      "operationalActions": "Operational Actions",
+      "findWork": "Find Work",
+      "browseOpp": "Browse opportunities",
+      "myTenders": "My Tenders",
+      "trackSub": "Track submissions",
+      "manageOngoing": "Manage ongoing work",
+      "liveMap": "Live Map",
+      "geoView": "Geospatial view",
+      "recentProjects": "Recent Projects",
+      "viewAll": "View All",
+      "noActiveProjects": "No active projects",
+      "newTenders": "New Tenders",
+      "severity": "Severity",
+      "bidNow": "Bid Now",
+      "noChances": "No chances available",
+      "myProjects": "My Projects",
+      "manageProject": "Manage Project",
+      "noActiveFound": "No active projects found.",
+      "recent": "Recent",
+      "priority": "Priority",
+      "submitTender": "Submit Tender",
+      "noAvailableFound": "No available work found.",
+      "mySubmissions": "My Submissions",
+      "submittedOn": "Submitted on",
+      "noTendersFound": "No tenders found.",
+      "loading": "Loading Workspace...",
+      "error": "Dashboard Error",
+      "retry": "Refresh",
+      "signOut": "Sign Out",
+      "refresh": "Refresh Data",
+      "projectsPage": {
+        "loading": "Loading Projects...",
+        "title": "Active Projects",
+        "subtitle": "Manage Construction Work",
+        "activeCount": "{count} Active",
+        "stats": {
+          "active": "Active",
+          "activeDesc": "Currently working",
+          "completed": "Completed",
+          "completedDesc": "Successfully finished",
+          "totalValue": "Total Value",
+          "totalValueDesc": "Project portfolio",
+          "avgProgress": "Avg Progress",
+          "avgProgressDesc": "Overall completion"
+        },
+        "projectDetails": "Project Details",
+        "card": {
+          "budget": "Budget",
+          "updated": "Updated",
+          "noDate": "No date",
+          "progress": "Progress",
+          "details": "Details",
+          "update": "Update"
+        },
+        "empty": {
+          "title": "No projects assigned",
+          "desc": "Projects assigned to you by administrators will appear here automatically."
+        }
+      },
+      "availablePage": {
+        "loading": "Loading Jobs...",
+        "title": "Available Works",
+        "subtitle": "Browse & Bid on Projects",
+        "filters": {
+          "allSeverity": "All Severity",
+          "high": "High Priority",
+          "medium": "Medium Priority",
+          "low": "Low Priority",
+          "mostRecent": "Most Recent",
+          "highestSeverity": "Highest Severity"
+        },
+        "opportunitiesFound": "{count} Opportunities Found",
+        "openTenders": "Open Tenders",
+        "card": {
+          "pendingBid": "Pending Bid",
+          "severityLevel": "Severity Level",
+          "placeTender": "Place Tender"
+        },
+        "empty": {
+          "title": "No open opportunities found",
+          "desc": "Check back later for new tenders."
+        }
+      }
     }
   },
   "auth": {
@@ -279,7 +702,12 @@
       "demoPassword": "password",
       "communityDriven": "Community Driven",
       "communityDrivenDesc": "Join thousands making a difference in their cities",
-      "orContinueWith": "Or continue with"
+      "orContinueWith": "Or continue with",
+      "googleSignIn": "Continue with Google",
+      "googleSigningIn": "Signing in...",
+      "registerLink": "Register Here",
+      "loginFailed": "Login failed.",
+      "googleFailed": "Google sign-in failed."
     },
     "register": {
       "title": "Create Account",
@@ -348,8 +776,23 @@
     "about": "About",
     "contact": "Contact",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "copyright": "© 2025 Nagar Sewak. All rights reserved.",
+    "terms": "Terms of Use",
+    "copyright": "© 2025 Nagar Sewak.",
+    "rights": "All rights reserved.",
+    "brandSubtitle": "Citizen Engagement Portal",
+    "description": "Empowering citizens with direct access to local governance, reporting, and civic tracking. A step towards transparent and efficient administration.",
+    "quickLinks": "Quick Links",
+    "government": "Government",
+    "contactUs": "Contact Us",
+    "address": "Ministry of Urban Affairs, Nirman Bhawan, New Delhi",
+    "allContentOwned": "All Content Owned by Government of India.",
+    "accessibility": "Accessibility Statement",
+    "govLinks": {
+      "indiaGov": "National Portal of India",
+      "digitalIndia": "Digital India",
+      "myGov": "MyGov",
+      "dataGov": "Data.gov.in"
+    },
     "documentation": "Documentation",
     "apiGuide": "API Guide",
     "helpCenter": "Help Center",
@@ -360,7 +803,6 @@
     "subscribe": "Subscribe",
     "emailPlaceholder": "your@email.com",
     "builtWith": "Built with",
-    "forGovernance": "for transparent governance.",
-    "description": "Empowering citizens and improving governance through transparent, real-time civic engagement and accountability."
+    "forGovernance": "for transparent governance."
   }
 }

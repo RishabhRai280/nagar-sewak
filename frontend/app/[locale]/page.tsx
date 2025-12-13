@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -35,8 +36,8 @@ export default function GovLandingPage() {
     { icon: BarChart3, title: t('features.adminDashboard.title'), description: t('features.adminDashboard.description'), color: "blue" },
     { icon: Shield, title: t('features.transparentGovernance.title'), description: t('features.transparentGovernance.description'), color: "blue" },
     { icon: Zap, title: t('features.realTimeUpdates.title'), description: t('features.realTimeUpdates.description'), color: "orange" },
-    { icon: Camera, title: "AI-Powered Verification", description: "Automatic categorization of issues using advanced image recognition.", color: "blue" },
-    { icon: Award, title: "Citizen Rewards", description: "Earn civic points for reporting and verifying community issues.", color: "green" },
+    { icon: Camera, title: t('features.aiVerification.title'), description: t('features.aiVerification.description'), color: "blue" },
+    { icon: Award, title: t('features.citizenRewards.title'), description: t('features.citizenRewards.description'), color: "green" },
   ];
 
   const stats = [
@@ -80,13 +81,13 @@ export default function GovLandingPage() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link href="/login">
               <button className="px-10 py-5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-xl shadow-[0_8px_0_rgb(194,65,12)] hover:shadow-[0_4px_0_rgb(194,65,12)] hover:translate-y-[4px] transition-all flex items-center gap-3">
-                {t('hero.getStarted')}
+                {t('hero.startReporting')}
                 <ArrowRight size={24} />
               </button>
             </Link>
             <Link href="/about">
               <button className="px-10 py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xl border-2 border-slate-600 hover:border-slate-500 transition-all">
-                {t('hero.learnMore')}
+                {t('hero.viewLiveMap')}
               </button>
             </Link>
           </div>
@@ -129,7 +130,7 @@ export default function GovLandingPage() {
       {/* --- SCHEMES TICKER: Digital India Marquee --- */}
       <section className="py-4 bg-orange-50 border-y border-orange-100 overflow-hidden mb-20">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
-          <span className="bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded uppercase min-w-max">Supported Initiatives</span>
+          <span className="bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded uppercase min-w-max">{t('initiatives.title')}</span>
           <div className="flex gap-12 animate-marquee whitespace-nowrap text-slate-600 text-sm font-semibold">
             <span>Swachh Bharat Abhiyan</span>
             <span>•</span>
@@ -151,10 +152,10 @@ export default function GovLandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">
-              Transforming <span className="text-blue-700">Urban Governance</span>
+              {t('spotlight.title')} <span className="text-blue-700">{t('spotlight.titleHighlight')}</span>
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Experience transparent, efficient, and accountable municipal management through next-gen technology.
+              {t('spotlight.subtitle')}
             </p>
           </div>
 
@@ -165,13 +166,12 @@ export default function GovLandingPage() {
                 <div className="inline-block p-3 rounded-lg bg-blue-100 text-blue-700">
                   <Shield size={32} />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900">Total Transparency</h3>
+                <h3 className="text-4xl font-bold text-slate-900">{t('spotlight.transparency.title')}</h3>
                 <p className="text-lg text-slate-600 leading-loose">
-                  Every complaint logged is tracked on an immutable public ledger.
-                  Citizens can verify the status of road repairs, sanitation drives, and budget allocation in real-time.
+                  {t('spotlight.transparency.description')}
                 </p>
                 <ul className="space-y-4">
-                  {['Public Audit Trails', 'Budget Transparency', 'Contractor Accountability'].map((item, i) => (
+                  {[t('spotlight.transparency.list.audit'), t('spotlight.transparency.list.budget'), t('spotlight.transparency.list.accountability')].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
                       <CheckCircle className="text-green-600" size={20} /> {item}
                     </li>
@@ -194,13 +194,12 @@ export default function GovLandingPage() {
                 <div className="inline-block p-3 rounded-lg bg-orange-100 text-orange-600">
                   <MapPin size={32} />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900">Geo-Tagged Precision</h3>
+                <h3 className="text-4xl font-bold text-slate-900">{t('spotlight.geo.title')}</h3>
                 <p className="text-lg text-slate-600 leading-loose">
-                  Pinpoint issues with customized GIS markers. Upload photos and videos that are automatically geo-stamped
-                  to prevent duplicate reports and ensure crews reach the exact spot.
+                  {t('spotlight.geo.description')}
                 </p>
                 <ul className="space-y-4">
-                  {['Exact Location Data', 'Visual Evidence Upload', 'Cluster Analysis'].map((item, i) => (
+                  {[t('spotlight.geo.list.location'), t('spotlight.geo.list.evidence'), t('spotlight.geo.list.cluster')].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
                       <CheckCircle className="text-orange-500" size={20} /> {item}
                     </li>
@@ -223,19 +222,18 @@ export default function GovLandingPage() {
                 <div className="inline-block p-3 rounded-lg bg-green-100 text-green-700">
                   <Star size={32} />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900">Merit-Based Contracts</h3>
+                <h3 className="text-4xl font-bold text-slate-900">{t('spotlight.contracts.title')}</h3>
                 <p className="text-lg text-slate-600 leading-loose">
-                  Contractors are rated by citizens upon job completion. High-performing agencies get priority,
-                  while poor performers are flagged automatically by the smart system.
+                  {t('spotlight.contracts.description')}
                 </p>
                 <div className="flex gap-4">
                   <div className="px-6 py-4 bg-slate-50 rounded-xl border border-slate-200">
                     <div className="text-3xl font-bold text-green-600 mb-1">4.8/5</div>
-                    <div className="text-sm text-slate-500">Avg Top Contractor</div>
+                    <div className="text-sm text-slate-500">{t('spotlight.contracts.stats.rating')}</div>
                   </div>
                   <div className="px-6 py-4 bg-slate-50 rounded-xl border border-slate-200">
                     <div className="text-3xl font-bold text-slate-900 mb-1">15ms</div>
-                    <div className="text-sm text-slate-500">Fast Resolution</div>
+                    <div className="text-sm text-slate-500">{t('spotlight.contracts.stats.speed')}</div>
                   </div>
                 </div>
               </div>
@@ -262,7 +260,7 @@ export default function GovLandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              Comprehensive <span className="text-blue-700">Platform Features</span>
+              {t('featuresGrid.title')} <span className="text-blue-700">{t('featuresGrid.titleHighlight')}</span>
             </h2>
           </div>
 

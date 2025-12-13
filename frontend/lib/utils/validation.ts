@@ -1,4 +1,4 @@
-// lib/validation.ts
+// lib/utils/validation.ts
 export const ValidationRules = {
     title: {
         minLength: 5,
@@ -22,9 +22,12 @@ export const ValidationRules = {
         message: "Invalid coordinates",
     },
     file: {
-        maxSize: 10 * 1024 * 1024, // 10MB
-        allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/heic"],
-        message: "File must be an image (JPEG, PNG, WebP, HEIC) and less than 10MB",
+        maxSize: 50 * 1024 * 1024, // 50MB
+        allowedTypes: [
+            "image/jpeg", "image/png", "image/webp", "image/heic",
+            "video/mp4", "video/webm", "video/ogg", "video/quicktime", "video/x-matroska"
+        ],
+        message: "File must be an image or video and less than 50MB",
     },
     phone: {
         pattern: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
@@ -48,54 +51,54 @@ export function validateComplaint(data: {
     lat: number | null;
     lng: number | null;
     file: File | null;
-}): { valid: boolean; errors: string[] } {
+}, t: any): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     // Title validation
     if (!data.title || data.title.trim().length < ValidationRules.title.minLength) {
-        errors.push(`Title must be at least ${ValidationRules.title.minLength} characters`);
+        errors.push(t('validation.title.minLength', { min: ValidationRules.title.minLength }));
     }
     if (data.title && data.title.length > ValidationRules.title.maxLength) {
-        errors.push(`Title must not exceed ${ValidationRules.title.maxLength} characters`);
+        errors.push(t('validation.title.maxLength', { max: ValidationRules.title.maxLength }));
     }
     if (data.title && !ValidationRules.title.pattern.test(data.title)) {
-        errors.push(ValidationRules.title.message);
+        errors.push(t('validation.title.pattern'));
     }
 
     // Description validation
     if (!data.description || data.description.trim().length < ValidationRules.description.minLength) {
-        errors.push(`Description must be at least ${ValidationRules.description.minLength} characters`);
+        errors.push(t('validation.description.minLength', { min: ValidationRules.description.minLength }));
     }
     if (data.description && data.description.length > ValidationRules.description.maxLength) {
-        errors.push(`Description must not exceed ${ValidationRules.description.maxLength} characters`);
+        errors.push(t('validation.description.maxLength', { max: ValidationRules.description.maxLength }));
     }
 
     // Severity validation
     if (data.severity < ValidationRules.severity.min || data.severity > ValidationRules.severity.max) {
-        errors.push(ValidationRules.severity.message);
+        errors.push(t('validation.severity'));
     }
 
     // Coordinates validation
     if (data.lat === null || data.lng === null) {
-        errors.push("GPS location is required");
+        errors.push(t('validation.gpsRequired'));
     } else {
         if (data.lat < ValidationRules.coordinates.latitude.min || data.lat > ValidationRules.coordinates.latitude.max) {
-            errors.push("Invalid latitude");
+            errors.push(t('validation.gpsInvalidLat'));
         }
         if (data.lng < ValidationRules.coordinates.longitude.min || data.lng > ValidationRules.coordinates.longitude.max) {
-            errors.push("Invalid longitude");
+            errors.push(t('validation.gpsInvalidLng'));
         }
     }
 
     // File validation
     if (!data.file) {
-        errors.push("Photo evidence is required");
+        errors.push(t('validation.photoRequired'));
     } else {
         if (data.file.size > ValidationRules.file.maxSize) {
-            errors.push(`File size must not exceed ${ValidationRules.file.maxSize / (1024 * 1024)}MB`);
+            errors.push(t('validation.file.maxSize', { max: ValidationRules.file.maxSize / (1024 * 1024) }));
         }
         if (!ValidationRules.file.allowedTypes.includes(data.file.type)) {
-            errors.push(ValidationRules.file.message);
+            errors.push(t('validation.file.allowedTypes'));
         }
     }
 

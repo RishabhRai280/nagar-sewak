@@ -7,8 +7,10 @@ import { Token, fetchContractorDashboard, ContractorDashboardData } from "@/lib/
 import { Construction, CheckCircle, DollarSign, TrendingUp, RefreshCcw, ArrowRight } from 'lucide-react';
 import Sidebar from "@/app/components/Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import { useTranslations } from "next-intl";
 
 export default function ContractorProjectsPage() {
+    const t = useTranslations('dashboard.contractor.projectsPage');
     const router = useRouter();
     const { collapsed } = useSidebar();
     const [data, setData] = useState<ContractorDashboardData | null>(null);
@@ -25,7 +27,7 @@ export default function ContractorProjectsPage() {
             setData(fetchedData);
         } catch (err: any) {
             console.error(err);
-            setError(err?.message || "Error loading dashboard");
+            setError(err?.message || t('errorLoadingDashboard'));
         } finally {
             setLoading(false);
         }
@@ -46,7 +48,7 @@ export default function ContractorProjectsPage() {
             <div className="flex items-center justify-center min-h-screen bg-slate-50">
                 <div className="flex flex-col items-center gap-6">
                     <div className="w-16 h-16 border-4 border-slate-200 border-t-[#1e3a8a] rounded-full animate-spin" />
-                    <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">Loading Workspace...</p>
+                    <p className="text-[#1e3a8a] font-bold text-lg tracking-wide uppercase">{t('loading')}</p>
                 </div>
             </div>
         );
@@ -58,7 +60,7 @@ export default function ContractorProjectsPage() {
                 <div className="text-center p-8 bg-white rounded-xl shadow-md border border-slate-200">
                     <p className="text-red-600 mb-4 font-bold">{error}</p>
                     <button onClick={loadData} className="px-6 py-2 bg-[#1e3a8a] text-white rounded-lg font-bold hover:bg-blue-900 transition">
-                        Retry
+                        {t('retry')}
                     </button>
                 </div>
             </div>
@@ -82,14 +84,14 @@ export default function ContractorProjectsPage() {
                                 <Construction className="text-white" size={28} />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">Active Projects</h1>
-                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Manage Construction Work</p>
+                                <h1 className="text-3xl font-black text-[#111827] uppercase tracking-tight">{t('title')}</h1>
+                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">{t('subtitle')}</p>
                             </div>
                         </div>
                         <div className="flex gap-3">
                             <span className="px-4 py-2 bg-blue-50 text-[#1e3a8a] rounded-lg font-bold border border-blue-100 flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-[#1e3a8a]"></span>
-                                {assignedProjects.length} Active
+                                {t('activeCount', { count: assignedProjects.length })}
                             </span>
                             <button onClick={loadData} className="px-4 py-2 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 hover:border-[#1e3a8a] transition shadow-sm">
                                 <RefreshCcw size={18} />
@@ -105,12 +107,12 @@ export default function ContractorProjectsPage() {
                             <div className="w-8 h-8 bg-blue-50 text-[#1e3a8a] rounded-lg flex items-center justify-center border border-blue-100">
                                 <Construction size={16} />
                             </div>
-                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Active</h3>
+                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.active')}</h3>
                         </div>
                         <div className="text-3xl font-black text-[#111827] mb-1">
                             {assignedProjects.filter(p => p.status?.toLowerCase() === 'in progress').length}
                         </div>
-                        <p className="text-xs text-slate-500 font-medium">Currently working</p>
+                        <p className="text-xs text-slate-500 font-medium">{t('stats.activeDesc')}</p>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -118,12 +120,12 @@ export default function ContractorProjectsPage() {
                             <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100">
                                 <CheckCircle size={16} />
                             </div>
-                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Completed</h3>
+                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.completed')}</h3>
                         </div>
                         <div className="text-3xl font-black text-[#111827] mb-1">
                             {assignedProjects.filter(p => p.status?.toLowerCase() === 'completed').length}
                         </div>
-                        <p className="text-xs text-slate-500 font-medium">Successfully finished</p>
+                        <p className="text-xs text-slate-500 font-medium">{t('stats.completedDesc')}</p>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -131,12 +133,12 @@ export default function ContractorProjectsPage() {
                             <div className="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center border border-purple-100">
                                 <DollarSign size={16} />
                             </div>
-                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Total Value</h3>
+                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.totalValue')}</h3>
                         </div>
                         <div className="text-3xl font-black text-[#111827] mb-1">
                             ₹{assignedProjects.reduce((sum, p) => sum + (p.budget || 0), 0).toLocaleString()}
                         </div>
-                        <p className="text-xs text-slate-500 font-medium">Project portfolio</p>
+                        <p className="text-xs text-slate-500 font-medium">{t('stats.totalValueDesc')}</p>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition">
@@ -144,7 +146,7 @@ export default function ContractorProjectsPage() {
                             <div className="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center border border-orange-100">
                                 <TrendingUp size={16} />
                             </div>
-                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">Avg Progress</h3>
+                            <h3 className="font-bold text-slate-500 text-xs uppercase tracking-wider">{t('stats.avgProgress')}</h3>
                         </div>
                         <div className="text-3xl font-black text-[#111827] mb-1">
                             {assignedProjects.length > 0
@@ -158,7 +160,7 @@ export default function ContractorProjectsPage() {
                                 : 0
                             }%
                         </div>
-                        <p className="text-xs text-slate-500 font-medium">Overall completion</p>
+                        <p className="text-xs text-slate-500 font-medium">{t('stats.avgProgressDesc')}</p>
                     </div>
                 </div>
 
@@ -166,7 +168,7 @@ export default function ContractorProjectsPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 lg:p-8">
                     <h2 className="text-xl font-black text-[#111827] mb-6 uppercase tracking-tight flex items-center gap-2">
                         <Construction className="text-[#1e3a8a]" size={24} />
-                        Project Details
+                        {t('projectDetails')}
                     </h2>
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         {assignedProjects.length > 0 ? (
@@ -179,8 +181,8 @@ export default function ContractorProjectsPage() {
                                     <div key={p.id} className="p-6 border border-slate-200 rounded-xl hover:shadow-lg hover:border-[#1e3a8a] transition group bg-white">
                                         <div className="flex justify-between items-start mb-4">
                                             <span className={`text-[10px] font-bold uppercase tracking-wide px-3 py-1 rounded-full ${p.status?.toLowerCase() === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                                                    p.status?.toLowerCase() === 'in progress' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                                                        'bg-orange-50 text-orange-700 border border-orange-200'
+                                                p.status?.toLowerCase() === 'in progress' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                                                    'bg-orange-50 text-orange-700 border border-orange-200'
                                                 }`}>
                                                 {p.status}
                                             </span>
@@ -192,20 +194,20 @@ export default function ContractorProjectsPage() {
 
                                         <div className="space-y-3 mb-4 text-sm">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-slate-500 font-medium">Budget</span>
+                                                <span className="text-slate-500 font-medium">{t('card.budget')}</span>
                                                 <span className="font-bold text-slate-900">₹{p.budget?.toLocaleString()}</span>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-slate-500 font-medium">Updated</span>
+                                                <span className="text-slate-500 font-medium">{t('card.updated')}</span>
                                                 <span className="font-bold text-slate-900">
-                                                    {p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'No date'}
+                                                    {p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : t('card.noDate')}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div className="mb-6">
                                             <div className="flex justify-between text-xs font-bold mb-2">
-                                                <span className="text-slate-500 uppercase">Progress</span>
+                                                <span className="text-slate-500 uppercase">{t('card.progress')}</span>
                                                 <span className="text-[#1e3a8a]">{progress}%</span>
                                             </div>
                                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -218,7 +220,7 @@ export default function ContractorProjectsPage() {
 
                                         <div className="flex gap-2">
                                             <Link href={`/projects/${p.id}`} className="flex-1 text-center py-2.5 bg-[#1e3a8a] text-white text-xs font-bold uppercase rounded-lg hover:bg-blue-900 transition shadow-sm">
-                                                Details
+                                                {t('card.details')}
                                             </Link>
                                             <button
                                                 onClick={() => {
@@ -227,7 +229,7 @@ export default function ContractorProjectsPage() {
                                                 }}
                                                 className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 text-xs font-bold uppercase rounded-lg hover:bg-slate-50 hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition"
                                             >
-                                                Update
+                                                {t('card.update')}
                                             </button>
                                         </div>
                                     </div>
@@ -236,8 +238,8 @@ export default function ContractorProjectsPage() {
                         ) : (
                             <div className="col-span-full text-center py-16 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                                 <Construction className="mx-auto mb-4 opacity-50 text-blue-400" size={48} />
-                                <p className="text-lg font-bold">No projects assigned</p>
-                                <p className="text-sm mt-1 max-w-sm mx-auto">Projects assigned to you by administrators will appear here automatically.</p>
+                                <p className="text-lg font-bold">{t('empty.title')}</p>
+                                <p className="text-sm mt-1 max-w-sm mx-auto">{t('empty.desc')}</p>
                             </div>
                         )}
                     </div>

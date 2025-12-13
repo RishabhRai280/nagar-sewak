@@ -3,6 +3,7 @@
 import { usePathname } from "@/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
+import { useSidebar } from "@/app/contexts/SidebarContext";
 
 export default function DynamicLayoutRenderer({
   children,
@@ -10,12 +11,14 @@ export default function DynamicLayoutRenderer({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { collapsed } = useSidebar();
+
   const isMapPage = pathname === "/map";
   const isDashboardPage = pathname.includes("/dashboard");
-  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isHelpPage = pathname.includes("/help");
 
   // Hide header ONLY on dashboard pages and Help pages (since Help uses Sidebar layout)
-  const shouldHideHeader = isDashboardPage || pathname.includes("/help");
+  const shouldHideHeader = isDashboardPage || isHelpPage;
 
   // Hide footer on dashboard AND map pages
   const shouldHideFooter = isDashboardPage || isMapPage;
@@ -29,7 +32,11 @@ export default function DynamicLayoutRenderer({
         {children}
       </main>
 
-      {!shouldHideFooter && <Footer />}
+      {!shouldHideFooter && (
+        <div className={`transition-all duration-300 ${isHelpPage ? (collapsed ? 'ml-16' : 'ml-64') : ''}`}>
+          <Footer />
+        </div>
+      )}
     </>
   );
 }
