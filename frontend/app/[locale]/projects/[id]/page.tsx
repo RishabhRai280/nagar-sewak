@@ -80,7 +80,7 @@ export default function ProjectDetailsPage() {
                 <h1 className="text-2xl font-bold text-slate-800 mb-2">Project Not Found</h1>
                 <p className="text-slate-600 mb-6">{error || "The requested project does not exist."}</p>
                 <Link href="/map" className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
-                    Back to Map
+                    Back to previous
                 </Link>
             </div>
         );

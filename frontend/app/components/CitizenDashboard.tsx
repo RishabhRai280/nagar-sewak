@@ -146,7 +146,7 @@ export default function CitizenDashboardComponent() {
                             <span className={`flex items-center gap-1.5 font-bold ${complaint.severity >= 4 ? 'text-red-600' : 'text-yellow-600'}`}>
                                 <AlertCircle size={16} /> Severity {complaint.severity}/5
                             </span>
-                            <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="ml-auto flex items-center gap-1 text-blue-600 font-bold hover:underline">
+                            <Link href={`/complaints/${complaint.id}`} className="ml-auto flex items-center gap-1 text-blue-600 font-bold hover:underline">
                                 View Details <Eye size={16} />
                             </Link>
                         </div>

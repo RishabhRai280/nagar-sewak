@@ -55,7 +55,7 @@ public class NotificationEventListener {
             .title("Complaint Status Updated")
             .message(String.format("Your complaint '%s' status changed from %s to %s", 
                 complaint.getTitle(), event.getOldStatus(), event.getNewStatus()))
-            .actionUrl("/dashboard/citizen/complaints/" + complaint.getId())
+            .actionUrl("/complaints/" + complaint.getId())
             .metadata(metadata)
             .build();
 

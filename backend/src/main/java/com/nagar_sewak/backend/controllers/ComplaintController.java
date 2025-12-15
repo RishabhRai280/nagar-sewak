@@ -375,7 +375,7 @@ public class ComplaintController {
                     .priority(NotificationPriority.MEDIUM)
                     .title("New Comment on Your Complaint")
                     .message(user.getFullName() + " commented: " + content.substring(0, Math.min(100, content.length())))
-                    .actionUrl("/dashboard/citizen/complaints/" + id)
+                    .actionUrl("/complaints/" + id)
                     .build()
             );
         }
@@ -415,7 +415,7 @@ public class ComplaintController {
                         .priority(NotificationPriority.HIGH)
                         .title("You were mentioned in a comment")
                         .message(comment.getUser().getFullName() + " mentioned you: " + content.substring(0, Math.min(100, content.length())))
-                        .actionUrl("/dashboard/citizen/complaints/" + comment.getComplaint().getId())
+                        .actionUrl("/complaints/" + comment.getComplaint().getId())
                         .build()
                 );
             });

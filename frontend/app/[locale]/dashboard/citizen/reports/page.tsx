@@ -243,7 +243,7 @@ export default function CitizenReportsPage() {
                     >
                       <Share2 size={16} />
                     </button>
-                    <Link href={`/dashboard/citizen/complaints/${complaint.id}`} className="text-xs font-bold text-[#1e3a8a] hover:underline uppercase tracking-wider flex items-center gap-1">
+                    <Link href={`/complaints/${complaint.id}`} className="text-xs font-bold text-[#1e3a8a] hover:underline uppercase tracking-wider flex items-center gap-1">
                       {t('viewDetails')} <Share2 size={12} className="rotate-[-90deg]" />
                     </Link>
                   </div>

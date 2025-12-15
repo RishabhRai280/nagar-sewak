@@ -223,7 +223,7 @@ export default function CitizenDashboardComponent() {
               </div>
               <div className="space-y-4">
                 {complaints.slice(0, 3).map(complaint => (
-                  <div key={complaint.id} className="group p-4 bg-slate-50 hover:bg-white border border-slate-100 hover:border-blue-200 rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => router.push(`/dashboard/citizen/complaints/${complaint.id}`)}>
+                  <div key={complaint.id} className="group p-4 bg-slate-50 hover:bg-white border border-slate-100 hover:border-blue-200 rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => router.push(`/complaints/${complaint.id}`)}>
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-bold text-slate-800 line-clamp-1 group-hover:text-[#1e3a8a] transition-colors">#{complaint.id} - {complaint.title}</h3>
                       <StatusBadge status={complaint.status} />

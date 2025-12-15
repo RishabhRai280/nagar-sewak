@@ -103,7 +103,7 @@ export default function CitizenHistoryPage() {
                   </div>
 
                   <div className="flex-1 pb-10">
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 group-hover:border-blue-300 group-hover:bg-white transition-all duration-300 hover:shadow-md cursor-pointer" onClick={() => router.push(`/dashboard/citizen/complaints/${complaint.id}`)}>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 group-hover:border-blue-300 group-hover:bg-white transition-all duration-300 hover:shadow-md cursor-pointer" onClick={() => router.push(`/complaints/${complaint.id}`)}>
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h3 className="text-base font-bold text-slate-900 group-hover:text-[#1e3a8a] transition-colors">{complaint.title}</h3>

@@ -485,6 +485,7 @@ function FloatingDetailsPanel({
   const t = useTranslations("map");
   const mediaItems = (data.photoUrls && data.photoUrls.length ? data.photoUrls : data.photoUrl ? [data.photoUrl] : []) as string[];
   const isVideo = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
 
   // Determine date to show
   const displayDate = data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-IN', {
@@ -533,19 +534,65 @@ function FloatingDetailsPanel({
       
          {/* Media Viewer - If exists */}
          {mediaItems.length > 0 && (
-          <div className="w-full h-56 bg-slate-100 flex items-center justify-center border-b border-slate-200 relative group">
-             {isVideo(mediaItems[0]) ? (
-                 <video src={buildAssetUrl(mediaItems[0]) ?? mediaItems[0]} className="w-full h-full object-contain" controls />
-             ) : (
-                 <img 
-                   src={buildAssetUrl(mediaItems[0]) ?? mediaItems[0]} 
-                   className="w-full h-full object-cover" 
-                   alt="Evidence" 
-                 />
-             )}
-             <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-medium">
-                Evidence Record
-             </div>
+          <div className="border-b border-slate-200">
+            {/* Main Media Display */}
+            <div className="w-full h-56 bg-slate-100 flex items-center justify-center relative group">
+               {isVideo(mediaItems[selectedMediaIndex]) ? (
+                   <video src={buildAssetUrl(mediaItems[selectedMediaIndex]) ?? mediaItems[selectedMediaIndex]} className="w-full h-full object-contain" controls />
+               ) : (
+                   <img 
+                     src={buildAssetUrl(mediaItems[selectedMediaIndex]) ?? mediaItems[selectedMediaIndex]} 
+                     className="w-full h-full object-cover" 
+                     alt="Evidence" 
+                   />
+               )}
+               <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-medium">
+                  Evidence Record {mediaItems.length > 1 ? `(${selectedMediaIndex + 1}/${mediaItems.length})` : ''}
+               </div>
+            </div>
+            
+            {/* Thumbnail Strip - Show if multiple media */}
+            {mediaItems.length > 1 && (
+              <div className="p-3 bg-slate-50">
+                <div className="flex gap-2 overflow-x-auto">
+                  {mediaItems.slice(0, 6).map((media, index) => {
+                    const isVideoThumb = isVideo(media);
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedMediaIndex(index)}
+                        className={`flex-shrink-0 w-12 h-12 rounded border-2 overflow-hidden bg-white transition-colors ${
+                          selectedMediaIndex === index 
+                            ? 'border-blue-500 ring-2 ring-blue-200' 
+                            : 'border-slate-200 hover:border-blue-400'
+                        }`}
+                      >
+                        {isVideoThumb ? (
+                          <video src={buildAssetUrl(media) ?? media} className="w-full h-full object-cover" />
+                        ) : (
+                          <img 
+                            src={buildAssetUrl(media) ?? media} 
+                            className="w-full h-full object-cover" 
+                            alt={`Evidence ${index + 1}`}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://placehold.co/100/e2e8f0/64748b?text=${index + 1}`;
+                            }}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                  {mediaItems.length > 6 && (
+                    <div className="flex-shrink-0 w-12 h-12 rounded border-2 border-slate-200 bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                      +{mediaItems.length - 6}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  {mediaItems.length} evidence file{mediaItems.length > 1 ? 's' : ''} • Click thumbnails to view
+                </p>
+              </div>
+            )}
           </div>
          )}
       
