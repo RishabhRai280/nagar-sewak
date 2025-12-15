@@ -78,6 +78,18 @@ public class EmailService {
     }
 
     /**
+     * Send password reset email asynchronously
+     */
+    @Async
+    public CompletableFuture<Boolean> sendPasswordResetEmail(String userEmail, String resetToken, String userName) {
+        EmailTemplateService.EmailContent content = emailTemplateService.createPasswordResetEmail(
+            userEmail, resetToken, userName);
+        
+        return sendEmailWithHistory(userEmail, content.getSubject(), content.getContent(), 
+                                  EmailTemplateType.PASSWORD_RESET);
+    }
+
+    /**
      * Send HTML email with history tracking and retry mechanism
      */
     @Async

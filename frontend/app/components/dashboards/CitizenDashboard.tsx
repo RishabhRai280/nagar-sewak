@@ -7,7 +7,7 @@ import Sidebar from "../shared/Sidebar";
 import Link from "next/link";
 import { Token, fetchCurrentUserProfile, UserProfile, buildAssetUrl } from "@/lib/api/api";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle, Clock, Plus, Map, ClipboardList, FileEdit, LayoutDashboard, User, TrendingUp, Star, RefreshCcw, AlertTriangle, Share2, Award } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Plus, Map, ClipboardList, FileEdit, LayoutDashboard, User, TrendingUp, Star, RefreshCcw, AlertTriangle, Share2, Award, Shield } from 'lucide-react';
 import NotificationWrapper from "../notifications/NotificationWrapper";
 import { useSidebar } from "@/app/contexts/SidebarContext";
 
@@ -161,7 +161,7 @@ export default function CitizenDashboardComponent() {
             <h2 className="text-lg font-bold text-slate-900 mb-6 uppercase tracking-wider flex items-center gap-2">
               <LayoutDashboard size={20} className="text-slate-400" /> {t('quickAccess')}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <Link href="/report">
                 <button className="w-full h-full p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#1e3a8a] rounded-xl transition-all duration-300 group shadow-sm hover:shadow-md text-left relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a8a] opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -203,6 +203,17 @@ export default function CitizenDashboardComponent() {
                   </div>
                   <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">{t('profile')}</h3>
                   <p className="text-sm text-slate-500 mt-1">{t('profileDesc')}</p>
+                </button>
+              </Link>
+
+              <Link href="/dashboard/citizen/privacy">
+                <button className="w-full h-full p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#1e3a8a] rounded-xl transition-all duration-300 group shadow-sm hover:shadow-md text-left relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a8a] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="w-12 h-12 bg-green-600 text-white rounded-lg flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
+                    <Shield size={24} />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1e3a8a] transition-colors">{t('privacyTitle')}</h3>
+                  <p className="text-sm text-slate-500 mt-1">{t('privacyDesc')}</p>
                 </button>
               </Link>
             </div>

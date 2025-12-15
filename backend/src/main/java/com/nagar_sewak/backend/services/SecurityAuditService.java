@@ -54,11 +54,12 @@ public class SecurityAuditService {
         String location = getLocationFromRequest(request);
 
         // Add request details to the details map
-        if (details == null) {
-            details = new java.util.HashMap<>();
+        Map<String, Object> mutableDetails = new java.util.HashMap<>();
+        if (details != null) {
+            mutableDetails.putAll(details);
         }
-        details.put("userAgent", userAgent);
-        details.put("location", location);
+        mutableDetails.put("userAgent", userAgent);
+        mutableDetails.put("location", location);
 
         SecurityAuditLog auditLog = SecurityAuditLog.builder()
                 .userId(userId)
@@ -66,7 +67,7 @@ public class SecurityAuditService {
                 .ipAddress(ipAddress)
                 .userAgent(userAgent)
                 .location(location)
-                .details(convertMapToJson(details))
+                .details(convertMapToJson(mutableDetails))
                 .build();
 
         try {

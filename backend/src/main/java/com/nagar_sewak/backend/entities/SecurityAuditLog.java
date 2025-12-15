@@ -6,10 +6,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "security_audit_logs", indexes = {
-    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_audit_user_id", columnList = "user_id"),
     @Index(name = "idx_event_type", columnList = "event_type"),
     @Index(name = "idx_timestamp", columnList = "timestamp"),
-    @Index(name = "idx_ip_address", columnList = "ip_address"),
+    @Index(name = "idx_audit_ip_address", columnList = "ip_address"),
     @Index(name = "idx_user_event_time", columnList = "user_id,event_type,timestamp")
 })
 @Getter

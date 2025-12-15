@@ -41,6 +41,7 @@ import LoadingState from "./LoadingState";
 import ShareBar from "../shared/ShareBar";
 import { useTranslations } from "next-intl";
 import "../../map-enhancements.css";
+import { printMapView } from "./MapPrintUtils";
 
 // Define combined type for map markers
 type MarkerItem =
@@ -49,6 +50,393 @@ type MarkerItem =
 
 const DEFAULT_CENTER: [number, number] = [21.1458, 79.0882]; // Central India
 const PROJECT_DETAILS_PATH = "/projects";
+
+// Print/Export functionality
+const handlePrintExport = async (data: any, isComplaint: boolean) => {
+  const options = [
+    { label: "Print Current View", action: "print" },
+    { label: "Export as PDF Report", action: "pdf" },
+    { label: "Export Data as JSON", action: "json" },
+    { label: "Export Data as CSV", action: "csv" },
+    { label: "Share Location", action: "share" }
+  ];
+
+  // Create a modal-like selection
+  const choice = await showExportOptions(options);
+  
+  switch (choice) {
+    case "print":
+      handlePrintView(data, isComplaint);
+      break;
+    case "pdf":
+      handlePDFExport(data, isComplaint);
+      break;
+    case "json":
+      handleJSONExport(data, isComplaint);
+      break;
+    case "csv":
+      handleCSVExport(data, isComplaint);
+      break;
+    case "share":
+      handleShareLocation(data);
+      break;
+  }
+};
+
+const showExportOptions = (options: Array<{label: string, action: string}>): Promise<string> => {
+  return new Promise((resolve) => {
+    // Create a temporary modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
+    modal.innerHTML = `
+      <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Export Options</h3>
+        <div class="space-y-2">
+          ${options.map(option => `
+            <button 
+              data-action="${option.action}"
+              class="w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-colors text-sm font-medium"
+            >
+              ${option.label}
+            </button>
+          `).join('')}
+        </div>
+        <button 
+          data-action="cancel"
+          class="w-full mt-4 px-4 py-2 text-slate-500 hover:text-slate-700 text-sm font-medium"
+        >
+          Cancel
+        </button>
+      </div>
+    `;
+
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const action = target.getAttribute('data-action');
+      if (action) {
+        document.body.removeChild(modal);
+        if (action !== 'cancel') {
+          resolve(action);
+        }
+      }
+    };
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      } else {
+        handleClick(e);
+      }
+    });
+
+    document.body.appendChild(modal);
+  });
+};
+
+const handlePrintView = (data: any, isComplaint: boolean) => {
+  // Find the map container element
+  const mapContainer = document.querySelector('.leaflet-container') as HTMLElement;
+  if (mapContainer) {
+    printMapView(mapContainer, data);
+    return;
+  }
+  
+  // Fallback to simple print if map container not found
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
+
+  const displayDate = data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const getStatusColor = (s: string) => {
+    const status = s?.toLowerCase();
+    if (status === 'resolved' || status === 'completed') return '#059669';
+    if (status === 'pending') return '#dc2626';
+    if (status === 'in_progress') return '#d97706';
+    return '#64748b';
+  };
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${isComplaint ? 'Complaint' : 'Project'} Report - ${data.title}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
+        .header { border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+        .title { font-size: 24px; font-weight: bold; margin: 0; color: #1e293b; }
+        .subtitle { font-size: 14px; color: #64748b; margin: 5px 0 0 0; }
+        .status { 
+          display: inline-block; 
+          padding: 4px 12px; 
+          border-radius: 20px; 
+          font-size: 12px; 
+          font-weight: bold; 
+          text-transform: uppercase;
+          background-color: ${getStatusColor(data.status)}20;
+          color: ${getStatusColor(data.status)};
+          border: 1px solid ${getStatusColor(data.status)}40;
+        }
+        .section { margin: 25px 0; }
+        .section-title { font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+        .detail-row { display: flex; margin: 8px 0; }
+        .detail-label { font-weight: bold; width: 150px; color: #64748b; }
+        .detail-value { flex: 1; }
+        .description { background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #2563eb; font-style: italic; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
+        @media print {
+          body { margin: 20px; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1 class="title">${data.title}</h1>
+        <p class="subtitle">
+          ${isComplaint ? 'Complaint Report' : 'Project Report'} • 
+          Case #${isComplaint ? 'CMP' : 'PRJ'}-${data.id} • 
+          <span class="status">${data.status?.replace('_', ' ') || 'Unknown'}</span>
+        </p>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Case Details</h2>
+        <div class="detail-row">
+          <span class="detail-label">Date Filed:</span>
+          <span class="detail-value">${displayDate}</span>
+        </div>
+        ${isComplaint ? `
+        <div class="detail-row">
+          <span class="detail-label">Severity Level:</span>
+          <span class="detail-value">${data.severity}/5 (Official Assessment)</span>
+        </div>
+        ` : ''}
+        ${!isComplaint && data.budget ? `
+        <div class="detail-row">
+          <span class="detail-label">Budget Allocated:</span>
+          <span class="detail-value">₹${data.budget.toLocaleString('en-IN')}</span>
+        </div>
+        ` : ''}
+        <div class="detail-row">
+          <span class="detail-label">Location:</span>
+          <span class="detail-value">${data.lat?.toFixed(6)}, ${data.lng?.toFixed(6)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Current Status:</span>
+          <span class="detail-value">${data.status?.replace('_', ' ') || 'Unknown'}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Description</h2>
+        <div class="description">
+          ${data.description || 'No description provided.'}
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Generated on ${new Date().toLocaleString('en-IN')} • Nagar Sewak Platform</p>
+        <p>This is an official document generated from the civic management system.</p>
+      </div>
+
+      <script>
+        window.onload = function() {
+          window.print();
+          window.onafterprint = function() {
+            window.close();
+          };
+        };
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+};
+
+const handlePDFExport = async (data: any, isComplaint: boolean) => {
+  try {
+    // Create a comprehensive report object
+    const reportData = {
+      type: isComplaint ? 'complaint' : 'project',
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      location: {
+        lat: data.lat,
+        lng: data.lng
+      },
+      createdAt: data.createdAt,
+      ...(isComplaint && { severity: data.severity }),
+      ...(!isComplaint && data.budget && { budget: data.budget })
+    };
+
+    // Send to backend for PDF generation
+    const response = await fetch('/api/reports/generate-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reportData)
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${isComplaint ? 'complaint' : 'project'}-${data.id}-report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } else {
+      // Get error details from response
+      let errorMessage = 'Failed to generate PDF';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // If response is not JSON, use status text
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    console.error('PDF export failed:', error);
+    
+    // Show more user-friendly error message
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    
+    // Create a better error modal instead of alert
+    const errorModal = document.createElement('div');
+    errorModal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
+    errorModal.innerHTML = `
+      <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">PDF Export Failed</h3>
+        </div>
+        <p class="text-slate-600 mb-6">${errorMessage}</p>
+        <div class="flex gap-3">
+          <button 
+            onclick="this.closest('.fixed').remove()"
+            class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+          >
+            Close
+          </button>
+          <button 
+            id="try-print-btn"
+            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Try Print Instead
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Add event listener for the print button
+    const printBtn = errorModal.querySelector('#try-print-btn');
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        document.body.removeChild(errorModal);
+        handlePrintView(data, isComplaint);
+      });
+    }
+    
+    document.body.appendChild(errorModal);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+      if (document.body.contains(errorModal)) {
+        document.body.removeChild(errorModal);
+      }
+    }, 10000);
+  }
+};
+
+const handleJSONExport = (data: any, isComplaint: boolean) => {
+  const exportData = {
+    type: isComplaint ? 'complaint' : 'project',
+    exportedAt: new Date().toISOString(),
+    data: data
+  };
+
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${isComplaint ? 'complaint' : 'project'}-${data.id}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+};
+
+const handleCSVExport = (data: any, isComplaint: boolean) => {
+  const headers = isComplaint 
+    ? ['ID', 'Title', 'Description', 'Status', 'Severity', 'Latitude', 'Longitude', 'Created At']
+    : ['ID', 'Title', 'Description', 'Status', 'Budget', 'Latitude', 'Longitude', 'Created At'];
+  
+  const row = isComplaint
+    ? [data.id, data.title, data.description, data.status, data.severity, data.lat, data.lng, data.createdAt]
+    : [data.id, data.title, data.description, data.status, data.budget, data.lat, data.lng, data.createdAt];
+
+  const csvContent = [
+    headers.join(','),
+    row.map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(',')
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${isComplaint ? 'complaint' : 'project'}-${data.id}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+};
+
+const handleShareLocation = async (data: any) => {
+  const shareData = {
+    title: data.title,
+    text: `Check out this location: ${data.title}`,
+    url: `${window.location.origin}/map?lat=${data.lat}&lng=${data.lng}&item=${data.id}`
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      console.log('Share cancelled');
+    }
+  } else {
+    // Fallback: copy to clipboard
+    const shareUrl = shareData.url;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert('Location link copied to clipboard!');
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Location link copied to clipboard!');
+    }
+  }
+};
 
 // --- Marker Icon Utilities ---
 
@@ -207,6 +595,12 @@ function MapContent({
               heatmapEnabled={heatmapEnabled}
               onClusteringToggle={setClusteringEnabled}
               onHeatmapToggle={setHeatmapEnabled}
+              onPrintMap={() => {
+                const mapContainer = document.querySelector('.leaflet-container') as HTMLElement;
+                if (mapContainer) {
+                  printMapView(mapContainer, selectedItem);
+                }
+              }}
               compact={true}
             />
           </div>
@@ -648,7 +1042,10 @@ function FloatingDetailsPanel({
          >
             Access Full Record
          </Link>
-         <button className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-bold rounded shadow-sm transition">
+         <button 
+            onClick={() => handlePrintExport(data, isComplaint)}
+            className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-bold rounded shadow-sm transition"
+         >
             Print / Export
          </button>
       </div>

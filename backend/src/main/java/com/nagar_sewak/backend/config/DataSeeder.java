@@ -27,6 +27,7 @@ public class DataSeeder {
     private final WardRepository wardRepo;
     private final RatingRepository ratingRepo;
     private final ComplaintRepository complaintRepo; 
+    private final EmailTemplateRepository emailTemplateRepo;
     private final PasswordEncoder passwordEncoder;
 
     @EventListener
@@ -142,6 +143,9 @@ public class DataSeeder {
         refreshContractorMetrics(contractorA);
         refreshContractorMetrics(contractorB);
 
+        // Seed email templates
+        seedEmailTemplates();
+
         System.out.println("--- Data Seeding Complete. Sample credentials ---");
         System.out.println("Admin: admin@nagar.gov / password");
         System.out.println("Citizen: citizen@public.org / password");
@@ -238,5 +242,56 @@ public class DataSeeder {
         contractor.setIsFlagged(flagged);
         contractor.setFlaggedAt(flagged ? ZonedDateTime.now() : null);
         contractorRepo.save(contractor);
+    }
+
+    private void seedEmailTemplates() {
+        if (emailTemplateRepo.count() > 0) return;
+
+        System.out.println("Seeding email templates...");
+
+        // Password Reset Template
+        EmailTemplate passwordResetTemplate = EmailTemplate.builder()
+                .type(EmailTemplateType.PASSWORD_RESET)
+                .subject("Password Reset Request - ${appName}")
+                .htmlContent("password-reset")
+                .language("en")
+                .active(true)
+                .build();
+
+        // Security Alert Template
+        EmailTemplate securityAlertTemplate = EmailTemplate.builder()
+                .type(EmailTemplateType.SECURITY_ALERT)
+                .subject("Security Alert - ${appName}")
+                .htmlContent("security-alert")
+                .language("en")
+                .active(true)
+                .build();
+
+        // Account Locked Template
+        EmailTemplate accountLockedTemplate = EmailTemplate.builder()
+                .type(EmailTemplateType.ACCOUNT_LOCKED)
+                .subject("Account Temporarily Locked - ${appName}")
+                .htmlContent("account-locked")
+                .language("en")
+                .active(true)
+                .build();
+
+        // New Device Login Template
+        EmailTemplate newDeviceTemplate = EmailTemplate.builder()
+                .type(EmailTemplateType.NEW_DEVICE_LOGIN)
+                .subject("New Device Login Detected - ${appName}")
+                .htmlContent("new-device-login")
+                .language("en")
+                .active(true)
+                .build();
+
+        emailTemplateRepo.saveAll(List.of(
+                passwordResetTemplate,
+                securityAlertTemplate,
+                accountLockedTemplate,
+                newDeviceTemplate
+        ));
+
+        System.out.println("Email templates seeded successfully!");
     }
 }

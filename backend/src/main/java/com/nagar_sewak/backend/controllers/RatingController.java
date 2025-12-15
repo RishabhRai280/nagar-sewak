@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ratings")
+@CrossOrigin("*")
 public class RatingController {
 
     private final RatingService ratingService;

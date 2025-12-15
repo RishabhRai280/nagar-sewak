@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -32,9 +33,19 @@ public class LoginAttemptService {
      * Get the current number of failed login attempts for an email
      */
     public int getFailedAttempts(String email) {
-        String key = REDIS_KEY_PREFIX + email.toLowerCase();
-        Object attempts = redisTemplate.opsForValue().get(key);
-        return attempts != null ? (Integer) attempts : 0;
+        try {
+            String key = REDIS_KEY_PREFIX + email.toLowerCase();
+            Object attempts = redisTemplate.opsForValue().get(key);
+            return attempts != null ? (Integer) attempts : 0;
+        } catch (Exception e) {
+            log.warn("Redis connection failed, using database fallback for failed attempts count for email: {}", email);
+            // Fallback to database count (less efficient but works without Redis)
+            return (int) loginAttemptRepository.countByEmailAndSuccessfulFalseAndAttemptTimeBetween(
+                email.toLowerCase(), 
+                java.time.LocalDateTime.now().minusMinutes(LOCK_DURATION_MINUTES),
+                java.time.LocalDateTime.now()
+            );
+        }
     }
 
     /**
@@ -54,16 +65,27 @@ public class LoginAttemptService {
         
         loginAttemptRepository.save(attempt);
         
-        // Update Redis counter
-        String key = REDIS_KEY_PREFIX + normalizedEmail;
-        Integer currentAttempts = (Integer) redisTemplate.opsForValue().get(key);
-        int newAttempts = (currentAttempts != null ? currentAttempts : 0) + 1;
-        
-        // Set expiry to reset counter after lock duration
-        redisTemplate.opsForValue().set(key, newAttempts, LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
-        
-        log.info("Failed login attempt recorded for email: {} from IP: {}. Total attempts: {}", 
-                normalizedEmail, ipAddress, newAttempts);
+        int newAttempts = 1;
+        try {
+            // Update Redis counter
+            String key = REDIS_KEY_PREFIX + normalizedEmail;
+            Integer currentAttempts = (Integer) redisTemplate.opsForValue().get(key);
+            newAttempts = (currentAttempts != null ? currentAttempts : 0) + 1;
+            
+            // Set expiry to reset counter after lock duration
+            redisTemplate.opsForValue().set(key, newAttempts, LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
+            
+            log.info("Failed login attempt recorded for email: {} from IP: {}. Total attempts: {}", 
+                    normalizedEmail, ipAddress, newAttempts);
+        } catch (Exception e) {
+            log.warn("Redis connection failed, using database fallback for failed attempts tracking for email: {}", normalizedEmail);
+            // Fallback to database count (less efficient but works without Redis)
+            newAttempts = (int) loginAttemptRepository.countByEmailAndSuccessfulFalseAndAttemptTimeBetween(
+                normalizedEmail, 
+                java.time.LocalDateTime.now().minusMinutes(LOCK_DURATION_MINUTES),
+                java.time.LocalDateTime.now()
+            );
+        }
         
         // Log security event
         Map<String, Object> details = Map.of(
@@ -109,23 +131,51 @@ public class LoginAttemptService {
      */
     public void resetFailedAttempts(String email) {
         String normalizedEmail = email.toLowerCase();
-        String key = REDIS_KEY_PREFIX + normalizedEmail;
-        redisTemplate.delete(key);
-        
-        // Also remove account lock if it exists
-        String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
-        redisTemplate.delete(lockKey);
-        
-        log.info("Failed attempts counter reset for email: {}", normalizedEmail);
+        try {
+            String key = REDIS_KEY_PREFIX + normalizedEmail;
+            redisTemplate.delete(key);
+            
+            // Also remove account lock if it exists
+            String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
+            redisTemplate.delete(lockKey);
+            
+            log.info("Failed attempts counter reset for email: {}", normalizedEmail);
+        } catch (Exception e) {
+            log.warn("Redis connection failed, failed attempts counter reset skipped for email: {}", normalizedEmail);
+        }
     }
 
     /**
      * Check if an account is currently locked
      */
     public boolean isAccountLocked(String email) {
-        String normalizedEmail = email.toLowerCase();
-        String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(lockKey));
+        try {
+            String normalizedEmail = email.toLowerCase();
+            String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
+            return Boolean.TRUE.equals(redisTemplate.hasKey(lockKey));
+        } catch (Exception e) {
+            log.warn("Redis connection failed, checking database for account lock status for email: {}", email);
+            // Fallback to database check
+            return isAccountLockedInDatabase(email);
+        }
+    }
+
+    /**
+     * Check if account is locked in database (fallback when Redis is unavailable)
+     */
+    private boolean isAccountLockedInDatabase(String email) {
+        try {
+            // This would require UserRepository, but we don't have it injected
+            // For now, we'll use a simple time-based check with login attempts
+            LocalDateTime cutoff = LocalDateTime.now().minusMinutes(LOCK_DURATION_MINUTES);
+            long recentFailedAttempts = loginAttemptRepository.countByEmailAndSuccessfulFalseAndAttemptTimeBetween(
+                email.toLowerCase(), cutoff, LocalDateTime.now()
+            );
+            return recentFailedAttempts >= MAX_ATTEMPTS;
+        } catch (Exception e) {
+            log.error("Failed to check account lock status in database", e);
+            return false;
+        }
     }
 
     /**
@@ -133,12 +183,16 @@ public class LoginAttemptService {
      */
     public void lockAccount(String email, HttpServletRequest request) {
         String normalizedEmail = email.toLowerCase();
-        String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
         LocalDateTime lockTime = LocalDateTime.now();
         
-        // Set lock with expiry
-        redisTemplate.opsForValue().set(lockKey, lockTime.toString(), 
-                LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
+        try {
+            String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
+            // Set lock with expiry
+            redisTemplate.opsForValue().set(lockKey, lockTime.toString(), 
+                    LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.warn("Redis connection failed, account lock not set in Redis for email: {}", normalizedEmail);
+        }
         
         // Log security event
         Map<String, Object> details = Map.of(
@@ -176,10 +230,45 @@ public class LoginAttemptService {
      * Get remaining lock time in minutes
      */
     public long getRemainingLockTimeMinutes(String email) {
-        String normalizedEmail = email.toLowerCase();
-        String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
-        Long ttl = redisTemplate.getExpire(lockKey, TimeUnit.MINUTES);
-        return ttl != null && ttl > 0 ? ttl : 0;
+        try {
+            String normalizedEmail = email.toLowerCase();
+            String lockKey = REDIS_LOCK_PREFIX + normalizedEmail;
+            Long ttl = redisTemplate.getExpire(lockKey, TimeUnit.MINUTES);
+            return ttl != null && ttl > 0 ? ttl : 0;
+        } catch (Exception e) {
+            log.warn("Redis connection failed, calculating remaining lock time from database for email: {}", email);
+            return getRemainingLockTimeFromDatabase(email);
+        }
+    }
+
+    /**
+     * Calculate remaining lock time from database (fallback when Redis is unavailable)
+     */
+    private long getRemainingLockTimeFromDatabase(String email) {
+        try {
+            // Find the most recent failed attempt that would have triggered the lock
+            LocalDateTime cutoff = LocalDateTime.now().minusMinutes(LOCK_DURATION_MINUTES);
+            List<LoginAttempt> recentAttempts = loginAttemptRepository.findByEmailAndSuccessfulFalseAndAttemptTimeBetween(
+                email.toLowerCase(), cutoff, LocalDateTime.now()
+            );
+            
+            if (recentAttempts.size() >= MAX_ATTEMPTS) {
+                // Find the attempt that triggered the lock (the 5th failed attempt)
+                recentAttempts.sort((a, b) -> b.getAttemptTime().compareTo(a.getAttemptTime()));
+                if (recentAttempts.size() >= MAX_ATTEMPTS) {
+                    LocalDateTime lockTriggeredAt = recentAttempts.get(MAX_ATTEMPTS - 1).getAttemptTime();
+                    LocalDateTime lockExpiresAt = lockTriggeredAt.plusMinutes(LOCK_DURATION_MINUTES);
+                    
+                    if (LocalDateTime.now().isBefore(lockExpiresAt)) {
+                        return java.time.Duration.between(LocalDateTime.now(), lockExpiresAt).toMinutes();
+                    }
+                }
+            }
+            return 0;
+        } catch (Exception e) {
+            log.error("Failed to calculate remaining lock time from database", e);
+            return 0;
+        }
     }
 
     /**

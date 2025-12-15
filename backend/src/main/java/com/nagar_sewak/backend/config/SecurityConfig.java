@@ -36,7 +36,10 @@ public class SecurityConfig {
                     // ================= PUBLIC READ ACCESS =================
                     // FIX: Added "/uploads/complaints/**" and "/uploads/projects/**" to allow public access to images
                     .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect", "/uploads/complaints/**", "/uploads/projects/**").permitAll() 
-                    .requestMatchers("/auth/**", "/login", "/register").permitAll()
+                    .requestMatchers("/auth/**", "/login", "/register", "/test/**").permitAll()
+                    
+                    // ================= REPORTS ACCESS =================
+                    .requestMatchers("/api/reports/**").permitAll()
                     
                     // ================= ADMIN/CONTRACTOR ACCESS =================
                     .requestMatchers(POST, "/projects").hasAuthority(Role.ADMIN.name())

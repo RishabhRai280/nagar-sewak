@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications", indexes = {
-    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_notif_user_id", columnList = "user_id"),
     @Index(name = "idx_is_read", columnList = "is_read"),
     @Index(name = "idx_created_at", columnList = "created_at"),
     @Index(name = "idx_user_read_created", columnList = "user_id,is_read,created_at")

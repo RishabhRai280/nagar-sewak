@@ -19,25 +19,70 @@
     "citizen": "Citizen"
   },
   "validation": {
+    "required": "This field is required",
+    "email": {
+      "invalid": "Please enter a valid email address",
+      "required": "Email address is required",
+      "exists": "An account with this email already exists",
+      "notFound": "No account found with this email address"
+    },
+    "password": {
+      "required": "Password is required",
+      "minLength": "Password must be at least {min} characters long",
+      "maxLength": "Password cannot exceed {max} characters",
+      "weak": "Password is too weak. Include uppercase, lowercase, numbers, and special characters",
+      "mismatch": "Passwords do not match",
+      "current": "Current password is incorrect",
+      "same": "New password must be different from current password"
+    },
+    "username": {
+      "required": "Username is required",
+      "minLength": "Username must be at least {min} characters",
+      "maxLength": "Username cannot exceed {max} characters",
+      "invalid": "Username can only contain letters, numbers, and underscores",
+      "exists": "This username is already taken",
+      "reserved": "This username is reserved"
+    },
+    "name": {
+      "required": "Full name is required",
+      "minLength": "Name must be at least {min} characters",
+      "maxLength": "Name cannot exceed {max} characters",
+      "invalid": "Name can only contain letters and spaces"
+    },
+    "phone": {
+      "required": "Phone number is required",
+      "invalid": "Please enter a valid phone number",
+      "format": "Phone number must be in format: +91XXXXXXXXXX"
+    },
     "title": {
+      "required": "Title is required",
       "minLength": "Title must be at least {min} characters",
       "maxLength": "Title must not exceed {max} characters",
       "pattern": "Title must contain only letters, numbers, and basic punctuation"
     },
     "description": {
+      "required": "Description is required",
       "minLength": "Description must be at least {min} characters",
       "maxLength": "Description must not exceed {max} characters"
     },
-    "severity": "Severity must be between 1 and 5",
+    "severity": {
+      "required": "Please select severity level",
+      "invalid": "Severity must be between 1 and 5"
+    },
     "coordinates": "Invalid coordinates",
     "file": {
+      "required": "Please select a file",
       "maxSize": "File must be less than {max}MB",
-      "allowedTypes": "File must be an image (JPEG, PNG, WebP, HEIC)"
+      "allowedTypes": "File must be an image (JPEG, PNG, WebP, HEIC)",
+      "corrupt": "File appears to be corrupted. Please try another file",
+      "upload": "Failed to upload file. Please try again"
     },
-    "gpsRequired": "GPS location is required",
-    "gpsInvalidLat": "Invalid latitude",
-    "gpsInvalidLng": "Invalid longitude",
-    "photoRequired": "Photo evidence is required"
+    "gpsRequired": "GPS location is required for accurate reporting",
+    "gpsInvalidLat": "Invalid latitude coordinate",
+    "gpsInvalidLng": "Invalid longitude coordinate",
+    "photoRequired": "Photo evidence is required for verification",
+    "terms": "You must agree to the terms and conditions",
+    "captcha": "Please complete the security verification"
   },
   "nav": {
     "home": "Home",
@@ -346,6 +391,8 @@
       "reportsDesc": "Track status & history",
       "profile": "Profile",
       "profileDesc": "Manage your account",
+      "privacyTitle": "Privacy & Data",
+      "privacyDesc": "Control your data & privacy",
       "recentSubmissions": "Recent Submissions",
       "viewAll": "View All",
       "noReports": "No reports submitted yet",
@@ -453,6 +500,47 @@
         "reportedBy": "Reported by",
         "dateFiled": "Date Filed",
         "resolutionDate": "Resolution Date"
+      },
+      "privacy": {
+        "title": "Privacy & Data Control",
+        "subtitle": "Manage your personal data and privacy settings",
+        "export": {
+          "title": "Export Your Data",
+          "description": "Download a complete copy of your personal data in JSON format. This includes all information we have about you.",
+          "button": "Export Data",
+          "exporting": "Exporting...",
+          "includes": {
+            "profile": "Profile information",
+            "complaints": "Complaint history",
+            "security": "Security logs",
+            "preferences": "Notification preferences"
+          }
+        },
+        "retention": {
+          "title": "Data Retention Policy",
+          "description": "We retain your data according to our privacy policy and legal requirements:",
+          "auditLogs": "Security logs: 365 days",
+          "emailHistory": "Email history: 90 days",
+          "loginAttempts": "Login attempts: 30 days",
+          "deviceData": "Device data: Until account deletion"
+        },
+        "deletion": {
+          "title": "Delete Your Account",
+          "description": "Permanently delete your account and personal data. This action cannot be undone.",
+          "button": "Delete Account",
+          "options": {
+            "title": "Deletion Options:",
+            "anonymize": "Anonymize data (recommended for system integrity)",
+            "complete": "Complete deletion (removes all traces)"
+          },
+          "confirm": {
+            "title": "Confirm Account Deletion",
+            "message": "Are you sure you want to delete your account? This action cannot be undone.",
+            "cancel": "Cancel",
+            "delete": "Delete Account",
+            "deleting": "Deleting..."
+          }
+        }
       }
     },
     "admin": {
@@ -678,6 +766,8 @@
     "login": {
       "title": "Welcome Back",
       "subtitle": "Login to your account",
+      "welcomeBack": "Welcome Back",
+      "enterCredentials": "Sign in to access your dashboard",
       "brandTitle": "Building",
       "brandHighlight": "Trust & Transparency",
       "brandSubtitle": "Join the next generation of civic engagement. Monitor projects, report issues, and secure your city's future.",
@@ -706,8 +796,54 @@
       "googleSignIn": "Continue with Google",
       "googleSigningIn": "Signing in...",
       "registerLink": "Register Here",
-      "loginFailed": "Login failed.",
-      "googleFailed": "Google sign-in failed."
+      "loginFailed": "Login failed. Please check your credentials and try again.",
+      "googleFailed": "Google sign-in failed. Please try again or use email login.",
+      "errors": {
+        "invalidEmail": "Please enter a valid email address",
+        "invalidPassword": "Password must be at least 8 characters long",
+        "emailRequired": "Email address is required",
+        "passwordRequired": "Password is required",
+        "loginError": "Login failed. Please try again.",
+        "serverError": "Server error. Please try again.",
+        "networkError": "Connection error. Check your internet connection.",
+        "accountLocked": "Account temporarily locked due to multiple failed attempts. Please try again later.",
+        "attemptsRemaining": "Invalid email or password. {remaining} attempt(s) remaining before account lockout.",
+        "finalAttempt": "Invalid email or password. This is your final attempt before account lockout."
+      },
+      "success": {
+        "loginSuccess": "Login successful",
+        "passwordReset": "Password reset link sent",
+        "accountCreated": "Account created successfully"
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email to receive a password reset link",
+      "emailLabel": "Email Address",
+      "emailHint": "We'll send a password reset link to this email",
+      "sendResetLink": "Send Reset Link",
+      "sending": "Sending...",
+      "backToLogin": "Back to Login",
+      "rememberPassword": "Remember your password?",
+      "signInLink": "Sign In",
+      "emailSent": "Email Sent!",
+      "checkEmail": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password.",
+      "sendAnother": "Send Another Email"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password below",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordHint": "Must be at least 6 characters long",
+      "resetPassword": "Reset Password",
+      "resetting": "Resetting...",
+      "backToLogin": "Back to Login",
+      "rememberPassword": "Remember your password?",
+      "signInLink": "Sign In",
+      "success": "Password Reset Successfully!",
+      "successMessage": "Your password has been reset successfully. You will be redirected to the login page shortly.",
+      "goToLogin": "Go to Login"
     },
     "register": {
       "title": "Create Account",
@@ -806,13 +942,74 @@
     "forGovernance": "for transparent governance."
   },
   "security": {
+    "login": {
+      "failed": "Invalid email or password",
+      "failedWithAttempts": "Invalid email or password. {remaining} attempts remaining.",
+      "accountLocked": "Account locked due to multiple failed attempts. Try again in {minutes} minutes.",
+      "success": "Login successful",
+      "newDeviceDetected": "New device detected"
+    },
+    "alerts": {
+      "loginAttempts": {
+        "title": "Login Warning",
+        "message": "Invalid email or password. {remaining} attempts remaining.",
+        "finalWarning": "Final warning: 1 attempt remaining before account lockout."
+      },
+      "accountLocked": {
+        "title": "Account Locked",
+        "message": "Account locked due to multiple failed attempts. Try again in {minutes} minutes.",
+        "resetOption": "You can reset your password to regain access immediately."
+      },
+      "newDevice": {
+        "title": "New Device Login",
+        "message": "Login detected from new device. Check your email for details."
+      },
+      "actions": {
+        "understood": "OK",
+        "resetPassword": "Reset Password",
+        "contactSupport": "Contact Support",
+        "close": "Close"
+      }
+    },
+    "notifications": {
+      "close": "Close",
+      "securityAlert": "Security Alert",
+      "accountLockAlert": "Account Lock Alert",
+      "newDeviceAlert": "New Device Alert",
+      "suspiciousActivity": "Suspicious activity detected on your account",
+      "immediateAction": "Immediate action required",
+      "reviewActivity": "Please review your recent activity"
+    },
+    "deviceConfirmation": {
+      "title": "Confirm New Device",
+      "subtitle": "We detected a login from an unrecognized device",
+      "deviceDetails": "Device Information",
+      "deviceType": "Device Type",
+      "browser": "Browser",
+      "operatingSystem": "Operating System",
+      "locationInfo": "Location Information",
+      "ipAddress": "IP Address",
+      "location": "Location",
+      "timeInfo": "Time Information",
+      "firstSeen": "First Seen",
+      "lastSeen": "Last Seen",
+      "securityNotice": "Security Notice",
+      "securityMessage": "If you don't recognize this device or location, please deny access and secure your account immediately.",
+      "trustDevice": "Trust this device",
+      "trustDeviceDescription": "Skip verification for future logins from this device",
+      "confirmAccess": "Confirm Access",
+      "denyAccess": "Deny Access",
+      "processing": "Processing...",
+      "helpText": "Need help with device security?",
+      "learnMore": "Learn More"
+    },
     "loginAttempts": {
-      "warning": "Warning: {attempts} failed login attempt(s)",
-      "remaining": "Account will be locked after {remaining} more failed attempt(s)",
+      "warning": "Warning: {attempts} failed login attempts",
+      "remaining": "Account will be locked after {remaining} more failed attempts",
       "accountLocked": "Account Locked",
-      "lockedMessage": "Your account has been temporarily locked due to multiple failed login attempts",
-      "lockDuration": "Please try again in {minutes} minutes",
-      "contactSupport": "If you believe this is an error, please contact support"
+      "lockedMessage": "Account temporarily locked due to multiple failed login attempts",
+      "lockDuration": "Try again in {minutes} minutes",
+      "contactSupport": "Contact support if you believe this is an error"
     },
     "deviceSecurity": {
       "newDevice": "New Device Login",
@@ -828,14 +1025,6 @@
       "noSecureAccount": "No, secure my account",
       "trustedDevice": "This device is now trusted",
       "deviceConfirmed": "Device confirmed successfully"
-    },
-    "notifications": {
-      "securityAlert": "Security Alert",
-      "accountLockAlert": "Account Lock Alert",
-      "newDeviceAlert": "New Device Alert",
-      "suspiciousActivity": "Suspicious activity detected on your account",
-      "immediateAction": "Immediate action required",
-      "reviewActivity": "Please review your recent activity"
     },
     "preferences": {
       "title": "Security Preferences",

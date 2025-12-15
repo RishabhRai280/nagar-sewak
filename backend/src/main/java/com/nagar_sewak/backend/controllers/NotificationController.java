@@ -18,6 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -76,24 +77,7 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/preferences")
-    public ResponseEntity<List<NotificationPreference>> getPreferences(
-            @AuthenticationPrincipal UserDetails userDetails) {
-        
-        Long userId = ((User) userDetails).getId();
-        List<NotificationPreference> preferences = notificationService.getUserPreferences(userId);
-        return ResponseEntity.ok(preferences);
-    }
 
-    @PutMapping("/preferences")
-    public ResponseEntity<List<NotificationPreference>> updatePreferences(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody List<NotificationService.NotificationPreferenceDTO> preferences) {
-        
-        Long userId = ((User) userDetails).getId();
-        List<NotificationPreference> updated = notificationService.updatePreferences(userId, preferences);
-        return ResponseEntity.ok(updated);
-    }
 
     @PostMapping("/test")
     public ResponseEntity<Notification> createTestNotification(@AuthenticationPrincipal UserDetails userDetails) {

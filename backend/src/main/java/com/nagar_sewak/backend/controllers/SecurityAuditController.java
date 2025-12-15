@@ -27,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/security/audit")
+@CrossOrigin("*")
 public class SecurityAuditController {
 
     private final SecurityAuditService securityAuditService;

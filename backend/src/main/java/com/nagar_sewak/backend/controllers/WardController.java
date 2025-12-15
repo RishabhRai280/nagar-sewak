@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/wards")
+@CrossOrigin("*")
 public class WardController {
 
     private final WardService wardService;

@@ -34,4 +34,10 @@ public class User {
 
     @Column(name = "reset_token_expiry")
     private java.time.LocalDateTime resetTokenExpiry;
+
+    @Column(name = "account_locked")
+    private Boolean accountLocked = false;
+
+    @Column(name = "account_locked_until")
+    private java.time.LocalDateTime accountLockedUntil;
 }

@@ -39,7 +39,41 @@ export default function LoginForm() {
       UserStore.set(profile);
       redirectByRole(profile);
     } catch (err: any) {
-      setError(err.message || "Login failed.");
+      // Debug logging
+      console.log('Login error caught:', err);
+      console.log('Error response:', err.response);
+      console.log('Error status:', err.status);
+      console.log('Error message:', err.message);
+      
+      // Handle security-specific error responses
+      if (err.response && err.response.error) {
+        const errorData = err.response.error;
+        console.log('Error data:', errorData);
+        if (errorData.warningMessage) {
+          console.log('Using warning message:', errorData.warningMessage);
+          setError(errorData.warningMessage);
+        } else if (errorData.remainingAttempts !== undefined) {
+          console.log('Using remaining attempts:', errorData.remainingAttempts);
+          if (errorData.remainingAttempts > 0) {
+            if (errorData.remainingAttempts === 1) {
+              setError(t('errors.finalAttempt'));
+            } else {
+              setError(t('errors.attemptsRemaining', { remaining: errorData.remainingAttempts }));
+            }
+          } else {
+            setError(t('errors.accountLocked'));
+          }
+        } else {
+          console.log('Using fallback error message');
+          setError(errorData.message || t('errors.loginError'));
+        }
+      } else if (err.status === 423 || err.message.includes('locked')) {
+        console.log('Account locked error');
+        setError(t('errors.accountLocked'));
+      } else {
+        console.log('Generic error fallback');
+        setError(err.message || t('errors.loginError'));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -83,10 +117,37 @@ export default function LoginForm() {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden"
+            className={`mb-6 p-4 border rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden ${
+              error.includes('locked') || error.includes('लॉक') 
+                ? 'bg-red-600/15 border-red-600/40 shadow-red-100/50 shadow-lg' 
+                : error.includes('attempt') || error.includes('प्रयास')
+                ? 'bg-amber-500/15 border-amber-500/40 shadow-amber-100/50 shadow-lg'
+                : 'bg-red-500/10 border-red-500/30'
+            }`}
           >
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-            <p className="text-red-700 text-sm font-semibold">{error}</p>
+            <AlertCircle className={`flex-shrink-0 mt-0.5 ${
+              error.includes('locked') || error.includes('लॉक') 
+                ? 'text-red-700' 
+                : error.includes('attempt') || error.includes('प्रयास')
+                ? 'text-amber-700'
+                : 'text-red-600'
+            }`} size={20} />
+            <div className="flex-1">
+              <p className={`text-sm font-semibold ${
+                error.includes('locked') || error.includes('लॉक') 
+                  ? 'text-red-800' 
+                  : error.includes('attempt') || error.includes('प्रयास')
+                  ? 'text-amber-800'
+                  : 'text-red-700'
+              }`}>
+                {error}
+              </p>
+              {(error.includes('attempt') || error.includes('प्रयास')) && (
+                <p className="text-xs text-amber-600 mt-1 font-medium">
+                  {t('pleaseSignIn')}
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -120,7 +181,7 @@ export default function LoginForm() {
         >
           <div className="flex justify-between ml-1">
             <label className="text-sm font-bold text-slate-700">{t('password')}</label>
-            <Link href="#" className="text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline transition-colors">
+            <Link href="/auth/forgot-password" className="text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline transition-colors">
               {t('forgotPassword')}
             </Link>
           </div>

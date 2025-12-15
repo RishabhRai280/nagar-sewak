@@ -65,8 +65,12 @@ public class EmailTemplateService {
                 variables.forEach(context::setVariable);
             }
 
-            // Process template
-            return templateEngine.process("email/" + template.getHtmlContent(), context);
+            // Process template - use template name directly for file-based templates
+            String templateName = template.getHtmlContent();
+            if (!templateName.startsWith("email/")) {
+                templateName = "email/" + templateName;
+            }
+            return templateEngine.process(templateName, context);
         } catch (Exception e) {
             log.error("Error rendering template for type: {} and language: {}", type, language, e);
             return getDefaultTemplate(type, variables);
@@ -169,6 +173,24 @@ public class EmailTemplateService {
     }
 
     /**
+     * Create password reset email content
+     */
+    public EmailContent createPasswordResetEmail(String userEmail, String resetToken, String userName) {
+        Map<String, Object> variables = Map.of(
+            "userEmail", userEmail,
+            "userName", userName,
+            "resetToken", resetToken,
+            "resetUrl", appUrl + "/auth/reset-password?token=" + resetToken,
+            "expiryTime", "1 hour"
+        );
+
+        String subject = renderSubject(EmailTemplateType.PASSWORD_RESET, variables);
+        String content = renderTemplate(EmailTemplateType.PASSWORD_RESET, variables);
+
+        return new EmailContent(subject, content);
+    }
+
+    /**
      * Get template by type and language
      */
     private EmailTemplate getTemplate(EmailTemplateType type, String language) {
@@ -203,6 +225,8 @@ public class EmailTemplateService {
                 return createDefaultAccountLocked(variables);
             case NEW_DEVICE_LOGIN:
                 return createDefaultNewDeviceAlert(variables);
+            case PASSWORD_RESET:
+                return createDefaultPasswordReset(variables);
             default:
                 return createGenericTemplate(type, variables);
         }
@@ -219,6 +243,8 @@ public class EmailTemplateService {
                 return "Account Temporarily Locked - " + appName;
             case NEW_DEVICE_LOGIN:
                 return "New Device Login Detected - " + appName;
+            case PASSWORD_RESET:
+                return "Password Reset Request - " + appName;
             default:
                 return "Notification - " + appName;
         }
@@ -307,6 +333,43 @@ public class EmailTemplateService {
             variables.get("loginTimestamp"),
             variables.get("confirmUrl"),
             variables.get("secureAccountUrl"),
+            appName
+        );
+    }
+
+    private String createDefaultPasswordReset(Map<String, Object> variables) {
+        return String.format("""
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1e3a8a; margin-bottom: 20px;">Password Reset Request</h2>
+                    <p>Hello %s,</p>
+                    <p>We received a request to reset your password for your %s account.</p>
+                    <p>Click the button below to reset your password:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="%s" style="background-color: #1e3a8a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Reset Password</a>
+                    </div>
+                    <p>Or copy and paste this link into your browser:</p>
+                    <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 4px;">%s</p>
+                    <p><strong>This link will expire in %s.</strong></p>
+                    <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+                    <p style="font-size: 12px; color: #666;">
+                        For security reasons, this link will only work once and will expire after %s.<br>
+                        If you need help, contact us at %s
+                    </p>
+                    <p>Best regards,<br><strong>%s Team</strong></p>
+                </div>
+            </body>
+            </html>
+            """,
+            variables.get("userName"),
+            appName,
+            variables.get("resetUrl"),
+            variables.get("resetUrl"),
+            variables.get("expiryTime"),
+            variables.get("expiryTime"),
+            supportEmail,
             appName
         );
     }

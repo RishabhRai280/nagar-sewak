@@ -19,6 +19,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/devices")
+@CrossOrigin("*")
 public class DeviceController {
 
     private final DeviceFingerprintService deviceFingerprintService;

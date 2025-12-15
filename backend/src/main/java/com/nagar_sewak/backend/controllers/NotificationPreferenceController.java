@@ -20,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications/preferences")
+@CrossOrigin("*")
 public class NotificationPreferenceController {
 
     private final NotificationPreferenceService notificationPreferenceService;

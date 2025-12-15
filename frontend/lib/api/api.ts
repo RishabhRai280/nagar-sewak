@@ -60,8 +60,13 @@ async function parseResponse<T>(response: Response): Promise<T> {
     if (contentType.includes('application/json')) {
       try {
         const errorData = await response.json();
-        const errorMessage = errorData.message || errorData.error || `Request failed with status ${response.status}`;
-        throw new Error(errorMessage);
+        
+        // Create enhanced error with response data for security features
+        const error = new Error(errorData.message || errorData.error || `Request failed with status ${response.status}`) as any;
+        error.response = errorData; // Attach full response for detailed error handling
+        error.status = response.status;
+        
+        throw error;
       } catch (e) {
         if (e instanceof Error) throw e;
       }
@@ -204,6 +209,18 @@ export interface AuthResponsePayload {
   email: string;
   userId: number;
   roles: string[];
+  // Security-related fields
+  newDevice?: boolean;
+  attemptCount?: number;
+  remainingAttempts?: number;
+  errorType?: string;
+  error?: {
+    error: string;
+    message: string;
+    attemptCount: number;
+    remainingAttempts: number;
+    warningMessage?: string;
+  };
 }
 
 export interface UserProfile {

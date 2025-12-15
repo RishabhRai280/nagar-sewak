@@ -131,36 +131,36 @@ export default function Header() {
               <GovLogo />
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav 
-              className="hidden md:flex items-center gap-1"
-              role="navigation"
-              aria-label="Main navigation menu"
-            >
-              {navLinks.map(link => {
-                const isActive = pathname === link.path;
-                return (
-                  <Link
-                    key={link.path}
-                    href={link.path}
-                    className={cn(
-                      "px-4 py-2 rounded-md text-sm font-bold transition-all duration-200 flex items-center gap-2 uppercase tracking-wide",
-                      isActive
-                        ? "bg-blue-50 text-blue-800 border-b-2 border-blue-600" // Gov Active Style
-                        : "text-slate-700 hover:bg-slate-50 hover:text-blue-700"
-                    )}
-                    aria-current={isActive ? "page" : undefined}
-                    aria-label={`Navigate to ${link.name}`}
-                  >
-                    {/* <link.icon size={16} />  Icons optional in top nav for cleaner official look */}
-                    {link.name}
-                  </Link>
-                )
-              })}
-            </nav>
-
-            {/* Actions Area */}
+            {/* Actions Area - Navigation moved here to be near notifications */}
             <div className="flex items-center gap-3">
+              
+              {/* Desktop Navigation - Now positioned near notifications */}
+              <nav 
+                className="hidden md:flex items-center gap-1 mr-2"
+                role="navigation"
+                aria-label="Main navigation menu"
+              >
+                {navLinks.map(link => {
+                  const isActive = pathname === link.path;
+                  return (
+                    <Link
+                      key={link.path}
+                      href={link.path}
+                      className={cn(
+                        "px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2",
+                        isActive
+                          ? "bg-blue-50 text-blue-700 border-b-2 border-blue-600"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+                      )}
+                      aria-current={isActive ? "page" : undefined}
+                      aria-label={`Navigate to ${link.name}`}
+                    >
+                      <link.icon size={16} />
+                      {link.name}
+                    </Link>
+                  )
+                })}
+              </nav>
 
               {/* Notifications */}
               {user && <NotificationWrapper />}

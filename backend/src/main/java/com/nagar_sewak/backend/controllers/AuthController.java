@@ -43,6 +43,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@CrossOrigin("*")
 public class AuthController {
 
     private final UserRepository userRepo;
@@ -52,6 +53,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final LoginAttemptService loginAttemptService;
     private final DeviceFingerprintService deviceFingerprintService;
+    private final com.nagar_sewak.backend.services.EmailService emailService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest req) {
@@ -128,12 +130,34 @@ public class AuthController {
             }
 
             // Find user by email
-            User user = userRepo.findByEmail(email)
-                    .orElseThrow(() -> {
-                        // Record failed attempt even for non-existent users to prevent enumeration attacks
-                        loginAttemptService.recordFailedAttempt(email, clientIp, request);
-                        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
-                    });
+            User user = userRepo.findByEmail(email).orElse(null);
+            
+            // Always record attempt regardless of user existence to prevent enumeration
+            if (user == null) {
+                loginAttemptService.recordFailedAttempt(email, clientIp, request);
+                
+                // Get attempt count for response (even for non-existent users)
+                int attemptCount = loginAttemptService.getFailedAttempts(email);
+                int remainingAttempts = Math.max(0, 5 - attemptCount);
+                
+                // Create detailed error response
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "INVALID_CREDENTIALS");
+                errorResponse.put("message", "Invalid email or password");
+                errorResponse.put("attemptCount", attemptCount);
+                errorResponse.put("remainingAttempts", remainingAttempts);
+                
+                if (remainingAttempts > 0) {
+                    errorResponse.put("warningMessage", String.format("Warning: %d failed attempt(s). Account will be locked after %d more failed attempt(s).", attemptCount, remainingAttempts));
+                }
+                
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    AuthResponse.builder()
+                        .message("Invalid email or password")
+                        .error(errorResponse)
+                        .build()
+                );
+            }
 
             try {
                 // Authenticate user using username (Spring Security uses username internally)
@@ -153,19 +177,15 @@ public class AuthController {
                 // Generate JWT token
                 String token = jwtUtil.generateToken(user.getUsername());
 
-                String message = "Login successful";
-                if (isNewDevice) {
-                    message = "Login successful from new device. A security notification has been sent to your email.";
-                }
-
                 AuthResponse response = AuthResponse.builder()
                         .token(token)
-                        .message(message)
+                        .message("Login successful")
                         .username(user.getUsername())
                         .fullName(user.getFullName())
                         .email(user.getEmail())
                         .userId(user.getId())
                         .roles(user.getRoles())
+                        .newDevice(isNewDevice)
                         .build();
 
                 return ResponseEntity.ok(response);
@@ -174,13 +194,28 @@ public class AuthController {
                 // Record failed attempt
                 loginAttemptService.recordFailedAttempt(email, clientIp, request);
                 
-                // Check if we should show warning
-                String warningMessage = "Invalid email or password";
-                if (loginAttemptService.shouldShowWarning(email)) {
-                    warningMessage = loginAttemptService.getWarningMessage(email);
+                // Get attempt count for response
+                int attemptCount = loginAttemptService.getFailedAttempts(email);
+                int remainingAttempts = Math.max(0, 5 - attemptCount);
+                
+                // Create detailed error response with attempt information
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "INVALID_CREDENTIALS");
+                errorResponse.put("message", "Invalid email or password");
+                errorResponse.put("attemptCount", attemptCount);
+                errorResponse.put("remainingAttempts", remainingAttempts);
+                
+                if (remainingAttempts > 0) {
+                    errorResponse.put("warningMessage", String.format("Warning: %d failed attempt(s). Account will be locked after %d more failed attempt(s).", attemptCount, remainingAttempts));
                 }
                 
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, warningMessage);
+                // Return structured error response
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    AuthResponse.builder()
+                        .message("Invalid email or password")
+                        .error(errorResponse)
+                        .build()
+                );
             }
 
         } catch (AccountLockedException e) {
@@ -339,7 +374,11 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest req) {
-        User user = userRepo.findByEmail(req.getEmail())
+        if (req.getEmail() == null || req.getEmail().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+        }
+
+        User user = userRepo.findByEmail(req.getEmail().toLowerCase())
                 .orElse(null); // Don't reveal if email exists for security
 
         if (user != null) {
@@ -349,8 +388,13 @@ public class AuthController {
             user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Token valid for 1 hour
             userRepo.save(user);
 
-            // TODO: Send email with reset link
-            // For now, return token (in production, send via email)
+            // Send password reset email
+            try {
+                emailService.sendPasswordResetEmail(user.getEmail(), resetToken, user.getFullName());
+            } catch (Exception e) {
+                // Log error but don't reveal to user for security
+                System.err.println("Failed to send password reset email: " + e.getMessage());
+            }
         }
 
         // Always return success to prevent email enumeration

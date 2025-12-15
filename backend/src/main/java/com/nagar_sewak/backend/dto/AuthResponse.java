@@ -21,9 +21,10 @@ public class AuthResponse {
     private Set<Role> roles;
     
     // Security-related fields
-    private String warningMessage;
-    private Boolean accountLocked;
-    private Long remainingLockTimeMinutes;
+    private Boolean newDevice;
+    private Integer attemptCount;
+    private Integer remainingAttempts;
     private String errorType;
+    private Object error; // For detailed error information
 }
 

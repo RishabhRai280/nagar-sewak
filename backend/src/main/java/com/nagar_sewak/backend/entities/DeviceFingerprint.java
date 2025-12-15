@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "device_fingerprints", indexes = {
-    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_device_user_id", columnList = "user_id"),
     @Index(name = "idx_fingerprint_hash", columnList = "fingerprint_hash"),
     @Index(name = "idx_trusted", columnList = "trusted"),
     @Index(name = "idx_user_trusted", columnList = "user_id,trusted")
