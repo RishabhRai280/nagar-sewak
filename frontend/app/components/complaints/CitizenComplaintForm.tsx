@@ -9,9 +9,10 @@ import { validateComplaint, sanitizeInput } from "@/lib/utils/validation";
 import { useTranslations } from "next-intl";
 import {
   MapPin, Upload, AlertCircle, Loader, CheckCircle,
-  FileText, Shield, X, ChevronRight, Image as ImageIcon,
-  Navigation, AlertTriangle, Building
+  FileText, X, ChevronRight,
+  Navigation
 } from 'lucide-react';
+import { StatusAnnouncement } from '../shared/AccessibilityUtils';
 
 const MiniMap = dynamic(() => import("../shared/MiniMap"), { ssr: false });
 const LocationPicker = dynamic(() => import("../shared/LocationPicker"), { ssr: false });
@@ -293,13 +294,17 @@ export default function CitizenComplaintForm() {
 
             {/* Error Notification */}
             {(error || validationErrors.length > 0) && (
-              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-md flex items-start gap-3 animate-pulse">
-                <AlertCircle className="text-red-600 mt-0.5" size={20} />
+              <div 
+                className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-md flex items-start gap-3 animate-pulse"
+                role="alert"
+                aria-live="assertive"
+              >
+                <AlertCircle className="text-red-600 mt-0.5" size={20} aria-hidden="true" />
                 <div>
                   <h4 className="text-red-800 font-bold text-sm">{t('form.failed')}</h4>
-                  <p className="text-red-700 text-sm mt-1">{error}</p>
+                  {error && <p className="text-red-700 text-sm mt-1">{error}</p>}
                   {validationErrors.length > 0 && (
-                    <ul className="list-disc list-inside text-red-700 text-xs mt-2 pl-1">
+                    <ul className="list-disc list-inside text-red-700 text-xs mt-2 pl-1" aria-label="Validation errors">
                       {validationErrors.map((e, i) => <li key={i}>{e}</li>)}
                     </ul>
                   )}
@@ -311,45 +316,79 @@ export default function CitizenComplaintForm() {
               {/* INPUTS */}
               <div className="space-y-6">
                 <div className="relative group">
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">{t('form.subject')} <span className="text-red-500">*</span></label>
+                  <label 
+                    htmlFor="complaint-title"
+                    className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide"
+                  >
+                    {t('form.subject')} <span className="text-red-500" aria-label="required">*</span>
+                  </label>
                   <div className="relative">
-                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+                    <FileText 
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" 
+                      size={20}
+                      aria-hidden="true"
+                    />
                     <input
+                      id="complaint-title"
+                      type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 placeholder:text-slate-400 font-bold text-sm shadow-sm"
                       placeholder={t('form.subjectPlaceholder')}
                       disabled={loading}
+                      required
+                      aria-describedby="title-help"
+                      aria-invalid={validationErrors.some(e => e.includes('title')) ? 'true' : 'false'}
                     />
+                    <div id="title-help" className="sr-only">
+                      Enter a brief, descriptive title for your complaint
+                    </div>
                   </div>
                 </div>
 
                 <div className="relative">
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide">{t('form.description')} <span className="text-red-500">*</span></label>
+                  <label 
+                    htmlFor="complaint-description"
+                    className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide"
+                  >
+                    {t('form.description')} <span className="text-red-500" aria-label="required">*</span>
+                  </label>
                   <textarea
+                    id="complaint-description"
                     rows={4}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400 shadow-sm leading-relaxed"
                     placeholder={t('form.descriptionPlaceholder')}
                     disabled={loading}
+                    required
+                    aria-describedby="description-help"
+                    aria-invalid={validationErrors.some(e => e.includes('description')) ? 'true' : 'false'}
                   />
+                  <div id="description-help" className="sr-only">
+                    Provide detailed information about the issue, including what happened, when, and any relevant circumstances
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase mb-3 block tracking-wide">{t('form.urgency')}</label>
-                  <div className="flex gap-3">
+                <fieldset>
+                  <legend className="text-xs font-bold text-slate-500 uppercase mb-3 block tracking-wide">
+                    {t('form.urgency')}
+                  </legend>
+                  <div className="flex gap-3" role="radiogroup" aria-labelledby="urgency-legend" aria-describedby="urgency-help">
                     {[1, 2, 3, 4, 5].map((lvl) => (
                       <button
                         key={lvl}
                         type="button"
                         onClick={() => setSeverity(lvl)}
-                        className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all transform active:scale-95 ${severity === lvl
+                        className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all transform active:scale-95 min-h-[44px] ${severity === lvl
                           ? lvl <= 2 ? 'bg-emerald-600 border-emerald-600 text-white shadow-emerald-200 shadow-lg'
                             : lvl <= 3 ? 'bg-amber-500 border-amber-500 text-white shadow-amber-200 shadow-lg'
                               : 'bg-red-600 border-red-600 text-white shadow-red-200 shadow-lg'
                           : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
                           }`}
+                        role="radio"
+                        aria-checked={severity === lvl}
+                        aria-label={`Urgency level ${lvl} of 5${lvl <= 2 ? ' - Low priority' : lvl <= 3 ? ' - Medium priority' : ' - High priority'}`}
                       >
                         {lvl}
                       </button>
@@ -359,7 +398,10 @@ export default function CitizenComplaintForm() {
                     <span>{t('form.routine')}</span>
                     <span>{t('form.immediate')}</span>
                   </div>
-                </div>
+                  <div id="urgency-help" className="sr-only">
+                    Select urgency level from 1 (routine) to 5 (immediate attention required)
+                  </div>
+                </fieldset>
               </div>
 
               {/* LOCATION & EVIDENCE - VERTICAL STACK */}
@@ -368,47 +410,92 @@ export default function CitizenComplaintForm() {
                 {/* Location - Full Width */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
-                    <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">{t('form.location.label')}</label>
-                    {latitude && <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1"><CheckCircle size={10} /> {t('form.location.gpsLocked')}</span>}
+                    <label 
+                      htmlFor="location-map"
+                      className="text-xs font-bold text-slate-500 uppercase block tracking-wide"
+                    >
+                      {t('form.location.label')}
+                    </label>
+                    {latitude && (
+                      <span 
+                        className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1"
+                        role="status"
+                        aria-label="Location has been set"
+                      >
+                        <CheckCircle size={10} aria-hidden="true" /> {t('form.location.gpsLocked')}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="relative h-40 bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-100 group cursor-pointer shadow-inner" onClick={() => setShowMapPicker(true)}>
+                  <button
+                    id="location-map"
+                    type="button"
+                    onClick={() => setShowMapPicker(true)}
+                    className="relative h-40 w-full bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-100 group cursor-pointer shadow-inner focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    aria-label={latitude && longitude ? `Location set at coordinates ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Click to change location.` : "Click to set location on map"}
+                    aria-describedby="location-help"
+                  >
                     {latitude && longitude ? (
                       <MiniMap lat={latitude} lng={longitude} />
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                        <MapPin size={32} className="mb-2 opacity-50" />
+                        <MapPin size={32} className="mb-2 opacity-50" aria-hidden="true" />
                         <span className="text-sm font-bold text-slate-500">{t('form.location.tapToSet')}</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                  </button>
+                  
+                  <div id="location-help" className="sr-only">
+                    Set the location where the issue occurred. You can use GPS detection or manually select on the map.
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <button type="button" onClick={getLocation} className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider">
-                      <Navigation size={14} /> {t('form.location.detect')}
+                    <button 
+                      type="button" 
+                      onClick={getLocation} 
+                      className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      aria-label="Detect current location using GPS"
+                      disabled={locationStatus === "fetching"}
+                    >
+                      <Navigation size={14} aria-hidden="true" /> 
+                      {locationStatus === "fetching" ? "Detecting..." : t('form.location.detect')}
                     </button>
-                    <button type="button" onClick={() => setShowMapPicker(true)} className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider">
-                      <MapPin size={14} /> {t('form.location.pin')}
+                    <button 
+                      type="button" 
+                      onClick={() => setShowMapPicker(true)} 
+                      className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      aria-label="Select location manually on map"
+                    >
+                      <MapPin size={14} aria-hidden="true" /> {t('form.location.pin')}
                     </button>
                   </div>
                 </div>
 
                 {/* File Upload - Adaptive sizing */}
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-slate-500 uppercase block tracking-wide">{t('form.evidence.label')} ({selectedFiles.length}/6)</label>
+                  <label 
+                    htmlFor="file-upload"
+                    className="text-xs font-bold text-slate-500 uppercase block tracking-wide"
+                  >
+                    {t('form.evidence.label')} ({selectedFiles.length}/6)
+                  </label>
 
                   <div className={selectedFiles.length > 0 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "block"}>
                     {/* Dropzone - Resizes based on state */}
-                    <label className={`
-                          flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-500 transition group bg-slate-50/50 relative overflow-hidden
+                    <label 
+                      htmlFor="file-upload"
+                      className={`
+                          flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-500 transition group bg-slate-50/50 relative overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500
                           ${selectedFiles.length === 0 ? "h-64 border-spacing-4" : "h-40"}
-                      `}>
+                      `}
+                      aria-describedby="file-upload-help"
+                    >
                       <div className={`
                             rounded-full bg-slate-200 group-hover:bg-blue-100 flex items-center justify-center mb-3 transition-colors
                             ${selectedFiles.length === 0 ? "w-20 h-20" : "w-12 h-12"}
                         `}>
-                        <Upload className="text-slate-400 group-hover:text-blue-600" size={selectedFiles.length === 0 ? 32 : 20} />
+                        <Upload className="text-slate-400 group-hover:text-blue-600" size={selectedFiles.length === 0 ? 32 : 20} aria-hidden="true" />
                       </div>
                       <span className={`font-bold text-slate-500 group-hover:text-blue-700 uppercase ${selectedFiles.length === 0 ? "text-lg" : "text-xs"}`}>
                         {selectedFiles.length === 0 ? t('form.evidence.clickToUpload') : t('form.evidence.addMore')}
@@ -416,19 +503,44 @@ export default function CitizenComplaintForm() {
                       {selectedFiles.length === 0 && (
                         <p className="text-slate-400 text-xs mt-2">{t('form.evidence.supports')}</p>
                       )}
-                      <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleFileChange} />
+                      <input 
+                        id="file-upload"
+                        type="file" 
+                        multiple 
+                        accept="image/*,video/*" 
+                        className="sr-only" 
+                        onChange={handleFileChange}
+                        aria-describedby="file-upload-help"
+                        aria-label="Upload evidence files (images or videos)"
+                      />
                     </label>
+                    
+                    <div id="file-upload-help" className="sr-only">
+                      Upload up to 6 image or video files as evidence for your complaint. Supported formats include JPG, PNG, MP4, and other common media formats.
+                    </div>
 
                     {/* Side Previews */}
                     {selectedFiles.length > 0 && (
-                      <div className="grid grid-cols-3 gap-3 h-40 overflow-y-auto custom-scrollbar content-start">
+                      <div 
+                        className="grid grid-cols-3 gap-3 h-40 overflow-y-auto custom-scrollbar content-start"
+                        role="list"
+                        aria-label="Uploaded evidence files"
+                      >
                         {selectedFiles.map((file, i) => (
-                          <div key={i} className="relative aspect-square rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shadow-sm group h-full">
+                          <div 
+                            key={i} 
+                            className="relative aspect-square rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shadow-sm group h-full"
+                            role="listitem"
+                          >
                             {file.type.startsWith('image') ? (
-                              <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
+                              <img 
+                                src={URL.createObjectURL(file)} 
+                                className="w-full h-full object-cover" 
+                                alt={`Evidence image: ${file.name}`}
+                              />
                             ) : (
                               <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center">
-                                <FileText size={20} className="text-slate-400 mb-1" />
+                                <FileText size={20} className="text-slate-400 mb-1" aria-hidden="true" />
                                 <span className="text-[8px] text-slate-500 truncate w-full">{file.name}</span>
                               </div>
                             )}
@@ -436,9 +548,10 @@ export default function CitizenComplaintForm() {
                               <button
                                 type="button"
                                 onClick={(e) => { e.preventDefault(); removeFile(i); }}
-                                className="bg-red-600 text-white rounded-full p-1.5 hover:scale-110 transition"
+                                className="bg-red-600 text-white rounded-full p-1.5 hover:scale-110 transition min-h-[44px] min-w-[44px] focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-red-600 outline-none"
+                                aria-label={`Remove ${file.name} from evidence`}
                               >
-                                <X size={14} />
+                                <X size={14} aria-hidden="true" />
                               </button>
                             </div>
                           </div>
@@ -453,12 +566,55 @@ export default function CitizenComplaintForm() {
             <div className="mt-8 pt-6 border-t border-slate-100">
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale"
+                disabled={loading || !title.trim() || !description.trim()}
+                className="w-full py-4 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none"
+                aria-describedby="submit-help"
               >
-                {loading ? <Loader className="animate-spin" size={18} /> : <>{t('form.submit')} <ChevronRight size={18} /></>}
+                {loading ? (
+                  <>
+                    <Loader className="animate-spin" size={18} aria-hidden="true" />
+                    <span>Submitting complaint...</span>
+                  </>
+                ) : (
+                  <>
+                    {t('form.submit')} 
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </>
+                )}
               </button>
+              <div id="submit-help" className="sr-only">
+                Submit your complaint. Make sure to fill in the title and description before submitting.
+              </div>
             </div>
+            
+            {/* Status announcements for screen readers */}
+            {loading && (
+              <StatusAnnouncement 
+                message="Submitting your complaint, please wait..." 
+                priority="polite" 
+              />
+            )}
+            
+            {locationStatus === "fetching" && (
+              <StatusAnnouncement 
+                message="Detecting your current location..." 
+                priority="polite" 
+              />
+            )}
+            
+            {locationStatus === "success" && latitude && longitude && (
+              <StatusAnnouncement 
+                message="Location detected successfully" 
+                priority="polite" 
+              />
+            )}
+            
+            {locationStatus === "error" && (
+              <StatusAnnouncement 
+                message="Unable to detect location. Please set location manually." 
+                priority="assertive" 
+              />
+            )}
           </form>
         </div>
       </div>

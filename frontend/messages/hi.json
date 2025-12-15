@@ -804,5 +804,58 @@
     "emailPlaceholder": "आपका@email.com",
     "builtWith": "के साथ बनाया गया",
     "forGovernance": "पारदर्शी शासन के लिए।"
+  },
+  "security": {
+    "loginAttempts": {
+      "warning": "चेतावनी: {attempts} असफल लॉगिन प्रयास",
+      "remaining": "{remaining} और असफल प्रयासों के बाद खाता लॉक हो जाएगा",
+      "accountLocked": "खाता लॉक",
+      "lockedMessage": "कई असफल लॉगिन प्रयासों के कारण आपका खाता अस्थायी रूप से लॉक कर दिया गया है",
+      "lockDuration": "कृपया {minutes} मिनट बाद पुनः प्रयास करें",
+      "contactSupport": "यदि आपको लगता है कि यह एक त्रुटि है, तो कृपया सहायता से संपर्क करें"
+    },
+    "deviceSecurity": {
+      "newDevice": "नए डिवाइस से लॉगिन",
+      "newDeviceMessage": "हमने एक नए डिवाइस से लॉगिन का पता लगाया है",
+      "deviceDetails": "डिवाइस विवरण",
+      "browser": "ब्राउज़र",
+      "operatingSystem": "ऑपरेटिंग सिस्टम",
+      "ipAddress": "IP पता",
+      "location": "स्थान",
+      "loginTime": "लॉगिन समय",
+      "wasItYou": "क्या यह आप थे?",
+      "yesItWasMe": "हाँ, यह मैं था",
+      "noSecureAccount": "नहीं, मेरे खाते को सुरक्षित करें",
+      "trustedDevice": "यह डिवाइस अब विश्वसनीय है",
+      "deviceConfirmed": "डिवाइस सफलतापूर्वक पुष्टि की गई"
+    },
+    "notifications": {
+      "securityAlert": "सुरक्षा अलर्ट",
+      "accountLockAlert": "खाता लॉक अलर्ट",
+      "newDeviceAlert": "नया डिवाइस अलर्ट",
+      "suspiciousActivity": "आपके खाते पर संदिग्ध गतिविधि का पता चला",
+      "immediateAction": "तत्काल कार्रवाई आवश्यक",
+      "reviewActivity": "कृपया अपनी हाल की गतिविधि की समीक्षा करें"
+    },
+    "preferences": {
+      "title": "सुरक्षा प्राथमिकताएं",
+      "emailNotifications": "ईमेल सूचनाएं",
+      "securityAlerts": "सुरक्षा अलर्ट",
+      "accountActivity": "खाता गतिविधि",
+      "newDeviceLogins": "नए डिवाइस लॉगिन",
+      "criticalAlertsRequired": "महत्वपूर्ण सुरक्षा अलर्ट अक्षम नहीं किए जा सकते",
+      "preferencesUpdated": "प्राथमिकताएं सफलतापूर्वक अपडेट की गईं"
+    },
+    "auditLog": {
+      "title": "सुरक्षा ऑडिट लॉग",
+      "recentActivity": "हाल की सुरक्षा गतिविधि",
+      "loginAttempt": "लॉगिन प्रयास",
+      "successfulLogin": "सफल लॉगिन",
+      "failedLogin": "असफल लॉगिन",
+      "accountLocked": "खाता लॉक",
+      "newDeviceLogin": "नया डिवाइस लॉगिन",
+      "passwordChanged": "पासवर्ड बदला गया",
+      "noActivity": "कोई हाल की सुरक्षा गतिविधि नहीं"
+    }
   }
 }

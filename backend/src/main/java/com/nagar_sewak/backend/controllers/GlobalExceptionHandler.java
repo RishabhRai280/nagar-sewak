@@ -1,5 +1,6 @@
 package com.nagar_sewak.backend.controllers;
 
+import com.nagar_sewak.backend.exceptions.AccountLockedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +24,18 @@ public class GlobalExceptionHandler {
         errorResponse.put("message", ex.getMessage());
         
         return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountLockedException(AccountLockedException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.LOCKED.value());
+        errorResponse.put("error", "ACCOUNT_LOCKED");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("remainingLockTimeMinutes", ex.getRemainingLockTimeMinutes());
+        
+        return ResponseEntity.status(HttpStatus.LOCKED).body(errorResponse);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

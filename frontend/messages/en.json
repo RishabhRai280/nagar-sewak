@@ -804,5 +804,58 @@
     "emailPlaceholder": "your@email.com",
     "builtWith": "Built with",
     "forGovernance": "for transparent governance."
+  },
+  "security": {
+    "loginAttempts": {
+      "warning": "Warning: {attempts} failed login attempt(s)",
+      "remaining": "Account will be locked after {remaining} more failed attempt(s)",
+      "accountLocked": "Account Locked",
+      "lockedMessage": "Your account has been temporarily locked due to multiple failed login attempts",
+      "lockDuration": "Please try again in {minutes} minutes",
+      "contactSupport": "If you believe this is an error, please contact support"
+    },
+    "deviceSecurity": {
+      "newDevice": "New Device Login",
+      "newDeviceMessage": "We detected a login from a new device",
+      "deviceDetails": "Device Details",
+      "browser": "Browser",
+      "operatingSystem": "Operating System",
+      "ipAddress": "IP Address",
+      "location": "Location",
+      "loginTime": "Login Time",
+      "wasItYou": "Was this you?",
+      "yesItWasMe": "Yes, it was me",
+      "noSecureAccount": "No, secure my account",
+      "trustedDevice": "This device is now trusted",
+      "deviceConfirmed": "Device confirmed successfully"
+    },
+    "notifications": {
+      "securityAlert": "Security Alert",
+      "accountLockAlert": "Account Lock Alert",
+      "newDeviceAlert": "New Device Alert",
+      "suspiciousActivity": "Suspicious activity detected on your account",
+      "immediateAction": "Immediate action required",
+      "reviewActivity": "Please review your recent activity"
+    },
+    "preferences": {
+      "title": "Security Preferences",
+      "emailNotifications": "Email Notifications",
+      "securityAlerts": "Security Alerts",
+      "accountActivity": "Account Activity",
+      "newDeviceLogins": "New Device Logins",
+      "criticalAlertsRequired": "Critical security alerts cannot be disabled",
+      "preferencesUpdated": "Preferences updated successfully"
+    },
+    "auditLog": {
+      "title": "Security Audit Log",
+      "recentActivity": "Recent Security Activity",
+      "loginAttempt": "Login Attempt",
+      "successfulLogin": "Successful Login",
+      "failedLogin": "Failed Login",
+      "accountLocked": "Account Locked",
+      "newDeviceLogin": "New Device Login",
+      "passwordChanged": "Password Changed",
+      "noActivity": "No recent security activity"
+    }
   }
 }

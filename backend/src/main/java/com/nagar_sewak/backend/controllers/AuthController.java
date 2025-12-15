@@ -13,9 +13,12 @@ import com.nagar_sewak.backend.dto.RegisterRequest;
 import com.nagar_sewak.backend.dto.ResetPasswordRequest;
 import com.nagar_sewak.backend.dto.UserProfileDTO;
 import com.nagar_sewak.backend.entities.*;
+import com.nagar_sewak.backend.exceptions.AccountLockedException;
 import com.nagar_sewak.backend.repositories.ComplaintRepository;
 import com.nagar_sewak.backend.repositories.UserRepository;
 import com.nagar_sewak.backend.security.JwtUtil;
+import com.nagar_sewak.backend.services.LoginAttemptService;
+import com.nagar_sewak.backend.services.DeviceFingerprintService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +38,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -45,6 +50,8 @@ public class AuthController {
     private final PasswordEncoder encoder;
     private final AuthenticationManager manager;
     private final JwtUtil jwtUtil;
+    private final LoginAttemptService loginAttemptService;
+    private final DeviceFingerprintService deviceFingerprintService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest req) {
@@ -98,7 +105,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req, HttpServletRequest request) {
         try {
             // Validate input
             if (req.getEmail() == null || req.getEmail().trim().isEmpty()) {
@@ -108,31 +115,85 @@ public class AuthController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required");
             }
 
+            String email = req.getEmail().toLowerCase();
+            String clientIp = loginAttemptService.getClientIpAddress(request);
+
+            // Check if account is locked
+            if (loginAttemptService.isAccountLocked(email)) {
+                long remainingMinutes = loginAttemptService.getRemainingLockTimeMinutes(email);
+                throw new AccountLockedException(
+                    String.format("Account is temporarily locked due to multiple failed login attempts. Please try again in %d minutes.", remainingMinutes),
+                    remainingMinutes
+                );
+            }
+
             // Find user by email
-            User user = userRepo.findByEmail(req.getEmail())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with this email"));
+            User user = userRepo.findByEmail(email)
+                    .orElseThrow(() -> {
+                        // Record failed attempt even for non-existent users to prevent enumeration attacks
+                        loginAttemptService.recordFailedAttempt(email, clientIp, request);
+                        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+                    });
 
-            // Authenticate user using username (Spring Security uses username internally)
-            manager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), req.getPassword())
+            try {
+                // Authenticate user using username (Spring Security uses username internally)
+                manager.authenticate(
+                        new UsernamePasswordAuthenticationToken(user.getUsername(), req.getPassword())
+                );
+
+                // Record successful login
+                loginAttemptService.recordSuccessfulAttempt(email, clientIp, request);
+
+                // Check if this is a new device
+                boolean isNewDevice = deviceFingerprintService.isNewDeviceLogin(user.getId().toString(), request);
+                
+                // Process device fingerprint (register if new, update if existing)
+                deviceFingerprintService.processDeviceForLogin(user.getId().toString(), request);
+
+                // Generate JWT token
+                String token = jwtUtil.generateToken(user.getUsername());
+
+                String message = "Login successful";
+                if (isNewDevice) {
+                    message = "Login successful from new device. A security notification has been sent to your email.";
+                }
+
+                AuthResponse response = AuthResponse.builder()
+                        .token(token)
+                        .message(message)
+                        .username(user.getUsername())
+                        .fullName(user.getFullName())
+                        .email(user.getEmail())
+                        .userId(user.getId())
+                        .roles(user.getRoles())
+                        .build();
+
+                return ResponseEntity.ok(response);
+
+            } catch (BadCredentialsException e) {
+                // Record failed attempt
+                loginAttemptService.recordFailedAttempt(email, clientIp, request);
+                
+                // Check if we should show warning
+                String warningMessage = "Invalid email or password";
+                if (loginAttemptService.shouldShowWarning(email)) {
+                    warningMessage = loginAttemptService.getWarningMessage(email);
+                }
+                
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, warningMessage);
+            }
+
+        } catch (AccountLockedException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "ACCOUNT_LOCKED");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("remainingLockTimeMinutes", e.getRemainingLockTimeMinutes());
+            
+            return ResponseEntity.status(HttpStatus.LOCKED).body(
+                AuthResponse.builder()
+                    .message(e.getMessage())
+                    .build()
             );
-
-            // Generate JWT token
-            String token = jwtUtil.generateToken(user.getUsername());
-
-            AuthResponse response = AuthResponse.builder()
-                    .token(token)
-                    .message("Login successful")
-                    .username(user.getUsername())
-                    .fullName(user.getFullName())
-                    .email(user.getEmail())
-                    .userId(user.getId())
-                    .roles(user.getRoles())
-                    .build();
-
-            return ResponseEntity.ok(response);
-        } catch (BadCredentialsException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -141,7 +202,7 @@ public class AuthController {
     }
 
     @PostMapping("/firebase")
-    public ResponseEntity<AuthResponse> firebaseLogin(@RequestBody FirebaseLoginRequest req) {
+    public ResponseEntity<AuthResponse> firebaseLogin(@RequestBody FirebaseLoginRequest req, HttpServletRequest request) {
         if (req.getIdToken() == null || req.getIdToken().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Firebase idToken is required");
         }
@@ -190,11 +251,22 @@ public class AuthController {
                 userRepo.save(user);
             }
 
+            // Check if this is a new device
+            boolean isNewDevice = deviceFingerprintService.isNewDeviceLogin(user.getId().toString(), request);
+            
+            // Process device fingerprint (register if new, update if existing)
+            deviceFingerprintService.processDeviceForLogin(user.getId().toString(), request);
+
             String token = jwtUtil.generateToken(user.getUsername());
+
+            String message = "Google sign-in successful";
+            if (isNewDevice) {
+                message = "Google sign-in successful from new device. A security notification has been sent to your email.";
+            }
 
             AuthResponse response = AuthResponse.builder()
                     .token(token)
-                    .message("Google sign-in successful")
+                    .message(message)
                     .username(user.getUsername())
                     .fullName(user.getFullName())
                     .email(user.getEmail())

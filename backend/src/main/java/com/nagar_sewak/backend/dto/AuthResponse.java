@@ -19,5 +19,11 @@ public class AuthResponse {
     private String email;
     private Long userId;
     private Set<Role> roles;
+    
+    // Security-related fields
+    private String warningMessage;
+    private Boolean accountLocked;
+    private Long remainingLockTimeMinutes;
+    private String errorType;
 }
 

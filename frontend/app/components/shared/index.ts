@@ -8,3 +8,5 @@ export { ErrorBoundary } from './ErrorBoundary';
 export { default as DynamicLayoutRenderer } from './DynamicLayoutRenderer';
 export { default as MapComponent } from './MapComponent';
 export { default as MiniMap } from './MiniMap';
+export { default as AccessibilitySettings } from './AccessibilitySettings';
+export * from './AccessibilityUtils';

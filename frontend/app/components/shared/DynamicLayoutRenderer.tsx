@@ -4,6 +4,7 @@ import { usePathname } from "@/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import AccessibilitySettings from "./AccessibilitySettings";
 
 export default function DynamicLayoutRenderer({
   children,
@@ -25,10 +26,19 @@ export default function DynamicLayoutRenderer({
 
   return (
     <>
+      {/* Skip to main content link for keyboard navigation */}
+      <a 
+        href="#main-content" 
+        className="skip-link"
+        tabIndex={1}
+      >
+        Skip to main content
+      </a>
+      
       {!shouldHideHeader && <Header />}
 
       {/* No padding for dashboard pages (they have their own layout with sidebar), map page (full-screen), or auth pages (full-screen) */}
-      <main className="">
+      <main id="main-content" className="" tabIndex={-1}>
         {children}
       </main>
 
@@ -37,6 +47,9 @@ export default function DynamicLayoutRenderer({
           <Footer />
         </div>
       )}
+      
+      {/* Accessibility Settings - Available on all pages */}
+      <AccessibilitySettings />
     </>
   );
 }

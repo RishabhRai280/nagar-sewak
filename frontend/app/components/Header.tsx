@@ -9,7 +9,7 @@ import {
   ChevronDown, User as UserIcon, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import LanguageSwitcher from './LanguageSwitcher';
+import LanguageSwitcher from './shared/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 
 export default function Header() {

@@ -117,16 +117,26 @@ export default function Header() {
         {/* 2. Main Header */}
         <header
           className="w-full bg-white py-3 shadow-md border-b-4 border-orange-500/20"
+          role="banner"
+          aria-label="Main navigation"
         >
           <div className="container mx-auto px-4 lg:px-8 flex justify-between items-center">
 
             {/* Logo Area */}
-            <Link href="/" className="group">
+            <Link 
+              href="/" 
+              className="group"
+              aria-label="Nagar Sewak - Go to homepage"
+            >
               <GovLogo />
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav 
+              className="hidden md:flex items-center gap-1"
+              role="navigation"
+              aria-label="Main navigation menu"
+            >
               {navLinks.map(link => {
                 const isActive = pathname === link.path;
                 return (
@@ -139,6 +149,8 @@ export default function Header() {
                         ? "bg-blue-50 text-blue-800 border-b-2 border-blue-600" // Gov Active Style
                         : "text-slate-700 hover:bg-slate-50 hover:text-blue-700"
                     )}
+                    aria-current={isActive ? "page" : undefined}
+                    aria-label={`Navigate to ${link.name}`}
                   >
                     {/* <link.icon size={16} />  Icons optional in top nav for cleaner official look */}
                     {link.name}
@@ -159,6 +171,9 @@ export default function Header() {
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center gap-2 pl-2 pr-1 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 transition-all bg-white shadow-sm"
+                    aria-expanded={isProfileOpen}
+                    aria-haspopup="menu"
+                    aria-label={`User menu for ${user.fullName || user.username}`}
                   >
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-blue-700 border border-blue-100">
                       {getUserInitials(user)}
@@ -173,17 +188,30 @@ export default function Header() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden ring-1 ring-black/5"
+                        role="menu"
+                        aria-label="User account menu"
                       >
                         <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
                           <p className="text-xs font-bold text-slate-500 uppercase">Signed in as</p>
                           <p className="text-sm font-semibold text-slate-800 truncate">{user.fullName || user.username}</p>
                         </div>
                         <div className="p-1">
-                          <Link href={dashboardPath} onClick={() => setIsProfileOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
+                          <Link 
+                            href={dashboardPath} 
+                            onClick={() => setIsProfileOpen(false)} 
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition"
+                            role="menuitem"
+                            aria-label="Go to dashboard"
+                          >
                             <LayoutDashboard size={16} />
                             {t('dashboard')}
                           </Link>
-                          <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition">
+                          <button 
+                            onClick={handleLogout} 
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition"
+                            role="menuitem"
+                            aria-label="Sign out of your account"
+                          >
                             <LogOut size={16} />
                             {t('logout')}
                           </button>
@@ -207,6 +235,9 @@ export default function Header() {
               <button
                 className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
+                aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -228,6 +259,9 @@ export default function Header() {
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-0 z-[90] bg-white pt-28 px-6 pb-6 md:hidden overflow-y-auto"
+            id="mobile-menu"
+            role="navigation"
+            aria-label="Mobile navigation menu"
           >
             <div className="flex flex-col gap-6">
               <div className="space-y-1">

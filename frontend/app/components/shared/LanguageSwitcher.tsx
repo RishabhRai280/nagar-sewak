@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import { Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 
 const languages = [
     { code: 'en', name: 'English', nativeName: 'English' },
@@ -22,6 +22,13 @@ export default function LanguageSwitcher() {
         setIsOpen(false);
 
         startTransition(() => {
+            // Store language preference in localStorage
+            try {
+                localStorage.setItem('preferred-language', newLocale);
+            } catch (error) {
+                console.warn('Failed to save language preference:', error);
+            }
+
             // Remove the current locale from the pathname and add the new one
             const pathWithoutLocale = pathname.replace(/^\/(en|hi)/, '');
             const newPath = `/${newLocale}${pathWithoutLocale || ''}`;
@@ -31,6 +38,21 @@ export default function LanguageSwitcher() {
     };
 
     const currentLanguage = languages.find(lang => lang.code === locale) || languages[0];
+
+    // Load saved language preference on mount
+    useEffect(() => {
+        try {
+            const savedLanguage = localStorage.getItem('preferred-language');
+            if (savedLanguage && savedLanguage !== locale && languages.some(lang => lang.code === savedLanguage)) {
+                // Only switch if the saved language is different from current and is valid
+                const pathWithoutLocale = pathname.replace(/^\/(en|hi)/, '');
+                const newPath = `/${savedLanguage}${pathWithoutLocale || ''}`;
+                router.replace(newPath);
+            }
+        } catch (error) {
+            console.warn('Failed to load language preference:', error);
+        }
+    }, []); // Empty dependency array to run only on mount
 
     return (
         <div className="relative">

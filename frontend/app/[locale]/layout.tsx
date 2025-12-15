@@ -9,6 +9,7 @@ import "../globals.css";
 import DynamicLayoutRenderer from "../components/shared/DynamicLayoutRenderer";
 import { ErrorBoundary } from "../components/shared/ErrorBoundary";
 import { SidebarProvider } from "../contexts/SidebarContext";
+import { AccessibilityProvider } from "../contexts/AccessibilityContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,11 +52,13 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ErrorBoundary>
-            <SidebarProvider>
-              <DynamicLayoutRenderer>
-                {children}
-              </DynamicLayoutRenderer>
-            </SidebarProvider>
+            <AccessibilityProvider>
+              <SidebarProvider>
+                <DynamicLayoutRenderer>
+                  {children}
+                </DynamicLayoutRenderer>
+              </SidebarProvider>
+            </AccessibilityProvider>
           </ErrorBoundary>
         </NextIntlClientProvider>
       </body>
