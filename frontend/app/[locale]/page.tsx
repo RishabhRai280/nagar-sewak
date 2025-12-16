@@ -3,8 +3,22 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Token, UserStore } from "@/lib/api/api";
+import { Token, UserStore, fetchAllTenders, TenderData } from "@/lib/api/api";
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the map component to avoid SSR issues
+const HomeMapPreview = dynamic(() => import('@/app/components/shared/HomeMapPreview'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-96 bg-gradient-to-br from-blue-50 via-green-50 to-blue-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-slate-600">Loading map...</p>
+      </div>
+    </div>
+  )
+});
 import {
   ArrowRight, CheckCircle, MapPin, TrendingUp, Shield, Users,
   BarChart3, Zap, Star, Award, Clock, Camera, CheckCircle2, FileText, ShieldCheck,
@@ -14,7 +28,9 @@ import {
   Calendar, User, Settings, HelpCircle, BookOpen, FileCheck, Layers, PieChart,
   Activity, Cpu, Database, Cloud, Code, Sparkles, Rocket, Trophy, Megaphone,
   Navigation, Upload, Image, Vote, MessageCircle, Repeat, DollarSign, Percent,
-  TrendingDown, BarChart, LineChart, Wifi, WifiOff, Fingerprint, Key, UserCheck
+  TrendingDown, BarChart, LineChart, Wifi, WifiOff, Fingerprint, Key, UserCheck,
+  Home, Building, Gavel, CreditCard, GraduationCap, Stethoscope, Car, Plane,
+  Loader2, Maximize2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,16 +53,117 @@ export default function GovLandingPage() {
       }
       setCtaLink(target);
     }
+
+    // Fetch real tender data
+    const loadTenders = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchAllTenders({ limit: 3 });
+        if (response.tenders && response.tenders.length > 0) {
+          // Map the API response to our display format
+          const mappedTenders = response.tenders.map(tender => ({
+            id: tender.id,
+            title: tender.title || tender.complaintTitle || `Tender #${tender.id}`,
+            budget: tender.budget || tender.quoteAmount || 0,
+            description: tender.description || "No description available",
+            status: tender.status,
+            createdAt: tender.createdAt,
+            complaintId: tender.complaintId
+          }));
+          setTenders(mappedTenders);
+        }
+      } catch (error) {
+        console.log('Using fallback tender data');
+        // Keep the fallback data if API fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTenders();
   }, []);
 
 
 
   const stats = [
-    { number: "10K+", label: "activeUsers", icon: Users, color: "blue" },
-    { number: "500+", label: "projectsTracked", icon: MapPin, color: "orange" },
-    { number: "2K+", label: "issuesResolved", icon: CheckCircle, color: "green" },
-    { number: "95%", label: "satisfactionRate", icon: Star, color: "blue" },
+    { number: "12.5L", label: "activeUsers", icon: Users, color: "blue", suffix: "" },
+    { number: "142", label: "projectsTracked", icon: Building2, color: "orange", suffix: "" },
+    { number: "94%", label: "satisfactionRate", icon: Star, color: "green", suffix: "" },
+    { number: "24/7", label: "support", icon: Headphones, color: "purple", suffix: "" },
   ];
+
+  // Online Services Data
+  const onlineServices = [
+    { title: "Property Tax", icon: Home, description: "Pay property taxes online", link: "/services/property-tax" },
+    { title: "Water Charges", icon: Zap, description: "View and pay water bills", link: "/services/water-charges" },
+    { title: "Trade License", icon: FileText, description: "Apply for trade licenses", link: "/services/trade-license" },
+    { title: "Birth/Death", icon: FileCheck, description: "Birth & death certificates", link: "/services/certificates" },
+    { title: "Building Plan", icon: Building, description: "Submit building plans", link: "/services/building-plan" },
+    { title: "Fire NOC", icon: Shield, description: "Fire safety clearance", link: "/services/fire-noc" },
+    { title: "Grievances", icon: MessageSquare, description: "File complaints online", link: "/report" },
+    { title: "RTI", icon: Eye, description: "Right to Information", link: "/services/rti" }
+  ];
+
+  // Government Schemes
+  const govSchemes = [
+    { 
+      title: "Pradhan Mantri Awas Yojana", 
+      category: "Housing", 
+      description: "Affordable housing for all",
+      color: "bg-orange-500",
+      link: "/schemes/pmay"
+    },
+    { 
+      title: "Jan Aushadhi Scheme", 
+      category: "Healthcare", 
+      description: "Generic medicines at small prices",
+      color: "bg-green-500",
+      link: "/schemes/jan-aushadhi"
+    },
+    { 
+      title: "Swachh Bharat Mission", 
+      category: "Sanitation", 
+      description: "Clean India initiative",
+      color: "bg-blue-500",
+      link: "/schemes/swachh-bharat"
+    },
+    { 
+      title: "Ayushman Bharat", 
+      category: "Healthcare", 
+      description: "Health insurance for all",
+      color: "bg-purple-500",
+      link: "/schemes/ayushman-bharat"
+    }
+  ];
+
+  // Tenders & Circulars - State for real data
+  const [tenders, setTenders] = useState<any[]>([
+    {
+      id: 1,
+      title: "Construction of Community Center in Ward 12",
+      budget: 2500000,
+      description: "Construction of a modern community center with multipurpose hall, library, and recreational facilities.",
+      status: "OPEN",
+      createdAt: "2024-12-20T00:00:00"
+    },
+    {
+      id: 2,
+      title: "Supply of LED Street Lights for Zone A",
+      budget: 1500000,
+      description: "Supply and installation of energy-efficient LED street lights across Zone A covering 200 locations.",
+      status: "OPEN",
+      createdAt: "2024-12-18T00:00:00"
+    },
+    {
+      id: 3,
+      title: "Waste Management Services Contract",
+      budget: 5000000,
+      description: "Comprehensive waste collection, transportation, and disposal services for residential areas.",
+      status: "CLOSED",
+      createdAt: "2024-12-15T00:00:00"
+    }
+  ]);
+  const [loading, setLoading] = useState(false);
 
 
   // FAQ based on translations
@@ -75,548 +192,541 @@ export default function GovLandingPage() {
     <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 font-sans selection:bg-orange-100 selection:text-orange-900">
 
       {/* ========================================
-          HERO SECTION
+          HERO SECTION - Government Portal Style
       ======================================== */}
-      < section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-slate-900 border-b-8 border-orange-500" >
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 opacity-95"></div>
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}></div>
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 pt-20 text-center">
-          {/* National Emblem */}
-          <div className="mb-8 flex justify-center">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-orange-500/20 blur-xl rounded-full"></div>
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
-                alt="Satyamev Jayate"
-                className="w-32 h-32 md:w-40 md:h-40 invert brightness-0 drop-shadow-2xl"
-              />
-            </div>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 uppercase tracking-tighter drop-shadow-lg">
-            {t('hero.title')} <span className="text-orange-500">{t('hero.titleHighlight')}</span>
-          </h1>
-
-          <p className="text-xl md:text-3xl text-blue-100 max-w-4xl mx-auto mb-4 font-light leading-relaxed">
-            {t('hero.subtitle')}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-12">
-            <Link href="/login">
-              <button className="px-10 py-5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-xl shadow-[0_8px_0_rgb(194,65,12)] hover:shadow-[0_4px_0_rgb(194,65,12)] hover:translate-y-[4px] transition-all flex items-center gap-3">
-                {t('hero.startReporting')}
-                <ArrowRight size={24} />
-              </button>
-            </Link>
-            <Link href="/map">
-              <button className="px-10 py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xl border-2 border-slate-600 hover:border-slate-500 transition-all">
-                {t('hero.viewLiveMap')}
-              </button>
-            </Link>
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="mt-20 flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="text-green-400 w-8 h-8" />
-              <span className="text-white font-semibold text-lg uppercase tracking-wider">{t('hero.realTimeUpdates')}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Users className="text-blue-400 w-8 h-8" />
-              <span className="text-white font-semibold text-lg uppercase tracking-wider">10K+ {t('stats.activeUsers')}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Globe className="text-green-400 w-8 h-8" />
-              <span className="text-white font-semibold text-lg uppercase tracking-wider">Bilingual</span>
-            </div>
-          </div>
-        </div>
-      </section >
-
-      {/* ========================================
-          STATS SECTION - Elevated Card
-      ======================================== */}
-      < section className="relative z-20 -mt-20 mx-4 md:mx-12 mb-20" >
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {stats.map((stat, i) => (
-              <div key={i} className="flex flex-col items-center group">
-                <div className={cn(
-                  "w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300",
-                  stat.color === "blue" && "bg-blue-50 text-blue-700",
-                  stat.color === "orange" && "bg-orange-50 text-orange-600",
-                  stat.color === "green" && "bg-green-50 text-green-700"
-                )}>
-                  <stat.icon size={32} />
+        <div className="relative z-10 container mx-auto px-4 py-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              {/* Government Branding */}
+              <div className="flex items-center gap-4 mb-8">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                  alt="Government of India"
+                  className="w-16 h-16 invert brightness-0"
+                />
+                <div>
+                  <h2 className="text-2xl font-bold">Government of India</h2>
+                  <p className="text-blue-200 text-sm">Ministry of Urban Affairs</p>
                 </div>
-                <span className="text-4xl font-extrabold text-slate-900 mb-1">{stat.number}</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t(`stats.${stat.label}`)}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section >
 
-      {/* ========================================
-          GOVERNMENT INITIATIVES TICKER
-      ======================================== */}
-      < section className="py-4 bg-orange-50 border-y border-orange-100 overflow-hidden mb-20" >
-        <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
-          <span className="bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded uppercase min-w-max">
-            Government Initiatives
-          </span>
-          <div className="flex gap-12 whitespace-nowrap text-slate-600 text-sm font-semibold overflow-hidden">
-            <div className="flex gap-12 animate-marquee">
-              <span>Swachh Bharat Abhiyan</span>
-              <span>•</span>
-              <span>Digital India Corporation</span>
-              <span>•</span>
-              <span>Smart Cities Mission</span>
-              <span>•</span>
-              <span>AMRUT Scheme</span>
-              <span>•</span>
-              <span>Pradhan Mantri Awas Yojana</span>
-              <span>•</span>
-              <span>National Urban Digital Mission</span>
-            </div>
-          </div>
-        </div>
-      </section >
-
-      {/* ========================================
-          HOW IT WORKS - REDESIGNED
-      ======================================== */}
-      <section className="py-24 bg-gradient-to-b from-white to-slate-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-              {t('features.title')} <span className="text-blue-700"></span>
-            </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              {t('features.subtitle')}
-            </p>
-          </div>
-
-          {/* Process Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {[
-              {
-                step: 1,
-                title: t('features.report.title'),
-                description: t('features.report.description'),
-                icon: Camera,
-                color: "bg-blue-600",
-                tags: t.raw('features.report.tags')
-              },
-              {
-                step: 2,
-                title: t('features.track.title'),
-                description: t('features.track.description'),
-                icon: Activity,
-                color: "bg-orange-500",
-                tags: t.raw('features.track.tags')
-              },
-              {
-                step: 3,
-                title: t('features.engage.title'),
-                description: t('features.engage.description'),
-                icon: Star,
-                color: "bg-green-600",
-                tags: t.raw('features.engage.tags')
-              }
-            ].map((step, index) => (
-              <div
-                key={index}
-                className="relative bg-white/80 backdrop-blur-xl p-8 rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group overflow-hidden"
-              >
-                {/* Decorative Gradient Blob */}
-                <div className={cn(
-                  "absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-10 blur-3xl transition-all group-hover:opacity-20",
-                  step.color === "bg-blue-600" ? "bg-blue-600" : step.color === "bg-orange-500" ? "bg-orange-500" : "bg-green-600"
-                )}></div>
-
-                {/* Step Number Badge */}
-                <div className={cn(
-                  "absolute -top-4 -right-4 w-12 h-12 rounded-full text-white font-bold text-xl flex items-center justify-center shadow-lg ring-4 ring-slate-50",
-                  step.color
-                )}>
-                  {step.step}
-                </div>
-
-                {/* Icon */}
-                <div className={cn(
-                  "w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-lg",
-                  step.color
-                )}>
-                  <step.icon size={32} />
-                </div>
-
-                {/* Title */}
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">
-                  {step.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-slate-600 leading-relaxed mb-6">
-                  {step.description}
+              <div>
+                <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
+                  Empowering<br />
+                  <span className="text-orange-400">Every Citizen.</span>
+                </h1>
+                <p className="text-xl text-blue-100 mb-8 leading-relaxed max-w-lg">
+                  Digital India initiative for transparent governance and efficient public service delivery through technology.
                 </p>
-
-                {/* Features Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {(step.tags as string[]).map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold border border-slate-200 group-hover:bg-white group-hover:shadow-sm transition-all"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Connecting Arrow (Desktop) */}
-                {index < 2 && (
-                  <div className="hidden lg:flex absolute top-1/2 -right-6 w-12 h-12 z-20 transform -translate-y-1/2 items-center justify-center">
-                    <ArrowRight className="text-slate-300 drop-shadow-sm" size={40} />
-                  </div>
-                )}
               </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href={ctaLink}>
+                  <button className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                    Get Started
+                    <ArrowRight size={20} />
+                  </button>
+                </Link>
+                <Link href="/map">
+                  <button className="px-8 py-4 border-2 border-white/30 text-white hover:bg-white/10 rounded-lg font-bold text-lg transition-all">
+                    View Services
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Content - Service Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
+                  <FileText className="text-white" size={24} />
+                </div>
+                <h3 className="font-bold mb-2">File Complaints</h3>
+                <p className="text-blue-200 text-sm">Report civic issues with GPS location and photo evidence</p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 mt-8">
+                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
+                  <MapPin className="text-white" size={24} />
+                </div>
+                <h3 className="font-bold mb-2">Track Progress</h3>
+                <p className="text-blue-200 text-sm">Monitor complaint status and project updates in real-time</p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 -mt-4">
+                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                  <BarChart3 className="text-white" size={24} />
+                </div>
+                <h3 className="font-bold mb-2">View Analytics</h3>
+                <p className="text-blue-200 text-sm">Access comprehensive dashboards and performance metrics</p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 mt-4">
+                <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="text-white" size={24} />
+                </div>
+                <h3 className="font-bold mb-2">Secure Access</h3>
+                <p className="text-blue-200 text-sm">Multi-factor authentication and device fingerprinting</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================
+          STATS SECTION - Government Dashboard Style
+      ======================================== */}
+      <section className="relative z-20 -mt-16 mx-4 md:mx-8 mb-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
+              <h2 className="text-2xl font-bold text-white">Platform Statistics</h2>
+              <p className="text-blue-100">Real-time data from our civic engagement platform</p>
+            </div>
+            
+            {/* Stats Grid */}
+            <div className="p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+              {stats.map((stat, i) => (
+                <div key={i} className="text-center group">
+                  <div className={cn(
+                    "w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300",
+                    stat.color === "blue" && "bg-blue-50 text-blue-700 border-2 border-blue-200",
+                    stat.color === "orange" && "bg-orange-50 text-orange-600 border-2 border-orange-200",
+                    stat.color === "green" && "bg-green-50 text-green-700 border-2 border-green-200",
+                    stat.color === "purple" && "bg-purple-50 text-purple-700 border-2 border-purple-200"
+                  )}>
+                    <stat.icon size={28} />
+                  </div>
+                  <div className="text-3xl font-black text-slate-900 mb-2">{stat.number}</div>
+                  <div className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
+                    {stat.label === "activeUsers" && "Active Users"}
+                    {stat.label === "projectsTracked" && "Projects Tracked"}
+                    {stat.label === "satisfactionRate" && "Satisfaction Rate"}
+                    {stat.label === "support" && "Support Available"}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Additional Info */}
+            <div className="bg-slate-50 px-8 py-4 border-t border-slate-200">
+              <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>System Status: Online</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Last Updated: {new Date().toLocaleTimeString()}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span>Response Time: &lt;2s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================
+          ONLINE SERVICES SECTION
+      ======================================== */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Online Services</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Access government services digitally. Fast, secure, and available 24/7.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {onlineServices.map((service, index) => (
+              <Link key={index} href={service.link}>
+                <div className="group bg-white border-2 border-slate-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500 transition-colors">
+                    <service.icon className="text-blue-600 group-hover:text-white" size={24} />
+                  </div>
+                  <h3 className="font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                    {service.title}
+                  </h3>
+                  <p className="text-sm text-slate-600">{service.description}</p>
+                  <div className="mt-4 flex items-center text-blue-600 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                    Access Service <ArrowRight size={16} className="ml-1" />
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
 
-          {/* Bottom CTA */}
-          <div className="text-center">
-            <Link
-              href="/report"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-blue-500/30 transition-all hover:-translate-y-1"
-            >
-              {t('features.cta')}
-              <ArrowRight size={20} />
+          <div className="text-center mt-12">
+            <Link href="/services">
+              <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                View All Services
+              </button>
             </Link>
           </div>
         </div>
       </section>
 
       {/* ========================================
-          REAL FEATURES SHOWCASE
+          ENHANCED GEOGRAPHICAL VIEW & TENDERS SECTION
       ======================================== */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
-              {t('powerfulFeatures.title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">{t('powerfulFeatures.titleHighlight')}</span>
-            </h2>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto font-light leading-relaxed">
-              {t('powerfulFeatures.subtitle')}
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">City Overview & Opportunities</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Explore our interactive city map and discover the latest procurement opportunities
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { key: 'multiFile', icon: Upload, color: 'blue' },
-              { key: 'voting', icon: Vote, color: 'orange' },
-              { key: 'comments', icon: MessageCircle, color: 'green' },
-              { key: 'tracking', icon: BarChart, color: 'blue' },
-              { key: 'rating', icon: Star, color: 'orange' },
-              { key: 'tender', icon: DollarSign, color: 'green' },
-              { key: 'pdf', icon: FileText, color: 'blue' },
-              { key: 'fingerprint', icon: Fingerprint, color: 'orange' },
-              { key: 'notifications', icon: Bell, color: 'green' },
-              { key: 'gps', icon: MapPin, color: 'blue' },
-              { key: 'rbac', icon: Shield, color: 'orange' },
-              { key: 'bilingual', icon: Globe, color: 'green' }
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="group relative bg-white/5 backdrop-blur-md p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all hover:bg-white/10 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
-              >
-                <div className={cn(
-                  "absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500",
-                  item.color === 'blue' && "bg-gradient-to-br from-blue-500 to-transparent",
-                  item.color === 'orange' && "bg-gradient-to-br from-orange-500 to-transparent",
-                  item.color === 'green' && "bg-gradient-to-br from-green-500 to-transparent"
-                )}></div>
-
-                <div className="relative z-10">
-                  <div className={cn(
-                    "w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg",
-                    item.color === 'blue' && "bg-blue-500/20 text-blue-400",
-                    item.color === 'orange' && "bg-orange-500/20 text-orange-400",
-                    item.color === 'green' && "bg-green-500/20 text-green-400"
-                  )}>
-                    <item.icon size={28} />
+          <div className="grid lg:grid-cols-3 gap-8">
+            
+            {/* Enhanced Geographical View - Takes 2 columns */}
+            <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="p-6 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Interactive City Map</h3>
+                    <p className="text-slate-600">Real-time view of complaints, projects, and civic activities</p>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-200 transition-colors">
-                    {t(`powerfulFeatures.list.${item.key}.title`)}
-                  </h3>
-                  <p className="text-blue-100/70 leading-relaxed text-sm mb-4">
-                    {t(`powerfulFeatures.list.${item.key}.description`)}
-                  </p>
-                  <div className="pt-4 border-t border-white/10">
-                    <p className="text-xs text-blue-200/50 font-mono flex items-center gap-2">
-                      <Code size={12} />
-                      {t(`powerfulFeatures.list.${item.key}.technical`)}
-                    </p>
-                  </div>
+                  <Link href="/map">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                      <Maximize2 size={16} />
+                      Full Map
+                    </button>
+                  </Link>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================
-          SUCCESS STORIES / TESTIMONIALS
-      ======================================== */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              {t('testimonials.title')} <span className="text-green-700">{t('testimonials.titleHighlight')}</span>
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {t('testimonials.subtitle')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {testimonials.map((testimonial, i) => (
-              <div key={i} className="bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 hover:border-green-500 transition-all hover:shadow-xl group">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 group-hover:border-green-400 transition-colors">
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-full h-full object-cover"
-                    />
+              
+              {/* Enhanced Map Preview */}
+              <HomeMapPreview />
+              
+              <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50 border-t border-slate-200">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900">25</div>
+                    <div className="text-sm text-slate-600">Ward Boundaries</div>
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 leading-tight">{testimonial.name}</h4>
-                    <p className="text-xs text-slate-500">{testimonial.role}</p>
+                    <div className="text-2xl font-bold text-slate-900">142</div>
+                    <div className="text-sm text-slate-600">Active Complaints</div>
                   </div>
-                </div>
-
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="text-yellow-500 fill-yellow-500" size={16} />
-                  ))}
-                </div>
-
-                <p className="text-sm text-slate-700 leading-relaxed mb-4 italic line-clamp-4">
-                  "{testimonial.text}"
-                </p>
-
-                <div className="pt-4 border-t border-slate-300 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Issue:</span>
-                    <span className="font-semibold text-slate-700 truncate max-w-[120px]">{testimonial.issue}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Resolution:</span>
-                    <span className="font-semibold text-green-600 truncate max-w-[100px]">{testimonial.resolution}</span>
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900">38</div>
+                    <div className="text-sm text-slate-600">Ongoing Projects</div>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Tenders & Circulars - Takes 1 column */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="p-6 border-b border-slate-200">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Latest Tenders</h3>
+                <p className="text-slate-600 text-sm">Procurement opportunities and government notifications</p>
+              </div>
+              
+              {loading ? (
+                <div className="p-6 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
+                  <p className="text-slate-500 text-sm">Loading tenders...</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200 max-h-96 overflow-y-auto">
+                  {tenders.length > 0 ? (
+                    tenders.slice(0, 3).map((tender, index) => {
+                      // Check if this is real API data or mock data
+                      const isRealTender = tender.complaintId && tender.complaintId > 0;
+                      const linkHref = isRealTender ? `/tenders/${tender.id}` : '/tenders';
+                      
+                      return (
+                        <Link key={tender.id || index} href={linkHref}>
+                          <div className="p-4 hover:bg-slate-50 transition-colors cursor-pointer group">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                tender.status === 'OPEN' || tender.status === 'Active'
+                                  ? 'bg-green-100 text-green-800' 
+                                  : tender.status === 'CLOSED' || tender.status === 'Closed'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {tender.status === 'OPEN' ? 'Active' : tender.status === 'CLOSED' ? 'Closed' : tender.status}
+                              </span>
+                            </div>
+                            <h4 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors text-sm line-clamp-2 mb-2">
+                              {tender.title}
+                            </h4>
+                            {tender.description && (
+                              <p className="text-xs text-slate-500 line-clamp-2 mb-3">{tender.description}</p>
+                            )}
+                            <div className="flex justify-between items-center text-xs text-slate-600">
+                              <span className="font-semibold">
+                                ₹{tender.budget ? (tender.budget / 100000).toFixed(1) + 'L' : 'TBD'}
+                              </span>
+                              <span>{new Date(tender.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="mt-2 flex items-center text-blue-600 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                              {isRealTender ? 'View Details' : 'Browse Tenders'} <ArrowRight size={12} className="ml-1" />
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })
+                  ) : (
+                    <div className="p-6 text-center">
+                      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FileText className="text-slate-400" size={24} />
+                      </div>
+                      <h4 className="font-semibold text-slate-700 mb-2">No Active Tenders</h4>
+                      <p className="text-sm text-slate-500 mb-4">
+                        New procurement opportunities will appear here when available.
+                      </p>
+                      <Link href="/tenders">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                          View All Tenders
+                        </button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="p-4 bg-slate-50 border-t border-slate-200 text-center">
+                <Link href="/tenders">
+                  <button className="text-blue-600 font-semibold hover:text-blue-700 transition-colors text-sm flex items-center gap-1 mx-auto">
+                    View All Tenders <ArrowRight size={14} />
+                  </button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ========================================
-          FAQ SECTION - WITH READ MORE
+          GOVERNMENT SCHEMES SECTION
       ======================================== */}
-      <section className="py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              {t('faqs.title')} <span className="text-blue-700">{t('faqs.titleHighlight')}</span>
-            </h2>
-            <p className="text-lg text-slate-600">
-              {t('faqs.subtitle')}
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {(showAllFaqs ? faqs : faqs.slice(0, 6)).map((faq, i) => (
-              <div key={i} className="bg-slate-50 rounded-xl border-2 border-slate-200 overflow-hidden hover:border-blue-400 transition-all">
-                <button
-                  onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white transition-colors"
-                >
-                  <span className="font-bold text-slate-900 pr-4">{faq.question}</span>
-                  <ChevronDown className={cn(
-                    "flex-shrink-0 text-blue-600 transition-transform",
-                    activeFaq === i && "rotate-180"
-                  )} size={24} />
-                </button>
-                {activeFaq === i && (
-                  <div className="px-6 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4 bg-white">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Read More Button */}
-          {!showAllFaqs && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => setShowAllFaqs(true)}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg"
-              >
-                Read More FAQs ({faqs.length - 6} more)
-                <ChevronDown size={20} />
-              </button>
-            </div>
-          )}
-
-          {/* Show Less Button */}
-          {showAllFaqs && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => {
-                  setShowAllFaqs(false);
-                  window.scrollTo({ top: document.getElementById('faq-section')?.offsetTop || 0, behavior: 'smooth' });
-                }}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-slate-600 hover:bg-slate-700 text-white rounded-xl font-bold transition-all"
-              >
-                Show Less
-                <ChevronDown size={20} className="rotate-180" />
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ========================================
-          SECURITY & COMPLIANCE
-      ======================================== */}
-      <section className="py-24 bg-slate-50">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              {t('security.title')} <span className="text-red-700">{t('security.titleHighlight')}</span>
-            </h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Government Schemes</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {t('security.subtitle')}
+              Explore various government initiatives and welfare schemes for citizens
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { key: 'jwt', icon: Lock },
-              { key: 'fingerprint', icon: Fingerprint },
-              { key: 'spring', icon: Shield },
-              { key: 'encryption', icon: Key },
-              { key: 'rbac', icon: UserCheck },
-              { key: 'db', icon: Database },
-              { key: 'cloud', icon: Cloud },
-              { key: 'validation', icon: Code }
-            ].map((item, i) => (
-              <div key={i} className="text-center p-8 bg-white rounded-xl border border-slate-200 hover:border-red-500 transition-all hover:shadow-xl group hover:-translate-y-1">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-50 group-hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors">
-                  <item.icon size={32} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {govSchemes.map((scheme, index) => (
+              <Link key={index} href={scheme.link}>
+                <div className="group bg-white border-2 border-slate-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                  <div className={`h-2 ${scheme.color}`}></div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                        {scheme.category}
+                      </span>
+                      <ArrowRight className="text-slate-400 group-hover:text-blue-600 transition-colors" size={16} />
+                    </div>
+                    <h3 className="font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {scheme.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 line-clamp-2">{scheme.description}</p>
+                  </div>
                 </div>
-                <h3 className="font-bold text-slate-900 mb-3 text-lg">{t(`security.list.${item.key}.title`)}</h3>
-                <p className="text-slate-600">{t(`security.list.${item.key}.desc`)}</p>
-              </div>
+              </Link>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/schemes">
+              <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                View All Schemes
+              </button>
+            </Link>
           </div>
         </div>
       </section>
 
+
+
       {/* ========================================
-          MOBILE APP SECTION
+          CONTACT & MOBILE APP SECTION
       ======================================== */}
-      < section className="py-24 bg-gradient-to-br from-blue-900 to-slate-900 text-white relative overflow-hidden" >
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+      <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-50" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
 
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            
+            {/* Contact Information */}
             <div>
-              <h2 className="text-4xl font-bold mb-6">
-                Coming Soon: <span className="text-orange-400">Mobile App</span>
-              </h2>
-              <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-                Report issues on the go with our upcoming native mobile app for Android and iOS.
-                Get instant notifications, offline support, and faster performance.
-              </p>
+              <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
+              
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Phone className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Helpline</h3>
+                    <p className="text-blue-200">1800-11-2025</p>
+                    <p className="text-sm text-slate-400">Available 24/7</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Mail className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Email Support</h3>
+                    <p className="text-blue-200">support@nagarsewak.gov.in</p>
+                    <p className="text-sm text-slate-400">Response within 24 hours</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Building2 className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Office Address</h3>
+                    <p className="text-blue-200">Ministry of Urban Affairs</p>
+                    <p className="text-sm text-slate-400">Nirman Bhawan, New Delhi - 110011</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 p-6 bg-white/5 rounded-xl border border-white/10">
+                <h3 className="font-semibold mb-3">Emergency Services</h3>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-red-400">100</div>
+                    <div className="text-xs text-slate-400">Police</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-red-400">101</div>
+                    <div className="text-xs text-slate-400">Fire</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-red-400">108</div>
+                    <div className="text-xs text-slate-400">Ambulance</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile App Section */}
+            <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-2xl p-8 border border-white/10">
+              <div className="text-center mb-8">
+                <Smartphone className="w-20 h-20 text-blue-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-4">
+                  Nagar Sewak <span className="text-orange-400">Mobile App</span>
+                </h2>
+                <p className="text-blue-200 mb-6">
+                  Download our mobile app for faster access to government services on the go.
+                </p>
+              </div>
 
               <div className="space-y-4 mb-8">
                 {[
-                  "Offline complaint drafting",
-                  "Push notifications",
-                  "Camera integration",
-                  "GPS auto-detection",
-                  "Faster performance",
-                  "Native UI/UX"
+                  "File complaints with GPS location",
+                  "Track application status",
+                  "Receive push notifications",
+                  "Offline form filling",
+                  "Multi-language support"
                 ].map((feature, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <CheckCircle className="text-green-400" size={20} />
-                    <span className="text-blue-100">{feature}</span>
+                    <CheckCircle className="text-green-400 flex-shrink-0" size={16} />
+                    <span className="text-sm text-blue-100">{feature}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="flex gap-4">
-                <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-3">
-                  <Smartphone size={24} />
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 bg-black rounded-lg p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                    <Smartphone size={16} />
+                  </div>
                   <div>
-                    <div className="text-xs text-blue-200">Coming to</div>
-                    <div className="font-bold">Google Play</div>
+                    <div className="text-xs text-gray-400">Download on the</div>
+                    <div className="font-semibold">App Store</div>
                   </div>
                 </div>
-                <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-3">
-                  <Smartphone size={24} />
+                <div className="flex-1 bg-black rounded-lg p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                    <Smartphone size={16} />
+                  </div>
                   <div>
-                    <div className="text-xs text-blue-200">Coming to</div>
-                    <div className="font-bold">App Store</div>
+                    <div className="text-xs text-gray-400">Get it on</div>
+                    <div className="font-semibold">Google Play</div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-blue-500/20 blur-3xl"></div>
-              <div className="relative bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20">
-                <Smartphone className="w-full h-96 text-white/20" />
               </div>
             </div>
           </div>
         </div>
-      </section >
+      </section>
 
       {/* ========================================
-          FINAL CTA
+          FINAL CTA SECTION
       ======================================== */}
-      < section className="py-20 bg-white border-t border-slate-200" >
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-slate-900 mb-6">
-            Ready to Make a <span className="text-orange-600">Difference</span>?
+          <h2 className="text-4xl font-bold mb-6">
+            Ready to Make a <span className="text-orange-300">Difference</span>?
           </h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of citizens making their communities better. Report issues, track progress, and engage with your local government.
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join millions of citizens in building a better, more transparent governance system. Your voice matters.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href={ctaLink} className="px-10 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-2">
-              Get Started Now
-              <ArrowRight size={20} />
+            <Link href={ctaLink}>
+              <button className="px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-2">
+                Get Started Now
+                <ArrowRight size={20} />
+              </button>
             </Link>
-            <Link href="/report" className="px-10 py-4 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl font-bold text-lg transition-all">
-              Report an Issue
+            <Link href="/report">
+              <button className="px-10 py-4 border-2 border-white text-white hover:bg-white hover:text-blue-600 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2">
+                Report an Issue
+              </button>
             </Link>
           </div>
+          
+          {/* Trust Indicators */}
+          <div className="mt-12 flex flex-wrap justify-center gap-8 text-blue-200">
+            <div className="flex items-center gap-2">
+              <Shield size={20} />
+              <span className="text-sm font-semibold">Secure & Encrypted</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Globe size={20} />
+              <span className="text-sm font-semibold">Available in Hindi & English</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock size={20} />
+              <span className="text-sm font-semibold">24/7 Support</span>
+            </div>
+          </div>
         </div>
-      </section >
+      </section>
 
-    </div >
+    </div>
   );
 }

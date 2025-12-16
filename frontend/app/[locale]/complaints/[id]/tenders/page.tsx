@@ -135,17 +135,17 @@ export default function ComplaintTendersPage() {
                 {/* Contractor Info */}
                 <div className="flex items-center gap-3 mb-4 p-3 bg-slate-50 rounded-xl">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {tender.contractorName.charAt(0)}
+                    {tender.contractorName?.charAt(0) || 'C'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <Link href={`/contractors/${tender.contractorId}`}>
                       <p className="font-bold text-slate-900 hover:text-blue-600 transition cursor-pointer truncate">
-                        {tender.contractorName}
+                        {tender.contractorName || 'Unknown Contractor'}
                       </p>
                     </Link>
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <Star size={12} className="text-yellow-500" />
-                      {tender.contractorAvgRating.toFixed(1)}
+                      {tender.contractorAvgRating?.toFixed(1) || 'N/A'}
                     </div>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function ComplaintTendersPage() {
                     <span className="text-xs text-blue-600 font-bold flex items-center gap-1">
                       <DollarSign size={14} /> BID AMOUNT
                     </span>
-                    <span className="text-lg font-extrabold text-slate-900">₹{tender.quoteAmount.toLocaleString()}</span>
+                    <span className="text-lg font-extrabold text-slate-900">₹{tender.quoteAmount?.toLocaleString() || '0'}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">

@@ -1,293 +1,370 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { ClipboardList, Plus, Search, Filter, Calendar, DollarSign, Users, ArrowRight, AlertTriangle } from "lucide-react";
-import { fetchAllTenders } from "@/lib/api/api";
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { ArrowLeft, Calendar, DollarSign, FileText, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { fetchAllTenders, TenderData } from '@/lib/api/api';
 
-interface Tender {
-  id: number;
-  complaintId: number;
-  complaintTitle: string;
-  description: string;
-  quoteAmount: number;
-  estimatedDays: number;
+// Mixed type for both API and mock data
+type DisplayTender = TenderData | {
+  id: string;
+  title: string;
+  department: string;
+  category: string;
+  estimatedValue: string;
+  publishDate: string;
+  lastDate: string;
   status: string;
-  contractorId: number;
-  contractorName: string;
-  createdAt: string;
-  updatedAt: string;
-  severity?: number;
-}
+  description: string;
+  eligibility: string;
+  documents: string[];
+};
 
 export default function TendersPage() {
-  const router = useRouter();
-  const [tenders, setTenders] = useState<Tender[]>([]);
+  const t = useTranslations();
+  const [tenders, setTenders] = useState<DisplayTender[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTenders = async () => {
       try {
-        const response = await fetchAllTenders({
-          search: searchTerm || undefined,
-          status: statusFilter !== "all" ? statusFilter : undefined,
-          page: 1,
-          limit: 50
-        });
-        setTenders(response.tenders);
-      } catch (error) {
-        console.error("Failed to load tenders:", error);
-        setTenders([]);
+        setLoading(true);
+        const response = await fetchAllTenders();
+        setTenders(response.tenders || []);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load tenders');
+        // Fallback to mock data
+        setTenders(mockTenders);
       } finally {
         setLoading(false);
       }
     };
 
     loadTenders();
-  }, [searchTerm, statusFilter]);
+  }, []);
 
-  const filteredTenders = tenders.filter(tender => {
-    const matchesSearch = tender.complaintTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tender.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tender.contractorName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || tender.status.toLowerCase() === statusFilter.toLowerCase();
-    return matchesSearch && matchesStatus;
-  });
+  const mockTenders = [
+    {
+      id: "TNR-2024-001",
+      title: "Construction of Community Center in Ward 12",
+      department: "Public Works Department",
+      category: "Construction",
+      estimatedValue: "₹25,00,000",
+      publishDate: "2024-12-20",
+      lastDate: "2025-01-15",
+      status: "Active",
+      description: "Construction of a modern community center with multipurpose hall, library, and recreational facilities.",
+      eligibility: "Class A contractors with minimum 5 years experience",
+      documents: ["Tender Notice", "Technical Specifications", "BOQ"]
+    },
+    {
+      id: "TNR-2024-002",
+      title: "Supply of LED Street Lights for Zone A",
+      department: "Electrical Department",
+      category: "Supply",
+      estimatedValue: "₹15,00,000",
+      publishDate: "2024-12-18",
+      lastDate: "2025-01-10",
+      status: "Active",
+      description: "Supply and installation of energy-efficient LED street lights across Zone A covering 200 locations.",
+      eligibility: "Registered electrical contractors",
+      documents: ["Tender Notice", "Technical Specifications", "Terms & Conditions"]
+    },
+    {
+      id: "TNR-2024-003",
+      title: "Waste Management Services Contract",
+      department: "Sanitation Department",
+      category: "Services",
+      estimatedValue: "₹50,00,000",
+      publishDate: "2024-12-15",
+      lastDate: "2024-12-30",
+      status: "Closed",
+      description: "Comprehensive waste collection, transportation, and disposal services for residential areas.",
+      eligibility: "Companies with waste management license",
+      documents: ["Tender Notice", "Service Requirements", "Contract Terms"]
+    }
+  ];
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "accepted": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-      case "pending": return "bg-yellow-100 text-yellow-700 border-yellow-200";
-      case "rejected": return "bg-red-100 text-red-700 border-red-200";
-      default: return "bg-slate-100 text-slate-700 border-slate-200";
+    switch (status) {
+      case 'Active':
+      case 'OPEN':
+        return 'bg-green-100 text-green-800';
+      case 'Closed':
+      case 'CLOSED':
+        return 'bg-red-100 text-red-800';
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Under Evaluation':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getSeverityColor = (severity: number) => {
-    if (severity >= 4) return "text-red-600";
-    if (severity >= 3) return "text-orange-600";
-    return "text-yellow-600";
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Construction':
+        return 'bg-blue-100 text-blue-800';
+      case 'Supply':
+        return 'bg-purple-100 text-purple-800';
+      case 'Services':
+        return 'bg-orange-100 text-orange-800';
+      case 'Maintenance':
+        return 'bg-green-100 text-green-800';
+      case 'Technology':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'Government':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
-
-  const stats = {
-    total: tenders.length,
-    pending: tenders.filter(t => t.status === "PENDING").length,
-    accepted: tenders.filter(t => t.status === "ACCEPTED").length,
-    rejected: tenders.filter(t => t.status === "REJECTED").length
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 pt-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-200 rounded w-64"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-white rounded-xl p-6 space-y-4">
-                  <div className="h-6 bg-slate-200 rounded w-3/4"></div>
-                  <div className="h-8 bg-slate-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-white rounded-xl p-6 space-y-4">
-                  <div className="h-6 bg-slate-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-slate-200 rounded w-full"></div>
-                  <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-slate-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <ClipboardList className="text-purple-600" size={24} />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Tender Management</h1>
-              <p className="text-slate-600">Review and manage all tender submissions</p>
-            </div>
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <ClipboardList className="text-blue-600" size={16} />
-                </div>
-                <h3 className="font-bold text-slate-900">Total</h3>
-              </div>
-              <div className="text-3xl font-bold text-slate-900">{stats.total}</div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="text-yellow-600" size={16} />
-                </div>
-                <h3 className="font-bold text-slate-900">Pending</h3>
-              </div>
-              <div className="text-3xl font-bold text-slate-900">{stats.pending}</div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <Users className="text-emerald-600" size={16} />
-                </div>
-                <h3 className="font-bold text-slate-900">Accepted</h3>
-              </div>
-              <div className="text-3xl font-bold text-slate-900">{stats.accepted}</div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                  <AlertTriangle className="text-red-600" size={16} />
-                </div>
-                <h3 className="font-bold text-slate-900">Rejected</h3>
-              </div>
-              <div className="text-3xl font-bold text-slate-900">{stats.rejected}</div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div className="flex gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search tenders..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-64"
-                />
-              </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-            <Link href="/tenders/create">
-              <button className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition flex items-center gap-2">
-                <Plus size={20} />
-                Create Tender
-              </button>
-            </Link>
-          </div>
+          <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
+            <ArrowLeft size={20} />
+            Back to Home
+          </Link>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Tenders & Procurement</h1>
+          <p className="text-lg text-slate-600">Latest procurement opportunities and government tenders for contractors and suppliers.</p>
         </div>
 
-        {/* Tenders List */}
-        <div className="space-y-4">
-          {filteredTenders.map((tender, index) => (
-            <motion.div
-              key={tender.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-all duration-300"
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(tender.status)}`}>
-                        {tender.status}
-                      </span>
-                      <span className="text-xs text-slate-500">Tender #{tender.id}</span>
-                      {tender.severity && (
-                        <div className={`flex items-center gap-1 text-xs font-bold ${getSeverityColor(tender.severity)}`}>
-                          <AlertTriangle size={12} />
-                          Severity {tender.severity}/5
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">
-                    {tender.complaintTitle}
-                  </h3>
-                  <p className="text-slate-600 text-sm mb-4 line-clamp-2">
-                    {tender.description}
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <DollarSign size={16} className="text-emerald-600" />
-                      <span className="font-semibold">₹{tender.quoteAmount.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-blue-600" />
-                      <span>{tender.estimatedDays} days</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users size={16} className="text-purple-600" />
-                      <span>{tender.contractorName}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <span>Submitted {new Date(tender.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Link href={`/complaints/${tender.complaintId}`}>
-                    <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">
-                      View Complaint
-                    </button>
-                  </Link>
-                  <Link href={`/tenders/${tender.id}`}>
-                    <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition flex items-center gap-2">
-                      View Details
-                      <ArrowRight size={16} />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {filteredTenders.length === 0 && (
-          <div className="text-center py-12">
-            <ClipboardList className="mx-auto mb-4 text-slate-400" size={48} />
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">No tenders found</h3>
-            <p className="text-slate-600 mb-4">
-              {searchTerm || statusFilter !== "all" 
-                ? "Try adjusting your search or filter criteria"
-                : "No tender submissions have been made yet"
-              }
-            </p>
-            <Link href="/tenders/create">
-              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition">
-                Create New Tender
-              </button>
-            </Link>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500 mr-3" />
+            <span className="text-slate-600">Loading tenders...</span>
           </div>
         )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+            <p className="text-yellow-800">
+              <strong>Notice:</strong> Unable to load live tender data. Showing sample data below.
+            </p>
+          </div>
+        )}
+
+        {/* Filters */}
+        {!loading && (
+          <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
+            <div className="flex flex-wrap gap-4">
+              <select className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option>All Categories</option>
+                <option>Construction</option>
+                <option>Supply</option>
+                <option>Services</option>
+                <option>Maintenance</option>
+                <option>Technology</option>
+              </select>
+              <select className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option>All Status</option>
+                <option>Active</option>
+                <option>Closed</option>
+                <option>Under Evaluation</option>
+              </select>
+              <select className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option>All Departments</option>
+                <option>Public Works Department</option>
+                <option>Electrical Department</option>
+                <option>Sanitation Department</option>
+                <option>IT Department</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Tenders List */}
+        {!loading && (
+          <div className="space-y-6">
+            {tenders.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-slate-700 mb-2">No Tenders Available</h3>
+                <p className="text-slate-500">New procurement opportunities will appear here when published.</p>
+              </div>
+            ) : (
+              tenders.map((tender, index) => {
+                // Check if this is real API data or mock data
+                const isRealTender = 'complaintId' in tender && tender.complaintId;
+                const displayTitle = isRealTender 
+                  ? ((tender as TenderData).title || (tender as TenderData).complaintTitle || `Tender #${tender.id}`)
+                  : (tender as any).title;
+                const displayValue = isRealTender
+                  ? `₹${(((tender as TenderData).budget || (tender as TenderData).quoteAmount || 0) / 100000).toFixed(1)}L`
+                  : (tender as any).estimatedValue;
+                const displayStatus = isRealTender
+                  ? ((tender as TenderData).status === 'OPEN' ? 'Active' : (tender as TenderData).status === 'CLOSED' ? 'Closed' : (tender as TenderData).status)
+                  : (tender as any).status;
+                const displayCategory = isRealTender ? 'Government' : (tender as any).category;
+                const displayDepartment = isRealTender ? 'Municipal Corporation' : (tender as any).department;
+
+                return (
+                  <div key={tender.id || index} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-sm font-mono text-slate-500">
+                            {isRealTender ? `TND-${tender.id}` : (tender as any).id}
+                          </span>
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(displayStatus)}`}>
+                            {displayStatus}
+                          </span>
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getCategoryColor(displayCategory)}`}>
+                            {displayCategory}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">{displayTitle}</h3>
+                        <p className="text-slate-600 mb-3">{tender.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <span>Department: {displayDepartment}</span>
+                          <span>•</span>
+                          <span>Est. Value: {displayValue}</span>
+                          {isRealTender && (tender as TenderData).complaintId && (
+                            <>
+                              <span>•</span>
+                              <span>Complaint ID: {(tender as TenderData).complaintId}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="lg:text-right">
+                        <div className="text-2xl font-bold text-slate-900 mb-1">{displayValue}</div>
+                        <div className="text-sm text-slate-500 mb-3">Estimated Value</div>
+                        <div className="flex lg:flex-col gap-2">
+                          {isRealTender ? (
+                            <Link href={`/tenders/${tender.id}`}>
+                              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm">
+                                View Details
+                              </button>
+                            </Link>
+                          ) : (
+                            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm">
+                              View Details
+                            </button>
+                          )}
+                          <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 transition-colors text-sm">
+                            Download
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-slate-200 pt-4">
+                      <div className="grid md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="font-semibold text-slate-700">Published:</span>
+                          <span className="text-slate-600 ml-2">
+                            {isRealTender 
+                              ? new Date((tender as TenderData).createdAt).toLocaleDateString()
+                              : new Date((tender as any).publishDate).toLocaleDateString()
+                            }
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-slate-700">Last Date:</span>
+                          <span className="text-slate-600 ml-2">
+                            {isRealTender 
+                              ? ((tender as TenderData).endDate ? new Date((tender as TenderData).endDate!).toLocaleDateString() : 'TBD')
+                              : new Date((tender as any).lastDate).toLocaleDateString()
+                            }
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-slate-700">
+                            {isRealTender ? 'Complaint' : 'Eligibility'}:
+                          </span>
+                          <span className="text-slate-600 ml-2">
+                            {isRealTender 
+                              ? ((tender as TenderData).complaintTitle || `Complaint #${(tender as TenderData).complaintId}`)
+                              : (tender as any).eligibility
+                            }
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3">
+                        <span className="font-semibold text-slate-700 text-sm">Documents:</span>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {isRealTender ? (
+                            (tender as TenderData).documentUrls && (tender as TenderData).documentUrls.length > 0 ? (
+                              (tender as TenderData).documentUrls.map((doc: string, docIndex: number) => (
+                                <a
+                                  key={docIndex}
+                                  href={`http://localhost:8080${doc}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium hover:bg-slate-200 transition-colors"
+                                >
+                                  <Download size={12} />
+                                  Document {docIndex + 1}
+                                </a>
+                              ))
+                            ) : (
+                              <span className="text-xs text-slate-500">No documents available</span>
+                            )
+                          ) : (
+                            (tender as any).documents.map((doc: string, docIndex: number) => (
+                              <button
+                                key={docIndex}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium hover:bg-slate-200 transition-colors"
+                              >
+                                <Download size={12} />
+                                {doc}
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* Help Section */}
+        <div className="mt-16 bg-blue-50 rounded-2xl p-8 border border-blue-200">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Tender Guidelines</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-2">For Contractors</h3>
+              <ul className="text-slate-600 space-y-1 text-sm">
+                <li>• Ensure valid contractor license</li>
+                <li>• Submit all required documents</li>
+                <li>• Follow technical specifications</li>
+                <li>• Meet eligibility criteria</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-2">Important Dates</h3>
+              <ul className="text-slate-600 space-y-1 text-sm">
+                <li>• Pre-bid meeting: As mentioned in tender</li>
+                <li>• Submission deadline: Strictly enforced</li>
+                <li>• Technical evaluation: 7-10 days</li>
+                <li>• Award notification: Within 15 days</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-6 flex gap-4">
+            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+              Tender Guidelines
+            </button>
+            <button className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-colors">
+              Contact Support
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -473,16 +473,20 @@ export interface TenderData {
   id: number;
   complaintId: number;
   complaintTitle: string;
-  contractorId: number;
-  contractorName: string;
-  contractorCompany: string;
-  contractorLicense: string;
-  contractorAvgRating: number;
-  quoteAmount: number;
-  estimatedDays: number;
+  contractorId?: number;
+  contractorName?: string;
+  contractorCompany?: string;
+  contractorLicense?: string;
+  contractorAvgRating?: number;
+  title?: string;
+  budget?: number;
+  quoteAmount?: number;
+  estimatedDays?: number;
   description: string;
   documentUrls: string[];
   status: string;
+  startDate?: string;
+  endDate?: string;
   createdAt: string;
   updatedAt: string;
 }

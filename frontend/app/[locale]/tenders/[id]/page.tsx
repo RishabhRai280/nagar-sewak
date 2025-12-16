@@ -133,7 +133,7 @@ export default function TenderDetailPage() {
                     <DollarSign size={18} />
                     <span className="text-xs font-bold uppercase">Quoted Amount</span>
                   </div>
-                  <p className="text-2xl font-extrabold text-slate-900">₹{tender.quoteAmount.toLocaleString()}</p>
+                  <p className="text-2xl font-extrabold text-slate-900">₹{tender.quoteAmount?.toLocaleString() || '0'}</p>
                 </div>
 
                 <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -212,7 +212,7 @@ export default function TenderDetailPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {tender.contractorName.charAt(0)}
+                    {tender.contractorName?.charAt(0) || 'C'}
                   </div>
                   <div className="flex-1">
                     <Link href={`/contractors/${tender.contractorId}`}>
@@ -235,7 +235,7 @@ export default function TenderDetailPage() {
                       <Star size={16} /> Rating
                     </span>
                     <span className="text-sm font-bold text-slate-900 flex items-center gap-1">
-                      {tender.contractorAvgRating.toFixed(1)} <Star size={14} className="text-yellow-500 fill-yellow-500" />
+                      {tender.contractorAvgRating?.toFixed(1) || 'N/A'} <Star size={14} className="text-yellow-500 fill-yellow-500" />
                     </span>
                   </div>
                 </div>

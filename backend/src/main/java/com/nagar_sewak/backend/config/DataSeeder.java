@@ -27,15 +27,22 @@ public class DataSeeder {
     private final WardRepository wardRepo;
     private final RatingRepository ratingRepo;
     private final ComplaintRepository complaintRepo; 
+    private final TenderRepository tenderRepo;
     private final EmailTemplateRepository emailTemplateRepo;
     private final PasswordEncoder passwordEncoder;
 
     @EventListener
     @Transactional
     public void seed(ApplicationReadyEvent event) {
-        if (userRepo.count() > 0) return;
-
-        System.out.println("--- Starting Data Seeding ---");
+        // Check if tenders already exist to avoid duplicates
+        if (tenderRepo.count() > 0) {
+            System.out.println("Tenders already exist, skipping tender seeding");
+            return;
+        }
+        
+        // If no users exist, create all data
+        if (userRepo.count() == 0) {
+            System.out.println("--- Starting Data Seeding ---");
         String hashedPassword = passwordEncoder.encode("password");
 
         // --- Users ---
@@ -120,7 +127,7 @@ public class DataSeeder {
                 4, 19.0600, 72.8800, citizenUser3, "In Progress",
                 null, null, null);
 
-        complaintRepo.saveAll(List.of(complaintA, complaintB, complaintC, complaintD, complaintE, complaintF));
+        List<Complaint> complaints = complaintRepo.saveAll(List.of(complaintA, complaintB, complaintC, complaintD, complaintE, complaintF));
 
         // --- Ratings ---
         Rating rating1 = createRating(citizenUser, contractorA, project2, 2,
@@ -143,8 +150,26 @@ public class DataSeeder {
         refreshContractorMetrics(contractorA);
         refreshContractorMetrics(contractorB);
 
-        // Seed email templates
-        seedEmailTemplates();
+            // --- Sample Tenders ---
+            seedSampleTenders(complaints, contractorA, contractorB);
+
+            // Seed email templates
+            seedEmailTemplates();
+        } else {
+            // Users exist, but no tenders - create tenders only
+            System.out.println("Users exist, creating tenders only...");
+            
+            // Get existing data
+            List<Complaint> existingComplaints = complaintRepo.findAll();
+            List<Contractor> existingContractors = contractorRepo.findAll();
+            
+            if (!existingComplaints.isEmpty() && !existingContractors.isEmpty()) {
+                seedSampleTenders(existingComplaints, existingContractors.get(0), 
+                    existingContractors.size() > 1 ? existingContractors.get(1) : existingContractors.get(0));
+            } else {
+                System.out.println("No existing complaints or contractors found, skipping tender creation");
+            }
+        }
 
         System.out.println("--- Data Seeding Complete. Sample credentials ---");
         System.out.println("Admin: admin@nagar.gov / password");
@@ -293,5 +318,72 @@ public class DataSeeder {
         ));
 
         System.out.println("Email templates seeded successfully!");
+    }
+
+    private void seedSampleTenders(List<Complaint> complaints, Contractor contractorA, Contractor contractorB) {
+        System.out.println("Seeding sample tenders...");
+
+        // Create some published tender opportunities (admin-published)
+        Tender tenderOpportunity1 = new Tender();
+        tenderOpportunity1.setComplaint(complaints.get(0)); // Pothole complaint
+        tenderOpportunity1.setTitle("Road Repair and Pothole Filling - Sector 4");
+        tenderOpportunity1.setDescription("Urgent repair of massive pothole on Sector 4 Main Road including surface leveling and proper drainage.");
+        tenderOpportunity1.setBudget(new BigDecimal("250000"));
+        tenderOpportunity1.setStatus("OPEN");
+        tenderOpportunity1.setStartDate(java.time.LocalDateTime.now().plusDays(7));
+        tenderOpportunity1.setEndDate(java.time.LocalDateTime.now().plusDays(30));
+
+        Tender tenderOpportunity2 = new Tender();
+        tenderOpportunity2.setComplaint(complaints.get(5)); // Garbage overflow complaint
+        tenderOpportunity2.setTitle("Waste Management Enhancement - Market Area");
+        tenderOpportunity2.setDescription("Comprehensive waste management solution including additional bins, scheduled pickups, and area cleaning.");
+        tenderOpportunity2.setBudget(new BigDecimal("180000"));
+        tenderOpportunity2.setStatus("OPEN");
+        tenderOpportunity2.setStartDate(java.time.LocalDateTime.now().plusDays(5));
+        tenderOpportunity2.setEndDate(java.time.LocalDateTime.now().plusDays(45));
+
+        // Create some contractor-submitted tenders
+        Tender contractorTender1 = new Tender();
+        contractorTender1.setComplaint(complaints.get(0)); // Pothole complaint
+        contractorTender1.setContractor(contractorA);
+        contractorTender1.setQuoteAmount(new BigDecimal("220000"));
+        contractorTender1.setEstimatedDays(15);
+        contractorTender1.setDescription("Professional road repair with high-quality asphalt and proper base preparation. Includes 2-year warranty.");
+        contractorTender1.setStatus("PENDING");
+
+        Tender contractorTender2 = new Tender();
+        contractorTender2.setComplaint(complaints.get(0)); // Same pothole complaint
+        contractorTender2.setContractor(contractorB);
+        contractorTender2.setQuoteAmount(new BigDecimal("195000"));
+        contractorTender2.setEstimatedDays(12);
+        contractorTender2.setDescription("Quick and efficient pothole repair using advanced cold-mix technology. Fast completion with minimal traffic disruption.");
+        contractorTender2.setStatus("PENDING");
+
+        Tender contractorTender3 = new Tender();
+        contractorTender3.setComplaint(complaints.get(5)); // Garbage complaint
+        contractorTender3.setContractor(contractorA);
+        contractorTender3.setQuoteAmount(new BigDecimal("165000"));
+        contractorTender3.setEstimatedDays(30);
+        contractorTender3.setDescription("Complete waste management overhaul including new bins, daily collection schedule, and monthly deep cleaning.");
+        contractorTender3.setStatus("PENDING");
+
+        // Create a closed/completed tender
+        Tender closedTender = new Tender();
+        closedTender.setComplaint(complaints.get(2)); // Graffiti complaint (already resolved)
+        closedTender.setContractor(contractorA);
+        closedTender.setTitle("Graffiti Removal and Wall Restoration");
+        closedTender.setQuoteAmount(new BigDecimal("45000"));
+        closedTender.setEstimatedDays(3);
+        closedTender.setDescription("Professional graffiti removal and wall repainting with anti-graffiti coating.");
+        closedTender.setStatus("ACCEPTED");
+        closedTender.setBudget(new BigDecimal("50000"));
+
+        tenderRepo.saveAll(List.of(
+            tenderOpportunity1, tenderOpportunity2, 
+            contractorTender1, contractorTender2, contractorTender3, 
+            closedTender
+        ));
+
+        System.out.println("Sample tenders seeded successfully!");
     }
 }

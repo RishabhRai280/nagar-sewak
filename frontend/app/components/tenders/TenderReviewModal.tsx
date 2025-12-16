@@ -93,7 +93,7 @@ export default function TenderReviewModal({ complaintId, complaintTitle, onClose
                                                 <p className="text-xs text-slate-500 font-bold uppercase mb-1">Quote Amount</p>
                                                 <p className="text-lg font-bold text-slate-900 flex items-center gap-1">
                                                     <DollarSign size={16} className="text-emerald-500" />
-                                                    ₹{tender.quoteAmount.toLocaleString()}
+                                                    ₹{tender.quoteAmount?.toLocaleString() || '0'}
                                                 </p>
                                             </div>
                                             <div className="bg-slate-50 p-3 rounded-lg">
