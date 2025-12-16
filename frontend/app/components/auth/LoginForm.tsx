@@ -23,9 +23,16 @@ export default function LoginForm() {
     const hasAdminAccess = profile.roles.some(role => ["ADMIN", "SUPER_ADMIN"].includes(role));
     const isContractor = profile.roles.includes("CONTRACTOR");
 
-    if (isContractor) router.push("/dashboard/contractor");
-    else if (hasAdminAccess) router.push("/dashboard/admin");
-    else router.push("/dashboard/citizen");
+    // Use window.location.href for reliable redirect with locale
+    const locale = window.location.pathname.split('/')[1] || 'en';
+
+    if (isContractor) {
+      window.location.href = `/${locale}/dashboard/contractor`;
+    } else if (hasAdminAccess) {
+      window.location.href = `/${locale}/dashboard/admin`;
+    } else {
+      window.location.href = `/${locale}/dashboard/citizen`;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +51,7 @@ export default function LoginForm() {
       console.log('Error response:', err.response);
       console.log('Error status:', err.status);
       console.log('Error message:', err.message);
-      
+
       // Handle security-specific error responses
       if (err.response && err.response.error) {
         const errorData = err.response.error;
@@ -117,29 +124,26 @@ export default function LoginForm() {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 0 }}
             transition={{ duration: 0.3 }}
-            className={`mb-6 p-4 border rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden ${
-              error.includes('locked') || error.includes('लॉक') 
-                ? 'bg-red-600/15 border-red-600/40 shadow-red-100/50 shadow-lg' 
-                : error.includes('attempt') || error.includes('प्रयास')
+            className={`mb-6 p-4 border rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden ${error.includes('locked') || error.includes('लॉक')
+              ? 'bg-red-600/15 border-red-600/40 shadow-red-100/50 shadow-lg'
+              : error.includes('attempt') || error.includes('प्रयास')
                 ? 'bg-amber-500/15 border-amber-500/40 shadow-amber-100/50 shadow-lg'
                 : 'bg-red-500/10 border-red-500/30'
-            }`}
+              }`}
           >
-            <AlertCircle className={`flex-shrink-0 mt-0.5 ${
-              error.includes('locked') || error.includes('लॉक') 
-                ? 'text-red-700' 
-                : error.includes('attempt') || error.includes('प्रयास')
+            <AlertCircle className={`flex-shrink-0 mt-0.5 ${error.includes('locked') || error.includes('लॉक')
+              ? 'text-red-700'
+              : error.includes('attempt') || error.includes('प्रयास')
                 ? 'text-amber-700'
                 : 'text-red-600'
-            }`} size={20} />
+              }`} size={20} />
             <div className="flex-1">
-              <p className={`text-sm font-semibold ${
-                error.includes('locked') || error.includes('लॉक') 
-                  ? 'text-red-800' 
-                  : error.includes('attempt') || error.includes('प्रयास')
+              <p className={`text-sm font-semibold ${error.includes('locked') || error.includes('लॉक')
+                ? 'text-red-800'
+                : error.includes('attempt') || error.includes('प्रयास')
                   ? 'text-amber-800'
                   : 'text-red-700'
-              }`}>
+                }`}>
                 {error}
               </p>
               {(error.includes('attempt') || error.includes('प्रयास')) && (

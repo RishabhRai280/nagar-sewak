@@ -55,22 +55,6 @@ export default function MapEnhancements({
         </div>
         <span>Heat Map</span>
       </motion.button>
-
-      {/* Print Map Button */}
-      {onPrintMap && (
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onPrintMap}
-          className="flex items-center gap-2 px-3 py-2 rounded-md font-bold text-xs transition-all w-full justify-start bg-transparent text-slate-600 hover:bg-slate-50"
-          title="Print map view"
-        >
-          <div className="p-1 rounded-full bg-slate-200 text-slate-500">
-            <Printer size={14} />
-          </div>
-          <span>Print Map</span>
-        </motion.button>
-      )}
     </div>
   );
 }

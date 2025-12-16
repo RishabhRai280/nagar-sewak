@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { Token, fetchCurrentUserProfile, UserProfile, UserStore } from "@/lib/api";
 import { useSidebar } from "@/app/contexts/SidebarContext";
-import TopBar from "./shared/TopBar";
+import { useAccessibility } from "@/app/contexts/AccessibilityContext";
+import { useLocale } from "next-intl";
 
 type SidebarRole = "citizen" | "admin" | "contractor";
 
@@ -35,6 +36,8 @@ export default function Sidebar() {
   const [role, setRole] = useState<SidebarRole>("citizen");
   const [loading, setLoading] = useState(true);
   const [hash, setHash] = useState<string>("");
+  const locale = useLocale();
+  const { fontSize, setFontSize } = useAccessibility();
 
   useEffect(() => {
     const cached = UserStore.get();
@@ -151,70 +154,123 @@ export default function Sidebar() {
     );
   }
 
+  const switchLanguage = (newLocale: string) => {
+    const pathWithoutLocale = pathname.replace(/^\/(en|hi)/, '');
+    router.push(`/${newLocale}${pathWithoutLocale}`);
+  };
+
   return (
     <>
-      {/* Top Gov Strip (Fixed) */}
-      <div className="fixed top-0 left-0 right-0 z-[60]">
-        <TopBar />
-      </div>
+      {/* Dashboard Government Header - Matching Main Site */}
+      <div className="flex flex-col w-full fixed top-0 left-0 right-0 z-[100]">
+        {/* Government Top Strip - Compact */}
+        <div className="bg-slate-900 text-white border-b border-slate-700 py-1 px-4 lg:px-6 flex justify-between items-center text-[11px]">
+          {/* Left: Government Identity */}
+          <div className="flex items-center gap-3">
+            <span className="font-semibold tracking-wide uppercase">Government of India</span>
+            <span className="hidden md:inline h-3 w-[1px] bg-slate-600"></span>
+            <span className="hidden md:inline opacity-80 text-[10px]">Ministry of Urban Affairs</span>
+          </div>
 
-      {/* Main Header (Below TopBar) */}
-      <header className="fixed top-[45px] md:top-[37px] left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-4 shadow-sm transition-all duration-300">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={toggleCollapsed}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors lg:hidden"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-
-          {/* Logo Area */}
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="flex flex-col">
-              <span className="font-bold text-slate-900 text-lg leading-none">Nagar Sewak</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">{t('citizenPortal')}</span>
+          {/* Right: Controls + Role */}
+          <div className="flex items-center gap-3">
+            {/* Font Size */}
+            <div className="hidden md:flex items-center gap-0.5 bg-slate-800/40 rounded px-1 py-0.5 border border-slate-700/50">
+              <button
+                onClick={() => setFontSize('normal')}
+                className={`px-1.5 py-0.5 rounded text-[10px] transition ${fontSize === 'normal' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+                title="Normal"
+              >
+                A-
+              </button>
+              <button
+                onClick={() => setFontSize('large')}
+                className={`px-1.5 py-0.5 rounded text-[10px] transition ${fontSize === 'large' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+                title="Large"
+              >
+                A
+              </button>
+              <button
+                onClick={() => setFontSize('extra-large')}
+                className={`px-1.5 py-0.5 rounded text-[10px] transition ${fontSize === 'extra-large' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+                title="Extra Large"
+              >
+                A+
+              </button>
             </div>
-          </Link>
-        </div>
 
-        <div className="flex items-center gap-4">
-
-
-          <div className="flex items-center gap-3 px-3 py-1.5 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-slate-200">
-            <div className="w-9 h-9 bg-[#1e3a8a] text-white rounded-full flex items-center justify-center font-bold shadow-md">
-              <User size={16} />
+            {/* Language */}
+            <div className="flex items-center gap-0.5 bg-slate-800/40 rounded px-1 py-0.5 border border-slate-700/50">
+              <button
+                onClick={() => switchLanguage('en')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition ${locale === 'en' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => switchLanguage('hi')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition ${locale === 'hi' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                HI
+              </button>
             </div>
-            <div className="hidden md:block text-left">
-              <div className="text-sm font-bold text-slate-900">{t('userProfile')}</div>
-              <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">{effectiveRole}</div>
+
+            {/* Role Badge */}
+            <div className="px-2 py-0.5 bg-white/10 rounded text-[10px] font-semibold uppercase tracking-wide">
+              {effectiveRole}
             </div>
           </div>
         </div>
-      </header>
+
+        {/* Main Header - Compact */}
+        <header className="w-full bg-white py-2 shadow-sm border-b border-slate-200">
+          <div className="container mx-auto px-4 lg:px-6 flex justify-between items-center">
+            {/* Logo Area */}
+            <Link href="/" className="group flex items-center gap-2">
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Satyamev Jayate</div>
+              </div>
+              <div className="h-8 w-[1px] bg-slate-300"></div>
+              <div className="flex flex-col">
+                <span className="text-base font-bold text-slate-900 leading-tight">Nagar Sewak</span>
+                <span className="text-[9px] font-medium text-slate-500 uppercase tracking-widest">Citizen Engagement Platform</span>
+              </div>
+            </Link>
+
+            {/* Right: User Profile */}
+            <div className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-lg transition-colors">
+              <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center border border-blue-100">
+                <User size={14} className="text-blue-700" />
+              </div>
+              <div className="hidden md:block text-left">
+                <div className="text-xs font-bold text-slate-900">{t('userProfile')}</div>
+              </div>
+            </div>
+          </div>
+        </header>
+      </div>
 
       {/* Sidebar Navigation */}
-      <aside className={`${collapsed ? "w-16" : "w-64"} bg-[#1e3a8a] text-white fixed inset-y-0 left-0 flex-col hidden lg:flex z-40 shadow-xl transition-all duration-300 pt-[calc(45px+4rem)] md:pt-[calc(37px+4rem)]`}>
-        {/* Collapse Toggle */}
-        <div className="px-4 py-3 flex justify-end">
+      <aside className={`${collapsed ? "w-16" : "w-64"} bg-[#1e3a8a] text-white fixed inset-y-0 left-0 flex-col hidden lg:flex z-40 shadow-xl transition-all duration-300 pt-[68px]`}>
+        {/* Collapse Toggle - Now visible below header */}
+        <div className="px-4 py-2 flex justify-end">
           <button
             onClick={toggleCollapsed}
-            className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-blue-200 hover:text-white"
+            className="p-1 hover:bg-white/10 rounded-md transition-colors text-blue-200 hover:text-white"
           >
-            <ChevronLeft size={16} className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
+            <ChevronLeft size={14} className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
           </button>
         </div>
 
         {/* Menu Label */}
         {!collapsed && (
-          <div className="px-6 py-2">
-            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest opacity-80">{t('mainMenu')}</span>
+          <div className="px-6 py-1.5">
+            <span className="text-[9px] font-bold text-blue-300 uppercase tracking-widest opacity-80">{t('mainMenu')}</span>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const isMapLink = item.href === '/map';
             const isDashboardLink = item.href.includes("/dashboard/") && (item as any).section;
@@ -230,14 +286,12 @@ export default function Sidebar() {
                 const targetUrl = `${item.href}#${(item as any).section}`;
 
                 if (pathname === item.href) {
-                  // Same page, just change hash
                   const itemHash = `#${(item as any).section}`;
                   setHash(itemHash);
                   window.history.pushState(null, '', targetUrl);
                   window.dispatchEvent(new HashChangeEvent('hashchange'));
                   setTimeout(() => scrollToHash(itemHash), 150);
                 } else {
-                  // Different page, navigate
                   router.push(targetUrl);
                 }
               }
@@ -252,13 +306,15 @@ export default function Sidebar() {
                 scroll={false}
               >
                 <div
-                  className={`flex items-center ${collapsed ? "justify-center px-1" : "gap-3 px-4"} py-3 mx-1 rounded-xl cursor-pointer transition-all duration-200 group relative overflow-hidden ${isActive
+                  className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-4"} py-2.5 mx-1 rounded-lg cursor-pointer transition-all duration-200 group relative overflow-hidden ${isActive
                     ? "bg-white/10 text-[#f97316] font-bold shadow-inner"
                     : "text-blue-100 hover:text-white hover:bg-white/5"
                     }`}
                 >
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#f97316] rounded-r-full"></div>}
-                  <item.icon size={20} className={`transition-colors relative z-10 ${isActive ? "text-[#f97316]" : "text-blue-200 group-hover:text-white"}`} />
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#f97316] rounded-r-full"></div>}
+                  <div className={`${collapsed ? "w-full" : ""} flex items-center justify-center`}>
+                    <item.icon size={18} className={`flex-shrink-0 transition-colors relative z-10 ${isActive ? "text-[#f97316]" : "text-blue-200 group-hover:text-white"}`} />
+                  </div>
                   {!collapsed && <span className="text-sm tracking-wide relative z-10">{item.label}</span>}
                 </div>
               </Link>
@@ -270,12 +326,14 @@ export default function Sidebar() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
 
         {/* Footer Actions */}
-        <div className="p-4 mt-auto border-t border-white/10 relative z-10 bg-[#172554]">
+        <div className="p-3 mt-auto border-t border-white/10 relative z-10 bg-[#172554]">
           <button
             onClick={handleLogout}
-            className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-4"} py-2.5 w-full text-blue-200 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 font-medium text-sm group`}
+            className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-4"} py-2 w-full text-blue-200 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 font-medium text-sm group`}
           >
-            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform text-blue-300" />
+            <div className={`${collapsed ? "w-full" : ""} flex items-center justify-center`}>
+              <LogOut size={16} className="flex-shrink-0 group-hover:-translate-x-1 transition-transform text-blue-300" />
+            </div>
             {!collapsed && t('signOut')}
           </button>
         </div>

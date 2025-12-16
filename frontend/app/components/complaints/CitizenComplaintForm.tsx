@@ -6,11 +6,12 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitComplaint, Token } from "@/lib/api/api";
 import { validateComplaint, sanitizeInput } from "@/lib/utils/validation";
+import { translateToHindi, translateToEnglish } from "@/lib/utils/translation";
 import { useTranslations } from "next-intl";
 import {
   MapPin, Upload, AlertCircle, Loader, CheckCircle,
   FileText, X, ChevronRight,
-  Navigation
+  Navigation, Languages, AlertTriangle
 } from 'lucide-react';
 import { StatusAnnouncement } from '../shared/AccessibilityUtils';
 
@@ -21,8 +22,15 @@ export default function CitizenComplaintForm() {
   const t = useTranslations('report');
   const tGlobal = useTranslations();
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+
+  // Bilingual states
+  const [titleEn, setTitleEn] = useState("");
+  const [titleHi, setTitleHi] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionHi, setDescriptionHi] = useState("");
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [languageWarning, setLanguageWarning] = useState<string | null>(null);
+
   const [severity, setSeverity] = useState(1);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -87,6 +95,108 @@ export default function CitizenComplaintForm() {
     );
   };
 
+  // Detect if text is in Hindi (Devanagari script)
+  const isHindiText = (text: string): boolean => {
+    const devanagariRegex = /[\u0900-\u097F]/;
+    return devanagariRegex.test(text);
+  };
+
+  // Detect if text is in English (Latin script)
+  const isEnglishText = (text: string): boolean => {
+    const latinRegex = /[a-zA-Z]/;
+    return latinRegex.test(text) && !isHindiText(text);
+  };
+
+  // Auto-translate title from English to Hindi
+  const handleTitleEnChange = async (value: string) => {
+    setTitleEn(value);
+    setLanguageWarning(null);
+
+    if (value.trim() && !isTranslating) {
+      // Check if user is typing Hindi in English box
+      if (isHindiText(value)) {
+        setLanguageWarning("Please write Hindi text in the Hindi box (हिंदी)");
+        setTitleHi(value);
+        setTitleEn("");
+        return;
+      }
+
+      setIsTranslating(true);
+      const translated = await translateToHindi(value);
+      setTitleHi(translated);
+      setIsTranslating(false);
+    } else if (!value.trim()) {
+      setTitleHi("");
+    }
+  };
+
+  // Auto-translate title from Hindi to English
+  const handleTitleHiChange = async (value: string) => {
+    setTitleHi(value);
+    setLanguageWarning(null);
+
+    if (value.trim() && !isTranslating) {
+      // Check if user is typing English in Hindi box
+      if (isEnglishText(value)) {
+        setLanguageWarning("Please write English text in the English box");
+        setTitleEn(value);
+        setTitleHi("");
+        return;
+      }
+
+      setIsTranslating(true);
+      const translated = await translateToEnglish(value);
+      setTitleEn(translated);
+      setIsTranslating(false);
+    } else if (!value.trim()) {
+      setTitleEn("");
+    }
+  };
+
+  // Auto-translate description from English to Hindi
+  const handleDescriptionEnChange = async (value: string) => {
+    setDescriptionEn(value);
+    setLanguageWarning(null);
+
+    if (value.trim() && !isTranslating) {
+      if (isHindiText(value)) {
+        setLanguageWarning("Please write Hindi text in the Hindi box (हिंदी)");
+        setDescriptionHi(value);
+        setDescriptionEn("");
+        return;
+      }
+
+      setIsTranslating(true);
+      const translated = await translateToHindi(value);
+      setDescriptionHi(translated);
+      setIsTranslating(false);
+    } else if (!value.trim()) {
+      setDescriptionHi("");
+    }
+  };
+
+  // Auto-translate description from Hindi to English
+  const handleDescriptionHiChange = async (value: string) => {
+    setDescriptionHi(value);
+    setLanguageWarning(null);
+
+    if (value.trim() && !isTranslating) {
+      if (isEnglishText(value)) {
+        setLanguageWarning("Please write English text in the English box");
+        setDescriptionEn(value);
+        setDescriptionHi("");
+        return;
+      }
+
+      setIsTranslating(true);
+      const translated = await translateToEnglish(value);
+      setDescriptionEn(translated);
+      setIsTranslating(false);
+    } else if (!value.trim()) {
+      setDescriptionEn("");
+    }
+  };
+
   const handleMapLocationSelect = (lat: number, lng: number) => {
     setLatitude(lat);
     setLongitude(lng);
@@ -112,6 +222,10 @@ export default function CitizenComplaintForm() {
     e.preventDefault();
     setError(null);
     setValidationErrors([]);
+
+    // Use English version for submission, fallback to Hindi if English is empty
+    const title = titleEn.trim() || titleHi.trim();
+    const description = descriptionEn.trim() || descriptionHi.trim();
 
     const sanitizedTitle = sanitizeInput(title);
     const sanitizedDescription = sanitizeInput(description);
@@ -150,12 +264,9 @@ export default function CitizenComplaintForm() {
         },
         selectedFiles
       );
-
       router.push("/dashboard/citizen?submission=success");
     } catch (err: any) {
-      const errorMessage = err?.message || err?.toString() || t('messages.submitError');
-      setError(errorMessage);
-      setValidationErrors([errorMessage]);
+      setError(err?.message ?? t('messages.submitError'));
     } finally {
       setLoading(false);
     }
@@ -176,6 +287,18 @@ export default function CitizenComplaintForm() {
       transition={{ duration: 0.5 }}
       className="max-w-6xl mx-auto"
     >
+      {/* Go Back Button */}
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-slate-600 hover:text-blue-700 transition-colors mb-6 group font-medium"
+      >
+        <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-blue-300 group-hover:bg-blue-50 transition-all">
+          <ChevronRight size={16} className="rotate-180 text-slate-400 group-hover:text-blue-600" />
+        </div>
+        <span>Back to Home</span>
+      </button>
+
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col lg:flex-row min-h-[600px]">
 
         {/* --- LEFT SIDE BANNER --- */}
@@ -294,7 +417,7 @@ export default function CitizenComplaintForm() {
 
             {/* Error Notification */}
             {(error || validationErrors.length > 0) && (
-              <div 
+              <div
                 className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-md flex items-start gap-3 animate-pulse"
                 role="alert"
                 aria-live="assertive"
@@ -315,58 +438,117 @@ export default function CitizenComplaintForm() {
             <div className="space-y-6">
               {/* INPUTS */}
               <div className="space-y-6">
-                <div className="relative group">
-                  <label 
-                    htmlFor="complaint-title"
-                    className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide"
-                  >
-                    {t('form.subject')} <span className="text-red-500" aria-label="required">*</span>
-                  </label>
-                  <div className="relative">
-                    <FileText 
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" 
-                      size={20}
-                      aria-hidden="true"
-                    />
-                    <input
-                      id="complaint-title"
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 placeholder:text-slate-400 font-bold text-sm shadow-sm"
-                      placeholder={t('form.subjectPlaceholder')}
-                      disabled={loading}
-                      required
-                      aria-describedby="title-help"
-                      aria-invalid={validationErrors.some(e => e.includes('title')) ? 'true' : 'false'}
-                    />
-                    <div id="title-help" className="sr-only">
-                      Enter a brief, descriptive title for your complaint
+                {/* Language Warning */}
+                <AnimatePresence>
+                  {languageWarning && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r flex items-start gap-3"
+                    >
+                      <AlertTriangle className="text-amber-600 mt-0.5" size={20} />
+                      <div>
+                        <h4 className="font-bold text-amber-800 text-sm">Language Detected</h4>
+                        <p className="text-amber-700 text-sm">{languageWarning}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Bilingual Title Inputs */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                      {t('form.subject')} <span className="text-red-500">*</span>
+                    </label>
+                    {isTranslating && (
+                      <div className="flex items-center gap-1 text-blue-600 text-xs">
+                        <Languages size={14} className="animate-pulse" />
+                        <span>Translating...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* English Title */}
+                    <div className="relative group">
+                      <label htmlFor="title-en" className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block">
+                        English
+                      </label>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={16} />
+                        <input
+                          id="title-en"
+                          type="text"
+                          value={titleEn}
+                          onChange={(e) => handleTitleEnChange(e.target.value)}
+                          className="w-full pl-10 pr-3 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 text-sm placeholder:text-slate-400"
+                          placeholder="Water Leakage in Sector 4"
+                          disabled={loading}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Hindi Title */}
+                    <div className="relative group">
+                      <label htmlFor="title-hi" className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block">
+                        हिंदी (Hindi)
+                      </label>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={16} />
+                        <input
+                          id="title-hi"
+                          type="text"
+                          value={titleHi}
+                          onChange={(e) => handleTitleHiChange(e.target.value)}
+                          className="w-full pl-10 pr-3 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 text-sm placeholder:text-slate-400"
+                          placeholder="सेक्टर 4 में पानी का रिसाव"
+                          disabled={loading}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="relative">
-                  <label 
-                    htmlFor="complaint-description"
-                    className="text-xs font-bold text-slate-500 uppercase mb-2 block tracking-wide"
-                  >
-                    {t('form.description')} <span className="text-red-500" aria-label="required">*</span>
+                {/* Bilingual Description Inputs */}
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                    {t('form.description')} <span className="text-red-500">*</span>
                   </label>
-                  <textarea
-                    id="complaint-description"
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400 shadow-sm leading-relaxed"
-                    placeholder={t('form.descriptionPlaceholder')}
-                    disabled={loading}
-                    required
-                    aria-describedby="description-help"
-                    aria-invalid={validationErrors.some(e => e.includes('description')) ? 'true' : 'false'}
-                  />
-                  <div id="description-help" className="sr-only">
-                    Provide detailed information about the issue, including what happened, when, and any relevant circumstances
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* English Description */}
+                    <div>
+                      <label htmlFor="desc-en" className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block">
+                        English
+                      </label>
+                      <textarea
+                        id="desc-en"
+                        rows={5}
+                        value={descriptionEn}
+                        onChange={(e) => handleDescriptionEnChange(e.target.value)}
+                        className="w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400"
+                        placeholder="Provide detailed information..."
+                        disabled={loading}
+                      />
+                    </div>
+
+                    {/* Hindi Description */}
+                    <div>
+                      <label htmlFor="desc-hi" className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block">
+                        हिंदी (Hindi)
+                      </label>
+                      <textarea
+                        id="desc-hi"
+                        rows={5}
+                        value={descriptionHi}
+                        onChange={(e) => handleDescriptionHiChange(e.target.value)}
+                        className="w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-slate-900 resize-none placeholder:text-slate-400"
+                        placeholder="विस्तृत जानकारी प्रदान करें..."
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -410,14 +592,14 @@ export default function CitizenComplaintForm() {
                 {/* Location - Full Width */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
-                    <label 
+                    <label
                       htmlFor="location-map"
                       className="text-xs font-bold text-slate-500 uppercase block tracking-wide"
                     >
                       {t('form.location.label')}
                     </label>
                     {latitude && (
-                      <span 
+                      <span
                         className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1"
                         role="status"
                         aria-label="Location has been set"
@@ -445,25 +627,25 @@ export default function CitizenComplaintForm() {
                     )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                   </button>
-                  
+
                   <div id="location-help" className="sr-only">
                     Set the location where the issue occurred. You can use GPS detection or manually select on the map.
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <button 
-                      type="button" 
-                      onClick={getLocation} 
+                    <button
+                      type="button"
+                      onClick={getLocation}
                       className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       aria-label="Detect current location using GPS"
                       disabled={locationStatus === "fetching"}
                     >
-                      <Navigation size={14} aria-hidden="true" /> 
+                      <Navigation size={14} aria-hidden="true" />
                       {locationStatus === "fetching" ? "Detecting..." : t('form.location.detect')}
                     </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowMapPicker(true)} 
+                    <button
+                      type="button"
+                      onClick={() => setShowMapPicker(true)}
                       className="py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow-sm uppercase tracking-wider min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       aria-label="Select location manually on map"
                     >
@@ -474,7 +656,7 @@ export default function CitizenComplaintForm() {
 
                 {/* File Upload - Adaptive sizing */}
                 <div className="space-y-3">
-                  <label 
+                  <label
                     htmlFor="file-upload"
                     className="text-xs font-bold text-slate-500 uppercase block tracking-wide"
                   >
@@ -483,7 +665,7 @@ export default function CitizenComplaintForm() {
 
                   <div className={selectedFiles.length > 0 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "block"}>
                     {/* Dropzone - Resizes based on state */}
-                    <label 
+                    <label
                       htmlFor="file-upload"
                       className={`
                           flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-500 transition group bg-slate-50/50 relative overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500
@@ -503,39 +685,39 @@ export default function CitizenComplaintForm() {
                       {selectedFiles.length === 0 && (
                         <p className="text-slate-400 text-xs mt-2">{t('form.evidence.supports')}</p>
                       )}
-                      <input 
+                      <input
                         id="file-upload"
-                        type="file" 
-                        multiple 
-                        accept="image/*,video/*" 
-                        className="sr-only" 
+                        type="file"
+                        multiple
+                        accept="image/*,video/*"
+                        className="sr-only"
                         onChange={handleFileChange}
                         aria-describedby="file-upload-help"
                         aria-label="Upload evidence files (images or videos)"
                       />
                     </label>
-                    
+
                     <div id="file-upload-help" className="sr-only">
                       Upload up to 6 image or video files as evidence for your complaint. Supported formats include JPG, PNG, MP4, and other common media formats.
                     </div>
 
                     {/* Side Previews */}
                     {selectedFiles.length > 0 && (
-                      <div 
+                      <div
                         className="grid grid-cols-3 gap-3 h-40 overflow-y-auto custom-scrollbar content-start"
                         role="list"
                         aria-label="Uploaded evidence files"
                       >
                         {selectedFiles.map((file, i) => (
-                          <div 
-                            key={i} 
+                          <div
+                            key={i}
                             className="relative aspect-square rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shadow-sm group h-full"
                             role="listitem"
                           >
                             {file.type.startsWith('image') ? (
-                              <img 
-                                src={URL.createObjectURL(file)} 
-                                className="w-full h-full object-cover" 
+                              <img
+                                src={URL.createObjectURL(file)}
+                                className="w-full h-full object-cover"
                                 alt={`Evidence image: ${file.name}`}
                               />
                             ) : (
@@ -566,7 +748,7 @@ export default function CitizenComplaintForm() {
             <div className="mt-8 pt-6 border-t border-slate-100">
               <button
                 type="submit"
-                disabled={loading || !title.trim() || !description.trim()}
+                disabled={loading || (!titleEn.trim() && !titleHi.trim()) || (!descriptionEn.trim() && !descriptionHi.trim())}
                 className="w-full py-4 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none"
                 aria-describedby="submit-help"
               >
@@ -577,7 +759,7 @@ export default function CitizenComplaintForm() {
                   </>
                 ) : (
                   <>
-                    {t('form.submit')} 
+                    {t('form.submit')}
                     <ChevronRight size={18} aria-hidden="true" />
                   </>
                 )}
@@ -586,86 +768,88 @@ export default function CitizenComplaintForm() {
                 Submit your complaint. Make sure to fill in the title and description before submitting.
               </div>
             </div>
-            
+
             {/* Status announcements for screen readers */}
             {loading && (
-              <StatusAnnouncement 
-                message="Submitting your complaint, please wait..." 
-                priority="polite" 
+              <StatusAnnouncement
+                message="Submitting your complaint, please wait..."
+                priority="polite"
               />
             )}
-            
+
             {locationStatus === "fetching" && (
-              <StatusAnnouncement 
-                message="Detecting your current location..." 
-                priority="polite" 
+              <StatusAnnouncement
+                message="Detecting your current location..."
+                priority="polite"
               />
             )}
-            
+
             {locationStatus === "success" && latitude && longitude && (
-              <StatusAnnouncement 
-                message="Location detected successfully" 
-                priority="polite" 
+              <StatusAnnouncement
+                message="Location detected successfully"
+                priority="polite"
               />
             )}
-            
+
             {locationStatus === "error" && (
-              <StatusAnnouncement 
-                message="Unable to detect location. Please set location manually." 
-                priority="assertive" 
+              <StatusAnnouncement
+                message="Unable to detect location. Please set location manually."
+                priority="assertive"
               />
             )}
           </form>
         </div>
-      </div>
+      </div >
 
       {/* Map Picker Modal */}
       <AnimatePresence>
-        {showMapPicker && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowMapPicker(false)}
-          >
+        {
+          showMapPicker && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowMapPicker(false)}
             >
-              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wide">{t('form.location.modalTitle')}</h3>
-                <button
-                  onClick={() => setShowMapPicker(false)}
-                  className="w-8 h-8 rounded hover:bg-slate-200 flex items-center justify-center transition-colors text-slate-500"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              <div className="h-[500px] relative">
-                <LocationPicker
-                  lat={latitude}
-                  lng={longitude}
-                  onLocationSelect={handleMapLocationSelect}
-                />
-              </div>
-              <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowMapPicker(false)}
-                  className="px-6 py-2 bg-slate-800 text-white text-xs font-bold uppercase rounded hover:bg-slate-900 transition"
-                >
-                  {t('form.location.confirm')}
-                </button>
-              </div>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-lg shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200"
+              >
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                  <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wide">{t('form.location.modalTitle')}</h3>
+                  <button
+                    onClick={() => setShowMapPicker(false)}
+                    className="w-8 h-8 rounded hover:bg-slate-200 flex items-center justify-center transition-colors text-slate-500"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="h-[500px] relative">
+                  <LocationPicker
+                    lat={latitude}
+                    lng={longitude}
+                    onLocationSelect={handleMapLocationSelect}
+                  />
+                </div>
+                <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(false)}
+                    className="px-6 py-2 bg-slate-800 text-white text-xs font-bold uppercase rounded hover:bg-slate-900 transition"
+                  >
+                    {t('form.location.confirm')}
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )
+        }
+      </AnimatePresence >
 
-    </motion.div>
+    </motion.div >
   );
 }

@@ -63,7 +63,7 @@ const handlePrintExport = async (data: any, isComplaint: boolean) => {
 
   // Create a modal-like selection
   const choice = await showExportOptions(options);
-  
+
   switch (choice) {
     case "print":
       handlePrintView(data, isComplaint);
@@ -83,7 +83,7 @@ const handlePrintExport = async (data: any, isComplaint: boolean) => {
   }
 };
 
-const showExportOptions = (options: Array<{label: string, action: string}>): Promise<string> => {
+const showExportOptions = (options: Array<{ label: string, action: string }>): Promise<string> => {
   return new Promise((resolve) => {
     // Create a temporary modal
     const modal = document.createElement('div');
@@ -140,7 +140,7 @@ const handlePrintView = (data: any, isComplaint: boolean) => {
     printMapView(mapContainer, data);
     return;
   }
-  
+
   // Fallback to simple print if map container not found
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
@@ -308,10 +308,10 @@ const handlePDFExport = async (data: any, isComplaint: boolean) => {
     }
   } catch (error) {
     console.error('PDF export failed:', error);
-    
+
     // Show more user-friendly error message
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
+
     // Create a better error modal instead of alert
     const errorModal = document.createElement('div');
     errorModal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
@@ -342,7 +342,7 @@ const handlePDFExport = async (data: any, isComplaint: boolean) => {
         </div>
       </div>
     `;
-    
+
     // Add event listener for the print button
     const printBtn = errorModal.querySelector('#try-print-btn');
     if (printBtn) {
@@ -351,9 +351,9 @@ const handlePDFExport = async (data: any, isComplaint: boolean) => {
         handlePrintView(data, isComplaint);
       });
     }
-    
+
     document.body.appendChild(errorModal);
-    
+
     // Auto-remove after 10 seconds
     setTimeout(() => {
       if (document.body.contains(errorModal)) {
@@ -382,10 +382,10 @@ const handleJSONExport = (data: any, isComplaint: boolean) => {
 };
 
 const handleCSVExport = (data: any, isComplaint: boolean) => {
-  const headers = isComplaint 
+  const headers = isComplaint
     ? ['ID', 'Title', 'Description', 'Status', 'Severity', 'Latitude', 'Longitude', 'Created At']
     : ['ID', 'Title', 'Description', 'Status', 'Budget', 'Latitude', 'Longitude', 'Created At'];
-  
+
   const row = isComplaint
     ? [data.id, data.title, data.description, data.status, data.severity, data.lat, data.lng, data.createdAt]
     : [data.id, data.title, data.description, data.status, data.budget, data.lat, data.lng, data.createdAt];
@@ -452,27 +452,27 @@ function createDivIcon(color: string, type: "project" | "complaint", status: str
   let bgColor = "white";
 
   if (isProject) {
-     borderColor = "#2563eb"; // Blue border
-     iconColor = "#2563eb";
-     if (isResolved) { borderColor = "#059669"; iconColor = "#059669"; } // Green if completed
+    borderColor = "#2563eb"; // Blue border
+    iconColor = "#2563eb";
+    if (isResolved) { borderColor = "#059669"; iconColor = "#059669"; } // Green if completed
   } else {
-     // Complaint
-     borderColor = "#dc2626"; // Red border
-     iconColor = "#dc2626";
-     if (isResolved) { borderColor = "#059669"; iconColor = "#059669"; } // Green if resolved
-     if (!isResolved && !isPending) { borderColor = "#d97706"; iconColor = "#d97706"; } // Amber if in progress
+    // Complaint
+    borderColor = "#dc2626"; // Red border
+    iconColor = "#dc2626";
+    if (isResolved) { borderColor = "#059669"; iconColor = "#059669"; } // Green if resolved
+    if (!isResolved && !isPending) { borderColor = "#d97706"; iconColor = "#d97706"; } // Amber if in progress
   }
 
   // Icons based on state
   const iconSvg = isProject
-    ? isResolved 
-       ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>`
-       : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>`
+    ? isResolved
+      ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+      : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>`
     : isResolved
-       ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>`
-       : isPending
-          ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line><circle cx="12" cy="12" r="10"></circle></svg>`
-          : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+      ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+      : isPending
+        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line><circle cx="12" cy="12" r="10"></circle></svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
 
   const markerHtml = `
     <div class="relative group cursor-pointer" style="width: 40px; height: 40px;">
@@ -907,44 +907,44 @@ function FloatingDetailsPanel({
     >
       {/* --- Official Case Header --- */}
       <div className="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start">
-         <div>
-            <div className="flex items-center gap-2 mb-1">
-               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                  {isComplaint ? "Case File #CMP-" : "Project File #PRJ-"}{data.id}
-               </span>
-               <span className={`px-2 py-0.5 text-[10px] font-bold uppercase border rounded-full ${getStatusColor(data.status)}`}>
-                  {data.status?.replace('_', ' ')}
-               </span>
-            </div>
-            <h2 className="text-lg font-bold text-slate-900 leading-snug">{data.title}</h2>
-         </div>
-         <button onClick={clearSelection} className="text-slate-400 hover:text-slate-700 transition">
-            <X size={20} />
-         </button>
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              {isComplaint ? "Case File #CMP-" : "Project File #PRJ-"}{data.id}
+            </span>
+            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase border rounded-full ${getStatusColor(data.status)}`}>
+              {data.status?.replace('_', ' ')}
+            </span>
+          </div>
+          <h2 className="text-lg font-bold text-slate-900 leading-snug">{data.title}</h2>
+        </div>
+        <button onClick={clearSelection} className="text-slate-400 hover:text-slate-700 transition">
+          <X size={20} />
+        </button>
       </div>
 
       {/* --- Body --- */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-0 bg-white">
-      
-         {/* Media Viewer - If exists */}
-         {mediaItems.length > 0 && (
+
+        {/* Media Viewer - If exists */}
+        {mediaItems.length > 0 && (
           <div className="border-b border-slate-200">
             {/* Main Media Display */}
             <div className="w-full h-56 bg-slate-100 flex items-center justify-center relative group">
-               {isVideo(mediaItems[selectedMediaIndex]) ? (
-                   <video src={buildAssetUrl(mediaItems[selectedMediaIndex]) ?? mediaItems[selectedMediaIndex]} className="w-full h-full object-contain" controls />
-               ) : (
-                   <img 
-                     src={buildAssetUrl(mediaItems[selectedMediaIndex]) ?? mediaItems[selectedMediaIndex]} 
-                     className="w-full h-full object-cover" 
-                     alt="Evidence" 
-                   />
-               )}
-               <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-medium">
-                  Evidence Record {mediaItems.length > 1 ? `(${selectedMediaIndex + 1}/${mediaItems.length})` : ''}
-               </div>
+              {isVideo(mediaItems[selectedMediaIndex]) ? (
+                <video src={buildAssetUrl(mediaItems[selectedMediaIndex]) ?? mediaItems[selectedMediaIndex]} className="w-full h-full object-contain" controls />
+              ) : (
+                <img
+                  src={buildAssetUrl(mediaItems[selectedMediaIndex]) ?? mediaItems[selectedMediaIndex]}
+                  className="w-full h-full object-cover"
+                  alt="Evidence"
+                />
+              )}
+              <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-medium">
+                Evidence Record {mediaItems.length > 1 ? `(${selectedMediaIndex + 1}/${mediaItems.length})` : ''}
+              </div>
             </div>
-            
+
             {/* Thumbnail Strip - Show if multiple media */}
             {mediaItems.length > 1 && (
               <div className="p-3 bg-slate-50">
@@ -955,18 +955,17 @@ function FloatingDetailsPanel({
                       <button
                         key={index}
                         onClick={() => setSelectedMediaIndex(index)}
-                        className={`flex-shrink-0 w-12 h-12 rounded border-2 overflow-hidden bg-white transition-colors ${
-                          selectedMediaIndex === index 
-                            ? 'border-blue-500 ring-2 ring-blue-200' 
-                            : 'border-slate-200 hover:border-blue-400'
-                        }`}
+                        className={`flex-shrink-0 w-12 h-12 rounded border-2 overflow-hidden bg-white transition-colors ${selectedMediaIndex === index
+                          ? 'border-blue-500 ring-2 ring-blue-200'
+                          : 'border-slate-200 hover:border-blue-400'
+                          }`}
                       >
                         {isVideoThumb ? (
                           <video src={buildAssetUrl(media) ?? media} className="w-full h-full object-cover" />
                         ) : (
-                          <img 
-                            src={buildAssetUrl(media) ?? media} 
-                            className="w-full h-full object-cover" 
+                          <img
+                            src={buildAssetUrl(media) ?? media}
+                            className="w-full h-full object-cover"
                             alt={`Evidence ${index + 1}`}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = `https://placehold.co/100/e2e8f0/64748b?text=${index + 1}`;
@@ -988,66 +987,66 @@ function FloatingDetailsPanel({
               </div>
             )}
           </div>
-         )}
-      
-         <div className="p-5 space-y-6">
-            
-            {/* Details Table */}
-            <div>
-               <h3 className="text-xs font-bold text-slate-900 uppercase border-b-2 border-slate-100 pb-2 mb-3">Case Particulars</h3>
-               <div className="space-y-0 text-sm">
-                  <div className="grid grid-cols-3 py-2 border-b border-slate-50">
-                     <span className="text-slate-500 font-medium">Date Filed</span>
-                     <span className="col-span-2 text-slate-900 font-semibold">{displayDate}</span>
-                  </div>
-                  {isComplaint && (
-                    <div className="grid grid-cols-3 py-2 border-b border-slate-50">
-                       <span className="text-slate-500 font-medium">Severity</span>
-                       <span className="col-span-2 text-slate-900 font-semibold flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${data.severity >= 4 ? 'bg-red-500' : 'bg-yellow-500'}`}></span>
-                          {data.severity}/5 (Official Assessment)
-                       </span>
-                    </div>
-                  )}
-                  {!isComplaint && data.budget && (
-                    <div className="grid grid-cols-3 py-2 border-b border-slate-50">
-                       <span className="text-slate-500 font-medium">Allocated Budget</span>
-                       <span className="col-span-2 text-slate-900 font-semibold">₹{(data.budget).toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
-                  <div className="grid grid-cols-3 py-2 border-b border-slate-50">
-                     <span className="text-slate-500 font-medium">Location</span>
-                     <span className="col-span-2 text-slate-900 font-mono text-xs pt-0.5">
-                        {data.lat?.toFixed(6)}, {data.lng?.toFixed(6)}
-                     </span>
-                  </div>
-               </div>
-            </div>
+        )}
 
-            {/* Description as 'Report' */}
-            <div>
-               <h3 className="text-xs font-bold text-slate-900 uppercase border-b-2 border-slate-100 pb-2 mb-3">Field Report</h3>
-               <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-3 rounded border border-slate-100 italic">
-                  "{data.description || t("noDescription")}"
-               </p>
+        <div className="p-5 space-y-6">
+
+          {/* Details Table */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase border-b-2 border-slate-100 pb-2 mb-3">Case Particulars</h3>
+            <div className="space-y-0 text-sm">
+              <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                <span className="text-slate-500 font-medium">Date Filed</span>
+                <span className="col-span-2 text-slate-900 font-semibold">{displayDate}</span>
+              </div>
+              {isComplaint && (
+                <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium">Severity</span>
+                  <span className="col-span-2 text-slate-900 font-semibold flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${data.severity >= 4 ? 'bg-red-500' : 'bg-yellow-500'}`}></span>
+                    {data.severity}/5 (Official Assessment)
+                  </span>
+                </div>
+              )}
+              {!isComplaint && data.budget && (
+                <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium">Allocated Budget</span>
+                  <span className="col-span-2 text-slate-900 font-semibold">₹{(data.budget).toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              <div className="grid grid-cols-3 py-2 border-b border-slate-50">
+                <span className="text-slate-500 font-medium">Location</span>
+                <span className="col-span-2 text-slate-900 font-mono text-xs pt-0.5">
+                  {data.lat?.toFixed(6)}, {data.lng?.toFixed(6)}
+                </span>
+              </div>
             </div>
-         </div>
+          </div>
+
+          {/* Description as 'Report' */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-900 uppercase border-b-2 border-slate-100 pb-2 mb-3">Field Report</h3>
+            <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-3 rounded border border-slate-100 italic">
+              "{data.description || t("noDescription")}"
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* --- Footer / Actions --- */}
       <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
-         <Link
-            href={isComplaint ? `/complaints/${data.id}` : `${PROJECT_DETAILS_PATH}/${data.id}`}
-            className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded shadow-sm text-center transition"
-         >
-            Access Full Record
-         </Link>
-         <button 
-            onClick={() => handlePrintExport(data, isComplaint)}
-            className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-bold rounded shadow-sm transition"
-         >
-            Print / Export
-         </button>
+        <Link
+          href={isComplaint ? `/complaints/${data.id}` : `${PROJECT_DETAILS_PATH}/${data.id}`}
+          className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded shadow-sm text-center transition"
+        >
+          Access Full Record
+        </Link>
+        <button
+          onClick={() => handlePrintExport(data, isComplaint)}
+          className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-bold rounded shadow-sm transition"
+        >
+          Print / Export
+        </button>
       </div>
 
     </motion.div>
@@ -1115,7 +1114,7 @@ function ItemListing({
                 {isComplaint ? "Complaint" : "Project"}
               </span>
             </div>
-            <h4 className="font-bold text-slate-800 text-base leading-tight group-hover:text-blue-700 transition-colors">
+            <h4 className="font-bold text-slate-800 text-sm leading-tight group-hover:text-blue-700 transition-colors">
               {data.title}
             </h4>
             <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">

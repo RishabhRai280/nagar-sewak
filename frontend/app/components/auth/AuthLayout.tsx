@@ -25,7 +25,7 @@ export default function AuthLayout({ children, title, subtitle, illustration, th
     const flexDirection = theme === 'green' ? 'lg:flex-row-reverse' : 'lg:flex-row';
 
     return (
-        <div className={`min-h-[calc(100vh-110px)] w-full flex flex-col ${flexDirection} bg-slate-50`}>
+        <div className={`min-h-screen w-full flex flex-col ${flexDirection} bg-slate-50`}>
 
             {/* Side Panel - Official Government Branding */}
             <div className={`hidden lg:flex w-1/2 ${bgColor} relative overflow-hidden flex-col justify-center items-center p-12 text-white transition-colors duration-500`}>

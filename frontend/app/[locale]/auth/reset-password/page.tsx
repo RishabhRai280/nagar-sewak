@@ -16,7 +16,7 @@ export default function ResetPasswordPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
-  
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations('auth.resetPassword');
@@ -66,9 +66,9 @@ export default function ResetPasswordPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           token,
-          newPassword: password 
+          newPassword: password
         }),
       });
 
@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
         setIsSuccess(true);
         // Redirect to login after 3 seconds
         setTimeout(() => {
-          router.push('/auth/login');
+          router.push('/login');
         }, 3000);
       } else {
         const errorData = await response.json();
@@ -107,7 +107,7 @@ export default function ResetPasswordPage() {
             >
               <CheckCircle2 className="text-green-600" size={32} />
             </motion.div>
-            
+
             <motion.h2
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function ResetPasswordPage() {
             >
               {t('success')}
             </motion.h2>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -125,14 +125,14 @@ export default function ResetPasswordPage() {
             >
               {t('successMessage')}
             </motion.p>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
               <Link
-                href="/auth/login"
+                href="/login"
                 className="w-full py-3 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-bold transition-all duration-300 flex items-center justify-center gap-2"
               >
                 {t('goToLogin')}
@@ -159,13 +159,13 @@ export default function ResetPasswordPage() {
           className="mb-8"
         >
           <Link
-            href="/auth/login"
+            href="/login"
             className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
             {t('backToLogin')}
           </Link>
-          
+
           <h2 className="text-3xl font-black text-slate-900 mb-2">{t('title')}</h2>
           <p className="text-slate-600 font-medium">{t('subtitle')}</p>
         </motion.div>
@@ -270,7 +270,7 @@ export default function ResetPasswordPage() {
         >
           <p className="text-slate-600 font-medium">
             {t('rememberPassword')}{' '}
-            <Link href="/auth/login" className="text-blue-700 font-bold hover:underline transition-all">
+            <Link href="/login" className="text-blue-700 font-bold hover:underline transition-all">
               {t('signInLink')}
             </Link>
           </p>

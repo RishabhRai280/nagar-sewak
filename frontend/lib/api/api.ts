@@ -1,48 +1,15 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
+import { Token, UserStore, UserProfile, ComplaintData } from './store';
+export { Token, UserStore };
+export type { UserProfile, ComplaintData };
+
 const STORAGE_KEYS = {
   token: 'jwtToken',
   user: 'ns:user',
 } as const;
 
-// ===================== TOKEN MANAGEMENT =====================
-export const Token = {
-  get: () => (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.token) : null),
-  set: (token: string) => {
-    if (typeof window !== 'undefined') localStorage.setItem(STORAGE_KEYS.token, token);
-  },
-  remove: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEYS.token);
-      localStorage.removeItem('token');
-    }
-  },
-};
 
-export const UserStore = {
-  get: (): UserProfile | null => {
-    if (typeof window === 'undefined') return null;
-    const raw = localStorage.getItem(STORAGE_KEYS.user) ?? localStorage.getItem('user');
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw) as UserProfile;
-    } catch {
-      return null;
-    }
-  },
-  set: (profile: UserProfile) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(profile));
-      localStorage.removeItem('user');
-    }
-  },
-  remove: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEYS.user);
-      localStorage.removeItem('user');
-    }
-  },
-};
 
 const buildUrl = (path: string) =>
   path.startsWith('http') ? path : `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
@@ -60,12 +27,12 @@ async function parseResponse<T>(response: Response): Promise<T> {
     if (contentType.includes('application/json')) {
       try {
         const errorData = await response.json();
-        
+
         // Create enhanced error with response data for security features
         const error = new Error(errorData.message || errorData.error || `Request failed with status ${response.status}`) as any;
         error.response = errorData; // Attach full response for detailed error handling
         error.status = response.status;
-        
+
         throw error;
       } catch (e) {
         if (e instanceof Error) throw e;
@@ -134,21 +101,7 @@ export interface ProjectDetail extends ProjectData {
   }>;
 }
 
-export interface ComplaintData {
-  id: number;
-  title: string;
-  description: string;
-  severity: number;
-  status: string;
-  lat: number;
-  lng: number;
-  projectId?: number;
-  project?: ProjectData | null;
-  photoUrl?: string | null;
-  photoUrls?: string[];
-  createdAt?: string | null;
-  resolvedAt?: string | null;
-}
+
 
 export interface MapData {
   projects: ProjectData[];
@@ -223,15 +176,7 @@ export interface AuthResponsePayload {
   };
 }
 
-export interface UserProfile {
-  id: number;
-  userId?: number; // backwards compat with AuthResponse
-  username: string;
-  fullName: string;
-  email: string;
-  roles: string[];
-  complaints: ComplaintData[];
-}
+
 
 export interface ComplaintSubmitData {
   title: string;

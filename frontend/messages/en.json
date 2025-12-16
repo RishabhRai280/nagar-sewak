@@ -113,13 +113,12 @@
   "landing": {
     "badge": "Civic Tech for Smart Cities",
     "hero": {
-      "title": "Building",
-      "titleHighlight": "Trust & Transparency",
-      "subtitle": "A next-gen platform enabling citizens and administration to collaborate seamlessly for accountable, efficient governance.",
+      "title": "Nagar",
+      "titleHighlight": "Sewak",
+      "subtitle": "Digital Citizen Engagement Platform",
       "startReporting": "Start Reporting",
       "viewLiveMap": "View Live Map",
-      "freeToUse": "Free to Use",
-      "realTimeUpdates": "Real-Time Updates",
+      "realTimeUpdates": "Gov Secured",
       "geoTagging": "Geo-Tagging"
     },
     "stats": {
@@ -150,65 +149,152 @@
       }
     },
     "features": {
+      "title": "How It Works",
+      "subtitle": "From complaint submission to resolution - a transparent, technology-driven process",
+      "report": {
+        "title": "File a Report",
+        "description": "Snap a photo, add location, and submit details in seconds. Our AI categorizes it automatically.",
+        "tags": ["Geo-Tagging", "AI Sorting", "Instant ID"]
+      },
+      "track": {
+        "title": "Track & Verify",
+        "description": "Follow your complaint's journey in real-time. Receive updates as officials take action.",
+        "tags": ["Live Status", "Photo Proof", "Timeline"]
+      },
+      "engage": {
+        "title": "Resolution & Feedback",
+        "description": "Once resolved, verify the fix with photo evidence and rate the service quality.",
+        "tags": ["Rating System", "Quality Check", "Feedback"]
+      },
+      "cta": "Start Your First Report"
+    },
+    "powerfulFeatures": {
       "title": "Powerful",
-      "titleHighlight": "Governance Features",
-      "subtitle": "Everything you need for transparent, efficient, and accountable civic engagement.",
-      "liveTracking": {
-        "title": "Live Project Tracking",
-        "description": "Track all development works with budget transparency, contractor details, and geo-locations on an interactive map."
-      },
-      "smartComplaints": {
-        "title": "Smart Geo-Tagged Complaints",
-        "description": "Report issues instantly with GPS location, photos, and real-time resolution tracking. Get instant zone routing."
-      },
-      "contractorRating": {
-        "title": "Contractor Rating System",
-        "description": "Rate completed projects and hold contractors accountable. Automatic flagging for poor performers."
-      },
-      "adminDashboard": {
-        "title": "Admin Dashboard & Analytics",
-        "description": "Real-time insights into active projects, pending complaints, resolution times, and flagged contractors."
-      },
-      "transparentGovernance": {
-        "title": "Transparent Governance",
-        "description": "Full budget breakdowns, contractor identities, and project statuses visible to all citizens."
-      },
-      "realTimeUpdates": {
-        "title": "Real-Time Updates",
-        "description": "Get instant notifications on complaint status, project progress, and resolution updates."
-      },
-      "aiVerification": {
-        "title": "AI-Powered Verification",
-        "description": "Automatic categorization of issues using advanced image recognition."
-      },
-      "citizenRewards": {
-        "title": "Citizen Rewards",
-        "description": "Earn civic points for reporting and verifying community issues."
-      },
-      "checkItems": {
-        "realTimeTracking": "Real-time status tracking",
-        "userFriendly": "User-friendly interface",
-        "securedData": "Secured data transactions"
+      "titleHighlight": "Features",
+      "subtitle": "Built with cutting-edge technology for transparent, efficient governance",
+      "list": {
+        "multiFile": {
+          "title": "Multi-File Complaint Submission",
+          "description": "Upload multiple photos and videos as evidence. Support for images and videos up to 50MB.",
+          "technical": "Spring Boot MultipartFile handling with Firebase Storage integration"
+        },
+        "voting": {
+          "title": "Public Voting System",
+          "description": "Citizens can vote on complaint urgency. Democratic prioritization of civic issues.",
+          "technical": "Real-time vote counting with duplicate prevention"
+        },
+        "comments": {
+          "title": "Comment Threads & Reactions",
+          "description": "Engage in discussions with threaded comments. React with emojis and add attachments.",
+          "technical": "Nested comment system with reaction tracking"
+        },
+        "tracking": {
+          "title": "Project Milestone Tracking",
+          "description": "Track project progress with percentage-based milestones. Photo evidence at each stage.",
+          "technical": "Progress tracking with milestone validation"
+        },
+        "rating": {
+          "title": "Contractor Rating System",
+          "description": "Rate contractor performance after project completion. Transparent quality metrics.",
+          "technical": "5-star rating system with review comments"
+        },
+        "tender": {
+          "title": "Tender Bidding System",
+          "description": "Contractors submit competitive bids. Transparent tender acceptance process.",
+          "technical": "Bid submission with document upload support"
+        },
+        "pdf": {
+          "title": "PDF Report Generation",
+          "description": "Generate detailed PDF reports of complaints and projects for official records.",
+          "technical": "Server-side PDF generation with iText library"
+        },
+        "fingerprint": {
+          "title": "Device Fingerprinting",
+          "description": "Advanced security with device fingerprinting. Track and trust known devices.",
+          "technical": "Browser fingerprinting with trust scoring"
+        },
+        "notifications": {
+          "title": "Smart Notifications",
+          "description": "Customizable email and SMS notifications. Real-time updates on complaint status.",
+          "technical": "Multi-channel notification system with preferences"
+        },
+        "gps": {
+          "title": "GPS Location Tagging",
+          "description": "Automatic GPS coordinates capture. Precise location mapping for field verification.",
+          "technical": "Geolocation API with reverse geocoding"
+        },
+        "rbac": {
+          "title": "Role-Based Access Control",
+          "description": "Secure multi-role system: Citizen, Admin, Contractor, Super Admin.",
+          "technical": "Spring Security with JWT authentication"
+        },
+        "bilingual": {
+          "title": "Bilingual Support",
+          "description": "Full English and Hindi support with auto-translation for user-generated content.",
+          "technical": "i18n with MyMemory Translation API"
+        }
+      }
+    },
+    "security": {
+      "title": "Security &",
+      "titleHighlight": "Compliance",
+      "subtitle": "Your data is protected with enterprise-grade security",
+      "list": {
+        "jwt": { "title": "JWT Authentication", "desc": "Secure token-based auth with automatic expiry" },
+        "fingerprint": { "title": "Device Fingerprinting", "desc": "Track and trust known devices for enhanced security" },
+        "spring": { "title": "Spring Security", "desc": "Industry-standard security framework" },
+        "encryption": { "title": "Encrypted Storage", "desc": "All data encrypted at rest and in transit" },
+        "rbac": { "title": "Role-Based Access", "desc": "Granular permissions for each user role" },
+        "db": { "title": "Secure Database", "desc": "PostgreSQL with row-level security" },
+        "cloud": { "title": "Firebase Security", "desc": "Cloud storage with strict security rules" },
+        "validation": { "title": "Input Validation", "desc": "Sanitization and validation of all inputs" }
       }
     },
     "testimonials": {
       "title": "Trusted by the",
       "titleHighlight": "Community",
-      "testimonial1": {
+      "subtitle": "Real people, real results - hear from our community",
+      "rajesh": {
         "name": "Rajesh Kumar",
-        "role": "Citizen, Mumbai",
-        "content": "Nagar Sewak has transformed how we report issues. My complaint about a pothole was resolved in just 3 days!"
+        "role": "Citizen, Sector 15",
+        "text": "Reported a water leakage issue with photos. Got fixed in 10 days! The voting system helped prioritize it. Excellent transparency.",
+        "issue": "Water Leakage",
+        "resolution": "10 days"
       },
-      "testimonial2": {
+      "priya": {
         "name": "Priya Sharma",
-        "role": "Community Leader, Delhi",
-        "content": "The transparency in project budgets and contractor ratings gives us confidence in our local governance."
+        "role": "Citizen, Sector 22",
+        "text": "Street lights were broken for months. Reported via app, contractor assigned within 3 days, fixed in a week. Love the SMS updates!",
+        "issue": "Street Lights",
+        "resolution": "7 days"
       },
-      "testimonial3": {
+      "amit": {
         "name": "Amit Patel",
-        "role": "Administrator, Ahmedabad",
-        "content": "The dashboard helps us track everything in real-time. It's a game-changer for municipal management."
+        "role": "Contractor",
+        "text": "The tender system is transparent and fair. I can bid on projects, upload documents, and track progress. Payment is prompt.",
+        "issue": "Road Repair Project",
+        "resolution": "Completed 5 projects"
+      },
+      "sunita": {
+        "name": "Dr. Sunita Verma",
+        "role": "Admin, Municipal Corporation",
+        "text": "Dashboard gives complete overview of all complaints. Easy to assign contractors, track budgets, and generate reports.",
+        "issue": "System Management",
+        "resolution": "Managing 500+ complaints"
       }
+    },
+    "faqs": {
+      "title": "Frequently Asked",
+      "titleHighlight": "Questions",
+      "subtitle": "Everything you need to know about Nagar Sewak",
+      "readMore": "Read More FAQs",
+      "showLess": "Show Less",
+      "q1": { "q": "How do I report a civic issue?", "a": "Click 'Report Issue', take photos/videos, add location, and submit." },
+      "q2": { "q": "Can I track the progress?", "a": "Absolutely! You'll receive real-time email/SMS updates at every stage." },
+      "q3": { "q": "What is the tender process?", "a": "Admins publish tenders for approved complaints. Contractors bid, and the best bid is selected transparently." },
+      "q4": { "q": "How are contractors rated?", "a": "Citizens rate contractors 1-5 stars after work completion. Ratings are public." },
+      "q5": { "q": "Is my data secure?", "a": "Yes, we use enterprise-grade encryption, JWT, and device fingerprinting." },
+      "q6": { "q": "Can I comment on complaints?", "a": "Yes, you can discuss issues, add photos, and react to comments." }
     },
     "cta": {
       "title": "Start Making a Difference Today",
@@ -264,18 +350,23 @@
     },
     "features": {
       "title": "How It Works",
+      "subtitle": "From complaint submission to resolution - a transparent, technology-driven process",
       "report": {
-        "title": "Report Issues",
-        "description": "Submit geo-tagged complaints with photo evidence"
+        "title": "File a Report",
+        "description": "Snap a photo, add location, and submit details in seconds. Our AI categorizes it automatically.",
+        "tags": ["Geo-Tagging", "AI Sorting", "Instant ID"]
       },
       "track": {
-        "title": "Track Progress",
-        "description": "Monitor resolution status in real-time"
+        "title": "Track & Verify",
+        "description": "Follow your complaint's journey in real-time. received updates as officials take action.",
+        "tags": ["Live Status", "Photo Proof", "Timeline"]
       },
       "engage": {
-        "title": "Engage",
-        "description": "Rate projects and provide feedback"
-      }
+        "title": "Resolution & Feedback",
+        "description": "Once resolved, verify the fix with photo evidence and rate the service quality.",
+        "tags": ["Rating System", "Quality Check", "Feedback"]
+      },
+      "cta": "Start Your First Report"
     }
   },
   "report": {
