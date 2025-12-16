@@ -17,7 +17,13 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem('sidebar-collapsed');
     if (saved !== null) {
-      setCollapsed(JSON.parse(saved));
+      try {
+        setCollapsed(JSON.parse(saved));
+      } catch (error) {
+        // If there's an error parsing, reset to default
+        localStorage.removeItem('sidebar-collapsed');
+        setCollapsed(false);
+      }
     }
   }, []);
 
@@ -26,6 +32,15 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   }, [collapsed]);
 
   const toggleCollapsed = () => setCollapsed(!collapsed);
+
+  // Add a global function to reset sidebar state (for debugging)
+  useEffect(() => {
+    (window as any).resetSidebar = () => {
+      localStorage.removeItem('sidebar-collapsed');
+      setCollapsed(false);
+      console.log('Sidebar state reset to expanded');
+    };
+  }, []);
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed, toggleCollapsed }}>

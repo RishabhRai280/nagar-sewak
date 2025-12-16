@@ -578,11 +578,11 @@ function MapContent({
   const markers = useMemo(() => items, [items]);
 
   return (
-    <div className="relative w-full h-full z-0 rounded-none lg:rounded-l-3xl overflow-hidden shadow-2xl border-l border-slate-200 bg-white">
+    <div className="relative w-full h-full z-0 rounded-none lg:rounded-l-3xl overflow-hidden shadow-2xl border-l border-slate-200 bg-white max-h-full">
       <MapContainer
         center={center}
         zoom={12}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", maxHeight: "100%" }}
         zoomControl={false}
         className="z-0"
       >
@@ -606,7 +606,7 @@ function MapContent({
           </div>
         </div>
 
-        {/* Map Layer Control - Bottom Left (Right of Sidebar) */}
+        {/* Map Layer Control - Moved to bottom of map */}
         <div className="absolute bottom-6 left-4 z-[900]">
           <div className="bg-white rounded-lg shadow-xl border border-slate-200 overflow-visible">
             <MapLayerControl
@@ -1077,7 +1077,7 @@ function ItemListing({
   }
 
   return (
-    <div className="space-y-3 p-5 pt-2 pb-24 lg:pb-6">
+    <div className="space-y-3 p-5 pt-2 pb-6">
       {items.map((item) => {
         const isComplaint = item.kind === "complaint";
         const data = item as any;
@@ -1542,7 +1542,7 @@ export default function Map({
 
   // --- Main Render ---
   return (
-    <div className="relative flex h-full w-full bg-slate-50 overflow-hidden rounded-none lg:rounded-3xl">
+    <div className="relative flex w-full h-full bg-slate-50 overflow-hidden rounded-none lg:rounded-3xl">
       {/* --- GLOBAL ANIMATED BACKGROUND (Visible through glass sidebar) --- */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
         <motion.div
@@ -1559,11 +1559,11 @@ export default function Map({
 
       {/* Left Column (Sidebar) - Solid White with Shadow */}
       <div
-        className={`relative z-10 w-full lg:w-[26rem] xl:w-[28rem] bg-white border-r border-slate-200 flex-shrink-0 transition-all duration-300 flex flex-col shadow-[4px_0_24px_-4px_rgba(0,0,0,0.12)]`}
+        className={`relative z-10 w-full lg:w-[26rem] xl:w-[28rem] bg-white border-r border-slate-200 flex-shrink-0 transition-all duration-300 flex flex-col shadow-[4px_0_24px_-4px_rgba(0,0,0,0.12)] h-full overflow-hidden`}
       >
         <div className="h-full flex flex-col">
           {SidebarHeader}
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative max-h-full">
             {/* Content Gradient Fade */}
             <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/40 to-transparent z-10 pointer-events-none" />
             {error && (
@@ -1580,7 +1580,7 @@ export default function Map({
       </div>
 
       {/* Right Column (Map) */}
-      <div className="flex-1 min-h-full relative z-10">
+      <div className="flex-1 h-full relative z-10 overflow-hidden">
         <MapContent
           items={filtered}
           selectedItem={selectedItem}

@@ -251,14 +251,15 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar Navigation */}
-      <aside className={`${collapsed ? "w-16" : "w-64"} bg-[#1e3a8a] text-white fixed inset-y-0 left-0 flex-col hidden lg:flex z-40 shadow-xl transition-all duration-300 pt-[68px]`}>
-        {/* Collapse Toggle - Now visible below header */}
-        <div className="px-4 py-2 flex justify-end">
+      <aside className={`${collapsed ? "w-16" : "w-64"} bg-[#1e3a8a] text-white fixed inset-y-0 left-0 flex-col hidden lg:flex z-40 shadow-xl transition-all duration-300 pt-[119px]`}>
+        {/* Collapse Toggle - More prominent and always visible */}
+        <div className="px-3 py-3 flex justify-end border-b border-white/10">
           <button
             onClick={toggleCollapsed}
-            className="p-1 hover:bg-white/10 rounded-md transition-colors text-blue-200 hover:text-white"
+            className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200 text-white hover:text-orange-300 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-orange-300/50 shadow-sm"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <ChevronLeft size={14} className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
+            <ChevronLeft size={18} className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
           </button>
         </div>
 
