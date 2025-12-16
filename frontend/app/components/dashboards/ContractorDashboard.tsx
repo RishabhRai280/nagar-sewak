@@ -371,16 +371,16 @@ export default function ContractorDashboardComponent() {
                             </h2>
                         </div>
                         <div className="space-y-4">
-                            {myTenders.length > 0 ? myTenders.map(t => (
-                                <div key={t.id} className="border border-slate-200 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50">
+                            {myTenders.length > 0 ? myTenders.map(tender => (
+                                <div key={tender.id} className="border border-slate-200 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50">
                                     <div>
-                                        <h4 className="font-bold text-slate-900 text-sm">Tender #{t.id}</h4>
-                                        <p className="text-xs text-slate-500">{t('submittedOn')} {new Date(t.createdAt || Date.now()).toLocaleDateString()}</p>
+                                        <h4 className="font-bold text-slate-900 text-sm">Tender #{tender.id}</h4>
+                                        <p className="text-xs text-slate-500">{t('submittedOn')} {new Date(tender.createdAt || Date.now()).toLocaleDateString()}</p>
                                     </div>
-                                    <span className={`text-[10px] uppercase font-bold px-3 py-1 rounded border ${t.status === 'ACCEPTED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                        t.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                    <span className={`text-[10px] uppercase font-bold px-3 py-1 rounded border ${tender.status === 'ACCEPTED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                        tender.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' :
                                             'bg-blue-50 text-blue-700 border-blue-200'
-                                        }`}>{t.status}</span>
+                                        }`}>{tender.status}</span>
                                 </div>
                             )) : <div className="text-center py-12 text-slate-500">{t('noTendersFound')}</div>}
                         </div>
