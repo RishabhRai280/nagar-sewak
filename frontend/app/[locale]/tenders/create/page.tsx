@@ -37,6 +37,17 @@ export default function CreateTenderPage() {
       try {
         const openComplaints = await fetchOpenComplaints();
         setComplaints(openComplaints as any);
+        
+        // Check if complaintId is provided in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const complaintId = urlParams.get('complaintId');
+        
+        if (complaintId) {
+          const preSelectedComplaint = openComplaints.find((c: any) => c.id.toString() === complaintId);
+          if (preSelectedComplaint) {
+            setSelectedComplaint(preSelectedComplaint as any);
+          }
+        }
       } catch (error) {
         console.error("Failed to load complaints:", error);
         setComplaints([]);

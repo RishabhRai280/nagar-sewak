@@ -279,7 +279,9 @@ export default function ContractorDashboardComponent() {
                                         <div className="flex items-center justify-between mt-3">
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${c.severity >= 4 ? 'bg-red-50 text-red-700 border-red-200' : 'bg-orange-50 text-orange-700 border-orange-200'
                                                 }`}>{t('severity')} {c.severity}</span>
-                                            <button className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">{t('bidNow')}</button>
+                                            <Link href={`/tenders/create?complaintId=${c.id}`} className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">
+                                                {t('bidNow')}
+                                            </Link>
                                         </div>
                                     </div>
                                 ))}
@@ -352,9 +354,9 @@ export default function ContractorDashboardComponent() {
                                     </div>
                                     <h3 className="font-bold text-lg text-slate-900 mb-2">{c.title}</h3>
                                     <p className="text-sm text-slate-500 mb-4 line-clamp-3 flex-1">{c.description}</p>
-                                    <button className="block w-full text-center py-2 bg-[#1e3a8a] text-white font-bold text-xs uppercase hover:bg-blue-900 transition rounded-lg shadow-lg shadow-blue-900/20">
+                                    <Link href={`/tenders/create?complaintId=${c.id}`} className="block w-full text-center py-2 bg-[#1e3a8a] text-white font-bold text-xs uppercase hover:bg-blue-900 transition rounded-lg shadow-lg shadow-blue-900/20">
                                         {t('submitTender')}
-                                    </button>
+                                    </Link>
                                 </div>
                             )) : <div className="text-center col-span-3 py-12 text-slate-500">{t('noAvailableFound')}</div>}
                         </div>

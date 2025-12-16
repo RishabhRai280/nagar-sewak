@@ -5,7 +5,7 @@ import { ArrowLeft, Home, CreditCard, FileText, Calendar } from 'lucide-react';
 
 export default function PropertyTaxPage() {
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link href="/services" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft size={20} />

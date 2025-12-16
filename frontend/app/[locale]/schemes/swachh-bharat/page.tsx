@@ -55,7 +55,7 @@ export default function SwachhBharatPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation */}
         <Link href="/schemes" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
@@ -238,7 +238,7 @@ export default function SwachhBharatPage() {
   </p>
 
   <a
-    href="https://sbm.gov.in/sbm"
+    href="https://swachhbharatmission.ddws.gov.in/"
     target="_blank"
     rel="noopener noreferrer"
     className="block w-full bg-white text-green-600 text-center py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors mb-3"
@@ -249,7 +249,7 @@ export default function SwachhBharatPage() {
   </a>
 
   <a
-    href="https://sbm.gov.in/sbm/rpt/Dashboard.aspx"
+    href="https://sbm.gov.in/sbmgdashboard/statesdashboard.aspx"
     target="_blank"
     rel="noopener noreferrer"
     className="block w-full border-2 border-white text-white text-center py-2 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors text-sm"
@@ -359,7 +359,7 @@ export default function SwachhBharatPage() {
               <h3 className="text-lg font-bold text-slate-900 mb-4">Useful Links</h3>
               <div className="space-y-2">
   <a
-    href="https://sbm.gov.in/sbmPhase2/Home/Guidelines"
+    href="https://swachhbharatmission.ddws.gov.in/guidelines"
     target="_blank"
     rel="noopener noreferrer"
     className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm"
@@ -379,7 +379,7 @@ export default function SwachhBharatPage() {
   </a>
 
   <a
-    href="https://sbm.gov.in/sbmPhase2/Home/FAQs"
+    href="https://swachhbharatmission.ddws.gov.in/faq"
     target="_blank"
     rel="noopener noreferrer"
     className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm"

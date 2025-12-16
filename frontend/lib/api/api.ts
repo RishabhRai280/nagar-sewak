@@ -697,16 +697,21 @@ export interface TenderCreateData {
 export async function createTender(data: TenderCreateData): Promise<TenderData> {
   const formData = new FormData();
 
-  formData.append('complaintId', data.complaintId.toString());
-  formData.append('description', data.description);
-  formData.append('quoteAmount', data.quoteAmount.toString());
-  formData.append('estimatedDays', data.estimatedDays.toString());
+  // Create the tender data object
+  const tenderData = {
+    description: data.description,
+    quoteAmount: data.quoteAmount,
+    estimatedDays: data.estimatedDays,
+    materials: data.materials || '',
+    methodology: data.methodology || '',
+    timeline: data.timeline || ''
+  };
 
-  if (data.materials) formData.append('materials', data.materials);
-  if (data.methodology) formData.append('methodology', data.methodology);
-  if (data.timeline) formData.append('timeline', data.timeline);
+  // Add the data as JSON
+  formData.append('data', new Blob([JSON.stringify(tenderData)], { type: 'application/json' }));
 
-  if (data.documents) {
+  // Add documents if any
+  if (data.documents && data.documents.length > 0) {
     data.documents.forEach((doc) => {
       formData.append('documents', doc);
     });
@@ -715,7 +720,7 @@ export async function createTender(data: TenderCreateData): Promise<TenderData> 
   const token = Token.get();
   if (!token) throw new Error('Authentication required. Please log in.');
 
-  const response = await fetch(`${API_BASE_URL}/tenders`, {
+  const response = await fetch(`${API_BASE_URL}/tenders/complaints/${data.complaintId}/submit`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,

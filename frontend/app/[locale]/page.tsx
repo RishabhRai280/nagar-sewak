@@ -37,22 +37,51 @@ import { cn } from "@/lib/utils";
 export default function GovLandingPage() {
   const t = useTranslations('landing');
   const [ctaLink, setCtaLink] = useState("/register");
+  const [dashboardLink, setDashboardLink] = useState("/auth/login");
+  const [analyticsLink, setAnalyticsLink] = useState("/auth/login");
+  const [currentTime, setCurrentTime] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
   const [showAllFaqs, setShowAllFaqs] = useState(false);
 
   useEffect(() => {
+    // Set current time to avoid hydration mismatch
+    setCurrentTime(new Date().toLocaleTimeString());
+    
+    // Update time every minute
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 60000);
+    
     if (Token.get()) {
       const user = UserStore.get();
       let target = "/dashboard/citizen";
+      let analytics = "/dashboard/citizen/reports";
+      
       if (user) {
         const hasAdminAccess = user.roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');
         const isContractor = user.roles.includes('CONTRACTOR');
-        if (hasAdminAccess) target = "/dashboard/admin";
-        else if (isContractor) target = "/dashboard/contractor";
+        
+        if (hasAdminAccess) {
+          target = "/dashboard/admin";
+          analytics = "/dashboard/admin"; // Admin dashboard has analytics built-in
+        } else if (isContractor) {
+          target = "/dashboard/contractor";
+          analytics = "/dashboard/contractor"; // Contractor dashboard has analytics built-in
+        }
       }
+      
       setCtaLink(target);
+      setDashboardLink(target);
+      setAnalyticsLink(analytics);
+    } else {
+      // For non-logged users, redirect dashboard actions to login
+      setDashboardLink("/auth/login");
+      setAnalyticsLink("/auth/login");
     }
+
+    // Cleanup interval on unmount
+    return () => clearInterval(timeInterval);
 
     // Fetch real tender data
     const loadTenders = async () => {
@@ -189,21 +218,33 @@ export default function GovLandingPage() {
   }));
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-50 text-slate-900 font-sans selection:bg-orange-100 selection:text-orange-900">
+    <div className="relative min-h-screen w-full bg-white text-slate-900 font-sans selection:bg-orange-100 selection:text-orange-900">
 
       {/* ========================================
           HERO SECTION - Government Portal Style
       ======================================== */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white overflow-hidden">
-        {/* Background Pattern */}
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white overflow-hidden min-h-screen">
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img 
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" 
+            alt="Government Building Background"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        
+        {/* Background Pattern Overlay */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
           }}></div>
         </div>
+        
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-blue-900/60"></div>
 
-        <div className="relative z-10 container mx-auto px-4 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="relative z-10 container mx-auto px-6 py-20">
+          <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
             {/* Left Content */}
             <div className="space-y-8">
               {/* Government Branding */}
@@ -236,7 +277,7 @@ export default function GovLandingPage() {
                     <ArrowRight size={20} />
                   </button>
                 </Link>
-                <Link href="/map">
+                <Link href="/services">
                   <button className="px-8 py-4 border-2 border-white/30 text-white hover:bg-white/10 rounded-lg font-bold text-lg transition-all">
                     View Services
                   </button>
@@ -244,39 +285,67 @@ export default function GovLandingPage() {
               </div>
             </div>
 
-            {/* Right Content - Service Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
-                  <FileText className="text-white" size={24} />
+            {/* Right Content - Service Cards in 3x2 Grid */}
+            <div className="grid grid-cols-3 gap-4">
+              <Link href="/report">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <FileText className="text-white" size={20} />
+                  </div>
+                  <h3 className="font-semibold mb-1 text-white text-sm">File Complaints</h3>
+                  <p className="text-blue-200 text-xs">Report civic issues with GPS location</p>
                 </div>
-                <h3 className="font-bold mb-2">File Complaints</h3>
-                <p className="text-blue-200 text-sm">Report civic issues with GPS location and photo evidence</p>
-              </div>
+              </Link>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 mt-8">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
-                  <MapPin className="text-white" size={24} />
+              <Link href={dashboardLink}>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
+                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <MapPin className="text-white" size={20} />
+                  </div>
+                  <h3 className="font-semibold mb-1 text-white text-sm">Track Progress</h3>
+                  <p className="text-blue-200 text-xs">Monitor complaint status in real-time</p>
                 </div>
-                <h3 className="font-bold mb-2">Track Progress</h3>
-                <p className="text-blue-200 text-sm">Monitor complaint status and project updates in real-time</p>
-              </div>
+              </Link>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 -mt-4">
-                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
-                  <BarChart3 className="text-white" size={24} />
+              <Link href={analyticsLink}>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
+                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <BarChart3 className="text-white" size={20} />
+                  </div>
+                  <h3 className="font-semibold mb-1 text-white text-sm">View Analytics</h3>
+                  <p className="text-blue-200 text-xs">Access comprehensive dashboards</p>
                 </div>
-                <h3 className="font-bold mb-2">View Analytics</h3>
-                <p className="text-blue-200 text-sm">Access comprehensive dashboards and performance metrics</p>
-              </div>
+              </Link>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 mt-4">
-                <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="text-white" size={24} />
+              <Link href="/services">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
+                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Settings className="text-white" size={20} />
+                  </div>
+                  <h3 className="font-semibold mb-1 text-white text-sm">Online Services</h3>
+                  <p className="text-blue-200 text-xs">Access government services digitally</p>
                 </div>
-                <h3 className="font-bold mb-2">Secure Access</h3>
-                <p className="text-blue-200 text-sm">Multi-factor authentication and device fingerprinting</p>
-              </div>
+              </Link>
+              
+              <Link href="/tenders">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
+                  <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Briefcase className="text-white" size={20} />
+                  </div>
+                  <h3 className="font-semibold mb-1 text-white text-sm">Tenders</h3>
+                  <p className="text-blue-200 text-xs">Browse procurement opportunities</p>
+                </div>
+              </Link>
+              
+              <Link href="/auth/login">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
+                  <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Shield className="text-white" size={20} />
+                  </div>
+                  <h3 className="font-semibold mb-1 text-white text-sm">Secure Access</h3>
+                  <p className="text-blue-200 text-xs">Multi-factor authentication System</p>
+                </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -285,54 +354,52 @@ export default function GovLandingPage() {
       {/* ========================================
           STATS SECTION - Government Dashboard Style
       ======================================== */}
-      <section className="relative z-20 -mt-16 mx-4 md:mx-8 mb-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-              <h2 className="text-2xl font-bold text-white">Platform Statistics</h2>
-              <p className="text-blue-100">Real-time data from our civic engagement platform</p>
-            </div>
-            
-            {/* Stats Grid */}
-            <div className="p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, i) => (
-                <div key={i} className="text-center group">
-                  <div className={cn(
-                    "w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300",
-                    stat.color === "blue" && "bg-blue-50 text-blue-700 border-2 border-blue-200",
-                    stat.color === "orange" && "bg-orange-50 text-orange-600 border-2 border-orange-200",
-                    stat.color === "green" && "bg-green-50 text-green-700 border-2 border-green-200",
-                    stat.color === "purple" && "bg-purple-50 text-purple-700 border-2 border-purple-200"
-                  )}>
-                    <stat.icon size={28} />
-                  </div>
-                  <div className="text-3xl font-black text-slate-900 mb-2">{stat.number}</div>
-                  <div className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
-                    {stat.label === "activeUsers" && "Active Users"}
-                    {stat.label === "projectsTracked" && "Projects Tracked"}
-                    {stat.label === "satisfactionRate" && "Satisfaction Rate"}
-                    {stat.label === "support" && "Support Available"}
-                  </div>
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Platform Statistics</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Real-time data from our civic engagement platform
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, i) => (
+              <div key={i} className="text-center group bg-white rounded-xl p-6 border border-slate-200 hover:shadow-lg transition-all">
+                <div className={cn(
+                  "w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300",
+                  stat.color === "blue" && "bg-blue-50 text-blue-700 border-2 border-blue-200",
+                  stat.color === "orange" && "bg-orange-50 text-orange-600 border-2 border-orange-200",
+                  stat.color === "green" && "bg-green-50 text-green-700 border-2 border-green-200",
+                  stat.color === "purple" && "bg-purple-50 text-purple-700 border-2 border-purple-200"
+                )}>
+                  <stat.icon size={28} />
                 </div>
-              ))}
-            </div>
-            
-            {/* Additional Info */}
-            <div className="bg-slate-50 px-8 py-4 border-t border-slate-200">
-              <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>System Status: Online</span>
+                <div className="text-3xl font-black text-slate-900 mb-2">{stat.number}</div>
+                <div className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
+                  {stat.label === "activeUsers" && "Active Users"}
+                  {stat.label === "projectsTracked" && "Projects Tracked"}
+                  {stat.label === "satisfactionRate" && "Satisfaction Rate"}
+                  {stat.label === "support" && "Support Available"}
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Last Updated: {new Date().toLocaleTimeString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span>Response Time: &lt;2s</span>
-                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Additional Info */}
+          <div className="mt-12 text-center">
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>System Status: Online</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Last Updated: {currentTime || "Loading..."}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span>Response Time: &lt;2s</span>
               </div>
             </div>
           </div>
