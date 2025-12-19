@@ -1,11 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { login, fetchCurrentUserProfile, UserStore, loginWithGoogle } from "@/lib/api/api";
-import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2, Chrome, Loader2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import {
+  login,
+  fetchCurrentUserProfile,
+  UserStore,
+  loginWithGoogle,
+} from "@/lib/api/api";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+  Chrome,
+  Loader2,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 import { signInWithPopup } from "firebase/auth";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebaseClient";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,14 +30,18 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
-  const t = useTranslations('auth.login');
+  const t = useTranslations("auth.login");
 
-  const redirectByRole = (profile: Awaited<ReturnType<typeof fetchCurrentUserProfile>>) => {
-    const hasAdminAccess = profile.roles.some(role => ["ADMIN", "SUPER_ADMIN"].includes(role));
+  const redirectByRole = (
+    profile: Awaited<ReturnType<typeof fetchCurrentUserProfile>>
+  ) => {
+    const hasAdminAccess = profile.roles.some((role) =>
+      ["ADMIN", "SUPER_ADMIN"].includes(role)
+    );
     const isContractor = profile.roles.includes("CONTRACTOR");
 
     // Use window.location.href for reliable redirect with locale
-    const locale = window.location.pathname.split('/')[1] || 'en';
+    const locale = window.location.pathname.split("/")[1] || "en";
 
     if (isContractor) {
       window.location.href = `/${locale}/dashboard/contractor`;
@@ -47,39 +64,43 @@ export default function LoginForm() {
       redirectByRole(profile);
     } catch (err: any) {
       // Debug logging
-      console.log('Login error caught:', err);
-      console.log('Error response:', err.response);
-      console.log('Error status:', err.status);
-      console.log('Error message:', err.message);
+      console.log("Login error caught:", err);
+      console.log("Error response:", err.response);
+      console.log("Error status:", err.status);
+      console.log("Error message:", err.message);
 
       // Handle security-specific error responses
       if (err.response && err.response.error) {
         const errorData = err.response.error;
-        console.log('Error data:', errorData);
+        console.log("Error data:", errorData);
         if (errorData.warningMessage) {
-          console.log('Using warning message:', errorData.warningMessage);
+          console.log("Using warning message:", errorData.warningMessage);
           setError(errorData.warningMessage);
         } else if (errorData.remainingAttempts !== undefined) {
-          console.log('Using remaining attempts:', errorData.remainingAttempts);
+          console.log("Using remaining attempts:", errorData.remainingAttempts);
           if (errorData.remainingAttempts > 0) {
             if (errorData.remainingAttempts === 1) {
-              setError(t('errors.finalAttempt'));
+              setError(t("errors.finalAttempt"));
             } else {
-              setError(t('errors.attemptsRemaining', { remaining: errorData.remainingAttempts }));
+              setError(
+                t("errors.attemptsRemaining", {
+                  remaining: errorData.remainingAttempts,
+                })
+              );
             }
           } else {
-            setError(t('errors.accountLocked'));
+            setError(t("errors.accountLocked"));
           }
         } else {
-          console.log('Using fallback error message');
-          setError(errorData.message || t('errors.loginError'));
+          console.log("Using fallback error message");
+          setError(errorData.message || t("errors.loginError"));
         }
-      } else if (err.status === 423 || err.message.includes('locked')) {
-        console.log('Account locked error');
-        setError(t('errors.accountLocked'));
+      } else if (err.status === 423 || err.message.includes("locked")) {
+        console.log("Account locked error");
+        setError(t("errors.accountLocked"));
       } else {
-        console.log('Generic error fallback');
-        setError(err.message || t('errors.loginError'));
+        console.log("Generic error fallback");
+        setError(err.message || t("errors.loginError"));
       }
     } finally {
       setIsLoading(false);
@@ -94,7 +115,11 @@ export default function LoginForm() {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
 
-      await loginWithGoogle(idToken, result.user.email ?? undefined, result.user.displayName ?? undefined);
+      await loginWithGoogle(
+        idToken,
+        result.user.email ?? undefined,
+        result.user.displayName ?? undefined
+      );
       const profile = await fetchCurrentUserProfile();
       UserStore.set(profile);
       redirectByRole(profile);
@@ -113,8 +138,10 @@ export default function LoginForm() {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <h2 className="text-3xl font-black text-slate-900 mb-2">{t('title')}</h2>
-        <p className="text-slate-600 font-medium">{t('subtitle')}</p>
+        <h2 className="text-3xl font-black text-slate-900 mb-2">
+          {t("title")}
+        </h2>
+        <p className="text-slate-600 font-medium">{t("subtitle")}</p>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -124,31 +151,39 @@ export default function LoginForm() {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -10, height: 0 }}
             transition={{ duration: 0.3 }}
-            className={`mb-6 p-4 border rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden ${error.includes('locked') || error.includes('लॉक')
-              ? 'bg-red-600/15 border-red-600/40 shadow-red-100/50 shadow-lg'
-              : error.includes('attempt') || error.includes('प्रयास')
-                ? 'bg-amber-500/15 border-amber-500/40 shadow-amber-100/50 shadow-lg'
-                : 'bg-red-500/10 border-red-500/30'
-              }`}
+            className={`mb-6 p-4 border rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden ${
+              error.includes("locked") || error.includes("लॉक")
+                ? "bg-red-600/15 border-red-600/40 shadow-red-100/50 shadow-lg"
+                : error.includes("attempt") || error.includes("प्रयास")
+                ? "bg-amber-500/15 border-amber-500/40 shadow-amber-100/50 shadow-lg"
+                : "bg-red-500/10 border-red-500/30"
+            }`}
           >
-            <AlertCircle className={`flex-shrink-0 mt-0.5 ${error.includes('locked') || error.includes('लॉक')
-              ? 'text-red-700'
-              : error.includes('attempt') || error.includes('प्रयास')
-                ? 'text-amber-700'
-                : 'text-red-600'
-              }`} size={20} />
+            <AlertCircle
+              className={`flex-shrink-0 mt-0.5 ${
+                error.includes("locked") || error.includes("लॉक")
+                  ? "text-red-700"
+                  : error.includes("attempt") || error.includes("प्रयास")
+                  ? "text-amber-700"
+                  : "text-red-600"
+              }`}
+              size={20}
+            />
             <div className="flex-1">
-              <p className={`text-sm font-semibold ${error.includes('locked') || error.includes('लॉक')
-                ? 'text-red-800'
-                : error.includes('attempt') || error.includes('प्रयास')
-                  ? 'text-amber-800'
-                  : 'text-red-700'
-                }`}>
+              <p
+                className={`text-sm font-semibold ${
+                  error.includes("locked") || error.includes("लॉक")
+                    ? "text-red-800"
+                    : error.includes("attempt") || error.includes("प्रयास")
+                    ? "text-amber-800"
+                    : "text-red-700"
+                }`}
+              >
                 {error}
               </p>
-              {(error.includes('attempt') || error.includes('प्रयास')) && (
+              {(error.includes("attempt") || error.includes("प्रयास")) && (
                 <p className="text-xs text-amber-600 mt-1 font-medium">
-                  {t('pleaseSignIn')}
+                  {t("pleaseSignIn")}
                 </p>
               )}
             </div>
@@ -163,9 +198,14 @@ export default function LoginForm() {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="space-y-2"
         >
-          <label className="text-sm font-bold text-slate-700 ml-1">{t('email')}</label>
+          <label className="text-sm font-bold text-slate-700 ml-1">
+            {t("email")}
+          </label>
           <div className="relative group">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-700 group-focus-within:scale-110" size={20} />
+            <Mail
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-700 group-focus-within:scale-110"
+              size={20}
+            />
             <input
               type="email"
               value={email}
@@ -184,13 +224,21 @@ export default function LoginForm() {
           className="space-y-2"
         >
           <div className="flex justify-between ml-1">
-            <label className="text-sm font-bold text-slate-700">{t('password')}</label>
-            <Link href="/auth/forgot-password" className="text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline transition-colors">
-              {t('forgotPassword')}
+            <label className="text-sm font-bold text-slate-700">
+              {t("password")}
+            </label>
+            <Link
+              href="/auth/forgot-password"
+              className="text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline transition-colors"
+            >
+              {t("forgotPassword")}
             </Link>
           </div>
           <div className="relative group">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-700 group-focus-within:scale-110" size={20} />
+            <Lock
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-blue-700 group-focus-within:scale-110"
+              size={20}
+            />
             <input
               type="password"
               value={password}
@@ -215,11 +263,11 @@ export default function LoginForm() {
           {isLoading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              {t('signingIn')}
+              {t("signingIn")}
             </>
           ) : (
             <>
-              {t('signIn')}
+              {t("signIn")}
               <ArrowRight size={20} />
             </>
           )}
@@ -237,11 +285,13 @@ export default function LoginForm() {
             <div className="w-full border-t border-slate-200"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white/60 text-slate-500 font-semibold">{t('orContinueWith')}</span>
+            <span className="px-4 bg-white/60 text-slate-500 font-semibold">
+              {t("orContinueWith")}
+            </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
             className="py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 group relative overflow-hidden"
@@ -259,8 +309,7 @@ export default function LoginForm() {
             <img src="https://parichay.nic.in/assets/img/parichay_logo.png" alt="Parichay" className="w-6 h-6 object-contain relative z-10" />
             <span className="text-sm font-bold text-slate-700 relative z-10">Parichay</span>
           </button>
-        </div>
-
+        </div> */}
 
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -273,12 +322,12 @@ export default function LoginForm() {
           {isGoogleLoading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              {t('googleSigningIn')}
+              {t("googleSigningIn")}
             </>
           ) : (
             <>
               <Chrome size={20} />
-              {t('googleSignIn')}
+              {t("googleSignIn")}
             </>
           )}
         </motion.button>
@@ -291,12 +340,15 @@ export default function LoginForm() {
         className="mt-8 text-center"
       >
         <p className="text-slate-600 font-medium">
-          {t('noAccount')}{' '}
-          <Link href="/register" className="text-blue-700 font-bold hover:underline transition-all">
-            {t('registerLink')}
+          {t("noAccount")}{" "}
+          <Link
+            href="/register"
+            className="text-blue-700 font-bold hover:underline transition-all"
+          >
+            {t("registerLink")}
           </Link>
         </p>
       </motion.div>
-    </div >
+    </div>
   );
 }

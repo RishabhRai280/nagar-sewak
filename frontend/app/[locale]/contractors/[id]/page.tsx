@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Token, fetchContractorProfile, ContractorProfile } from "@/lib/api";
 import { ArrowLeft, Building2, Award, Star, CheckCircle, Clock, AlertCircle, TrendingUp, FileText } from "lucide-react";
 import Link from "next/link";
+import { getRoleBasedBackUrl } from "@/lib/utils/navigation";
 
 export default function ContractorProfilePage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const id = params?.id as string;
 
@@ -51,7 +53,7 @@ export default function ContractorProfilePage() {
           <AlertCircle className="text-red-600 mx-auto mb-4" size={48} />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Error</h2>
           <p className="text-slate-600 mb-6">{error || "Contractor not found"}</p>
-          <Link href="/dashboard/admin">
+          <Link href={getRoleBasedBackUrl(pathname)}>
             <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
               Back to Dashboard
             </button>
@@ -76,7 +78,7 @@ export default function ContractorProfilePage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 lg:pt-28">
         {/* Back Button */}
-        <Link href="/dashboard/admin">
+        <Link href={getRoleBasedBackUrl(pathname)}>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

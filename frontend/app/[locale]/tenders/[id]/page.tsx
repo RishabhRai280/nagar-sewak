@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Token, fetchTenderById, TenderData, acceptTender } from "@/lib/api";
-import { ArrowLeft, DollarSign, Clock, FileText, Download, User, Star, Building2, Award, CheckCircle, AlertCircle } from "lucide-react";
+import { Token, fetchTenderById, TenderData, acceptTender, fetchComplaintById, ComplaintDetail } from "@/lib/api";
+import { ArrowLeft, DollarSign, Clock, FileText, Download, User, Star, Building2, CheckCircle, AlertCircle, MapPin, Calendar, Eye } from "lucide-react";
 import Link from "next/link";
+import { getRoleBasedBackUrl } from "@/lib/utils/navigation";
 
 export default function TenderDetailPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const id = params?.id as string;
 
   const [tender, setTender] = useState<TenderData | null>(null);
+  const [complaint, setComplaint] = useState<ComplaintDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
@@ -25,8 +28,18 @@ export default function TenderDetailPage() {
 
     const loadTender = async () => {
       try {
-        const data = await fetchTenderById(Number(id));
-        setTender(data);
+        const tenderData = await fetchTenderById(Number(id));
+        setTender(tenderData);
+        
+        // Fetch complaint details if complaintId is available
+        if (tenderData.complaintId) {
+          try {
+            const complaintData = await fetchComplaintById(tenderData.complaintId);
+            setComplaint(complaintData);
+          } catch (complaintErr) {
+            console.warn("Failed to load complaint details:", complaintErr);
+          }
+        }
       } catch (err: any) {
         setError(err.message || "Failed to load tender details");
       } finally {
@@ -44,7 +57,7 @@ export default function TenderDetailPage() {
     try {
       await acceptTender(tender.id);
       alert("Tender accepted successfully! Project has been created.");
-      router.push("/dashboard/admin");
+      router.push(getRoleBasedBackUrl(pathname));
     } catch (err: any) {
       alert(err.message || "Failed to accept tender");
     } finally {
@@ -67,7 +80,7 @@ export default function TenderDetailPage() {
           <AlertCircle className="text-red-600 mx-auto mb-4" size={48} />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Error</h2>
           <p className="text-slate-600 mb-6">{error || "Tender not found"}</p>
-          <Link href="/dashboard/admin">
+          <Link href={getRoleBasedBackUrl(pathname)}>
             <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
               Back to Dashboard
             </button>
@@ -97,7 +110,7 @@ export default function TenderDetailPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 lg:pt-28">
         {/* Back Button */}
-        <Link href="/dashboard/admin">
+        <Link href={getRoleBasedBackUrl(pathname)}>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -106,6 +119,58 @@ export default function TenderDetailPage() {
             <ArrowLeft size={18} /> Back to Dashboard
           </motion.button>
         </Link>
+
+        {/* Complaint Details Section */}
+        {complaint && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-blue-200 mb-6"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mb-2">Related Complaint</h2>
+                <p className="text-sm text-slate-600">This tender is for the following complaint:</p>
+              </div>
+              <Link href={`/complaints/${complaint.id}`}>
+                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition text-sm">
+                  <Eye size={16} />
+                  View Details
+                </button>
+              </Link>
+            </div>
+            
+            <div className="bg-white rounded-xl p-4 border border-blue-100">
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-lg font-bold text-slate-900">{complaint.title}</h3>
+                <span className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                  complaint.severity >= 4 ? 'bg-red-100 text-red-700 border-red-200' :
+                  complaint.severity >= 3 ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                  'bg-yellow-100 text-yellow-700 border-yellow-200'
+                }`}>
+                  Severity {complaint.severity}/5
+                </span>
+              </div>
+              
+              <p className="text-slate-700 mb-4 leading-relaxed">{complaint.description}</p>
+              
+              <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+                <div className="flex items-center gap-1">
+                  <MapPin size={14} />
+                  <span>Location: {complaint.lat?.toFixed(4)}, {complaint.lng?.toFixed(4)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar size={14} />
+                  <span>Reported: {complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <FileText size={14} />
+                  <span>ID: #{complaint.id}</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">

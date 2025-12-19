@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ClipboardList, Search, AlertTriangle, MapPin, Calendar, FileText, Save } from "lucide-react";
+import { ArrowLeft, ClipboardList, Search, AlertTriangle, MapPin, Calendar, Save } from "lucide-react";
 import { createTender, fetchOpenComplaints } from "@/lib/api/api";
+import { getRoleBasedBackUrl } from "@/lib/utils/navigation";
+import { usePathname } from "next/navigation";
 
 interface Complaint {
   id: number;
@@ -19,6 +21,7 @@ interface Complaint {
 
 export default function CreateTenderPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
@@ -85,7 +88,7 @@ export default function CreateTenderPage() {
       await createTender(tenderData);
       
       alert("Tender submitted successfully!");
-      router.push("/tenders");
+      router.push(getRoleBasedBackUrl(pathname));
     } catch (error: any) {
       alert(error.message || "Failed to create tender. Please try again.");
     } finally {
@@ -109,9 +112,9 @@ export default function CreateTenderPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/tenders" className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium mb-4">
+          <Link href={getRoleBasedBackUrl(pathname)} className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium mb-4">
             <ArrowLeft size={20} />
-            Back to Tenders
+            Back to Dashboard
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -297,7 +300,7 @@ export default function CreateTenderPage() {
 
                 {/* Actions */}
                 <div className="flex gap-4 pt-4 border-t border-slate-200">
-                  <Link href="/tenders" className="flex-1">
+                  <Link href={getRoleBasedBackUrl(pathname)} className="flex-1">
                     <button
                       type="button"
                       className="w-full px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition"
