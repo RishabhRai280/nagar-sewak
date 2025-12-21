@@ -53,7 +53,7 @@ export default function ProjectsPage() {
     loadProjects();
   }, [searchTerm, statusFilter]);
 
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = (projects || []).filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || project.status.toLowerCase() === statusFilter.toLowerCase();

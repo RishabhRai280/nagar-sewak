@@ -6,7 +6,8 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, MapPin, DollarSign, FileText, Calendar, Save, Upload, X, Navigation, Map as MapIcon, Loader, AlertCircle, Image, Video, Paperclip } from "lucide-react";
-import { createProject, Token } from "@/lib/api/api";
+import { createProject, Token, UserStore, fetchCurrentUserProfile } from "@/lib/api/api";
+import { getRoleBasedDashboardUrl } from "@/lib/utils/navigation";
 
 const MiniMap = dynamic(() => import("../../../components/shared/MiniMap"), { ssr: false });
 const LocationPicker = dynamic(() => import("../../../components/shared/LocationPicker"), { ssr: false });
@@ -37,9 +38,40 @@ export default function NewProjectPage() {
   });
 
   useEffect(() => {
-    if (!Token.get()) {
-      router.push("/login");
-    }
+    const checkAuthAndRole = async () => {
+      if (!Token.get()) {
+        router.push("/login");
+        return;
+      }
+
+      // Check if user is admin
+      try {
+        const cached = UserStore.get();
+        let roles: string[] = [];
+        
+        if (cached) {
+          roles = cached.roles || [];
+        } else {
+          const profile = await fetchCurrentUserProfile();
+          roles = profile.roles || [];
+        }
+
+        const hasAdminAccess = roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');
+        
+        if (!hasAdminAccess) {
+          setError("Only administrators can create new projects. Please contact an administrator.");
+          // Redirect after showing error
+          setTimeout(() => {
+            router.push("/projects");
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('Error checking user role:', error);
+        setError("Unable to verify permissions. Please try again.");
+      }
+    };
+
+    checkAuthAndRole();
   }, [router]);
 
   const getLocation = () => {
@@ -143,9 +175,9 @@ export default function NewProjectPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/projects" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4">
+          <Link href={getRoleBasedDashboardUrl()} className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4">
             <ArrowLeft size={20} />
-            Back to Projects
+            Back to Dashboard
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
