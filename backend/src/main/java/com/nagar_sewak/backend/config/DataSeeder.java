@@ -26,7 +26,7 @@ public class DataSeeder {
     private final ProjectRepository projectRepo;
     private final WardRepository wardRepo;
     private final RatingRepository ratingRepo;
-    private final ComplaintRepository complaintRepo; 
+    private final ComplaintRepository complaintRepo;
     private final TenderRepository tenderRepo;
     private final EmailTemplateRepository emailTemplateRepo;
     private final PasswordEncoder passwordEncoder;
@@ -34,147 +34,177 @@ public class DataSeeder {
     @EventListener
     @Transactional
     public void seed(ApplicationReadyEvent event) {
-        // Check if tenders already exist to avoid duplicates
-        if (tenderRepo.count() > 0) {
-            System.out.println("Tenders already exist, skipping tender seeding");
+        if (userRepo.count() > 0) {
+            System.out.println("Data already exists. Skipping main seeding.");
             return;
         }
-        
-        // If no users exist, create all data
-        if (userRepo.count() == 0) {
-            System.out.println("--- Starting Data Seeding ---");
+
+        System.out.println("--- Starting Realistic Data Seeding ---");
         String hashedPassword = passwordEncoder.encode("password");
 
-        // --- Users ---
-        User adminUser = createUser("admin", "admin@nagar.gov", "Govt Admin", hashedPassword, Set.of(Role.ADMIN, Role.SUPER_ADMIN));
-        User citizenUser = createUser("citizen", "citizen@public.org", "Active Citizen", hashedPassword, Set.of(Role.CITIZEN));
-        User citizenUser2 = createUser("citizen2", "citizen2@public.org", "Local Resident", hashedPassword, Set.of(Role.CITIZEN));
-        User citizenUser3 = createUser("citizen3", "citizen3@public.org", "Ward Volunteer", hashedPassword, Set.of(Role.CITIZEN));
-        User contractorUser = createUser("contractor", "contractor@builds.com", "City Builders Inc.", hashedPassword, Set.of(Role.CONTRACTOR));
-        User contractorUser2 = createUser("contractor2", "contractor2@infra.com", "Urban Infra Works", hashedPassword, Set.of(Role.CONTRACTOR));
+        // --- 1. Users ---
+        // Admin
+        User adminUser = createUser("admin", "admin@nagar.gov", "Nagar Sewak System Admin", hashedPassword, Set.of(Role.ADMIN, Role.SUPER_ADMIN));
 
-        // --- Contractors ---
-        Contractor contractorA = createContractor(contractorUser, "City Solutions Pvt. Ltd.", "LIC-12345");
-        Contractor contractorB = createContractor(contractorUser2, "Urban Infra Works LLP", "LIC-67890");
+        // Citizens
+        User aditya = createUser("citizen_pune_1", "202301100046@mitaoe.ac.in", "Aditya Kulkarni", hashedPassword, Set.of(Role.CITIZEN));
+        User rohan = createUser("citizen_mumbai_1", "202301100047@mitaoe.ac.in", "Rohan Mehta", hashedPassword, Set.of(Role.CITIZEN));
+        User aman = createUser("citizen_delhi_1", "202301100007@mitaoe.ac.in", "Aman Verma", hashedPassword, Set.of(Role.CITIZEN));
+        User suresh = createUser("citizen_pune_2", "samplebhai0012@gmail.com", "Suresh Patil", hashedPassword, Set.of(Role.CITIZEN));
 
-        // --- Wards ---
-        Ward wardA = createWard("Central Ward A", "East", 19.0760, 72.8777);
-        Ward wardB = createWard("North Ward B", "North", 19.2000, 72.8500);
-        Ward wardC = createWard("Riverside Ward C", "West", 19.0500, 72.8200);
-        Ward wardD = createWard("South Ward D", "South", 19.0000, 72.9100);
+        // Contractors
+        User ranjeetUser = createUser("contractor_urbanbuild", "ranjeetjat00001@gmail.com", "Ranjeet Jat", hashedPassword, Set.of(Role.CONTRACTOR));
+        User rishabhUser = createUser("contractor_metroworks", "rishabhrai281@gmail.com", "Rishabh Rai", hashedPassword, Set.of(Role.CONTRACTOR));
 
-        // --- Projects ---
-        Project project1 = createProject("Coastal Road Extension Phase 2",
-                "Construction of a 4-lane tunnel extension under the main creek.",
-                contractorA.getId(), new BigDecimal("550000000.00"), "In Progress", 19.0800, 72.8650);
+        // --- 2. Contractors Profiles ---
+        Contractor urbanBuild = createContractor(ranjeetUser, "UrbanBuild Infra Pvt Ltd", "LIC-UB-90231");
+        Contractor metroWorks = createContractor(rishabhUser, "MetroWorks Engineering", "LIC-MW-77441");
 
-        Project project2 = createProject("Sector 4 Community Park Renovation",
-                "Full renovation and landscaping of Sector 4 community park, adding new jogging tracks.",
-                contractorA.getId(), new BigDecimal("5000000.00"), "Completed", 19.0700, 72.9000);
+        // --- 3. Wards (Real Locations) ---
+        // Pune
+        createWard("Kothrud Ward", "Pune", 18.5074, 73.8077);
+        createWard("Shivajinagar Ward", "Pune", 18.5308, 73.8475);
+        // Mumbai
+        createWard("Andheri East Ward", "Mumbai", 19.1136, 72.8697);
+        createWard("Dadar West Ward", "Mumbai", 19.0196, 72.8420);
+        // Delhi
+        createWard("Lajpat Nagar Ward", "Delhi", 28.5677, 77.2433);
+        createWard("Rohini Sector 9 Ward", "Delhi", 28.7364, 77.1167);
 
-        Project project3 = createProject("New Water Treatment Plant",
-                "Construction of a small-scale water purification plant to serve Ward B.",
-                contractorA.getId(), new BigDecimal("80000000.00"), "Pending", 19.1900, 72.8550);
+        // --- 4. Projects (Logical + Location-Based) ---
 
-        Project project4 = createProject("Old Town Drainage Upgrade",
-                "Replacement of 3km sewage lines to eliminate annual flooding.",
-                contractorB.getId(), new BigDecimal("120000000.00"), "In Progress", 19.0220, 72.8600);
+        // Pune Projects
+        Project karveFlyover = createProject("Karve Road Flyover Expansion",
+                "Expansion to reduce traffic congestion and repair structural cracks.",
+                urbanBuild.getId(), new BigDecimal("120000000.00"), "In Progress", 18.5089, 73.8142,
+                "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"); // Construction
 
-        Project project5 = createProject("Smart LED Street Lighting",
-                "Smart streetlights with fault detection and remote control.",
-                contractorB.getId(), new BigDecimal("30000000.00"), "Completed", 19.0100, 72.9300);
+        Project shivajinagarDrain = createProject("Shivajinagar Storm Drain Upgrade",
+                "Upgrading drainage capacity in flood-prone bus stand area.",
+                metroWorks.getId(), new BigDecimal("60000000.00"), "Pending", 18.5311, 73.8459,
+                "https://images.unsplash.com/photo-1585645620949-a2e6f40409a8?q=80&w=1000&auto=format&fit=crop"); // Drain/Water
 
-        Project project6 = createProject("Primary Health Center Retrofit",
-                "HVAC and solar upgrades for the district PHC.",
-                contractorA.getId(), new BigDecimal("15000000.00"), "Pending", 19.1600, 72.8900);
+        // Mumbai Projects
+        Project andheriRoad = createProject("Andheri East Road Resurfacing",
+                "Heavy duty resurfacing to address recurring pothole complaints.",
+                urbanBuild.getId(), new BigDecimal("90000000.00"), "In Progress", 19.1148, 72.8719,
+                "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=1000&auto=format&fit=crop"); // Road work
 
-        List<Project> projects = projectRepo.saveAll(List.of(project1, project2, project3, project4, project5, project6));
+        Project dadarLighting = createProject("Dadar West Streetlight Smart Upgrade",
+                "Installation of smart LED streetlights with centralized control.",
+                metroWorks.getId(), new BigDecimal("35000000.00"), "Completed", 19.0202, 72.8405,
+                "https://images.unsplash.com/photo-1623945114138-164724248454?q=80&w=1000&auto=format&fit=crop"); // Streetlight
 
-        // --- Complaints ---
-        Complaint complaintA = createComplaint(
-                "Massive Pothole on Sector 4 Main Road",
-                "Pothole has caused two minor accidents this week. Requires urgent repair.",
-                5, 19.0850, 72.8700, citizenUser, "Pending",
-                "1763131283439_blueberry.jpg", null, null);
+        // Delhi Projects
+        Project lajpatDrain = createProject("Lajpat Nagar Drainage Repair",
+                "Fixing monsoon water logging issues in low-lying residential blocks.",
+                urbanBuild.getId(), new BigDecimal("40000000.00"), "In Progress", 28.5689, 77.2418,
+                "https://images.unsplash.com/photo-1579611504958-39cb32e5256e?q=80&w=1000&auto=format&fit=crop"); // Drain pipe
 
-        Complaint complaintB = createComplaint(
-                "Construction Debris Blocking Sidewalk",
-                "Debris from the coastal road project is blocking pedestrian traffic.",
-                3, 19.0810, 72.8655, citizenUser2, "In Progress",
-                null, project1, null);
+        Project rohiniBridge = createProject("Rohini Footbridge Structural Repair",
+                "Repairing cracks and rusted beams on the pedestrian footbridge.",
+                metroWorks.getId(), new BigDecimal("70000000.00"), "Pending", 28.7372, 77.1184,
+                "https://images.unsplash.com/photo-1584463673335-85309d94924b?q=80&w=1000&auto=format&fit=crop"); // Concrete/Bridge
 
-        Complaint complaintC = createComplaint(
-                "Graffiti on Community Park Wall",
-                "Graffiti was painted on the newly renovated park wall. Quickly cleaned up.",
-                1, 19.0705, 72.9010, citizenUser, "Resolved",
-                "1763141553475_blueberry.jpg", project2, Instant.now().minus(18, ChronoUnit.HOURS));
+        projectRepo.saveAll(List.of(karveFlyover, shivajinagarDrain, andheriRoad, dadarLighting, lajpatDrain, rohiniBridge));
 
-        Complaint complaintD = createComplaint(
-                "Standing Water near Ward Office",
-                "Drains blocked after light showers; foul smell reported.",
-                4, 19.0230, 72.8610, citizenUser3, "Pending",
-                null, project4, null);
+        // --- 5. Complaints (Realistic & Matched) ---
 
-        Complaint complaintE = createComplaint(
-                "Streetlight Flickering in Lane 9",
-                "Smart LED unit flickers every 5 seconds causing dark patch.",
-                2, 19.0110, 72.9320, citizenUser2, "Resolved",
-                "1763131283439_blueberry.jpg", project5, Instant.now().minus(3, ChronoUnit.DAYS));
+        // 1. Pune - Karve Road
+        Complaint c1 = createComplaint(
+                "Deep potholes near Karve Road Flyover",
+                "The potholes are getting bigger and causing traffic slowdowns. Dangerous for two-wheelers.",
+                5, 18.5085, 73.8140, aditya, "In Progress",
+                "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=1000&auto=format&fit=crop", // Pothole
+                karveFlyover, null);
 
-        Complaint complaintF = createComplaint(
-                "Garbage Overflowing Near Market",
-                "Bins overflowing daily due to delayed pickups; stray dogs everywhere.",
-                4, 19.0600, 72.8800, citizenUser3, "In Progress",
-                null, null, null);
+        // 2. Pune - Shivajinagar
+        Complaint c2 = createComplaint(
+                "Storm water overflowing near Shivajinagar Bus Stand",
+                "Every minor rain causes flooding near the entrance. Needs immediate drain cleaning.",
+                4, 18.5315, 73.8460, suresh, "Pending",
+                "https://images.unsplash.com/photo-1585645620949-a2e6f40409a8?q=80&w=1000&auto=format&fit=crop", // Drain
+                shivajinagarDrain, null);
 
-        List<Complaint> complaints = complaintRepo.saveAll(List.of(complaintA, complaintB, complaintC, complaintD, complaintE, complaintF));
+        // 3. Mumbai - Andheri
+        Complaint c3 = createComplaint(
+                "Road surface completely damaged near MIDC Andheri",
+                "The entire stretch is damaged. Vehicles damaging their suspensions.",
+                5, 19.1150, 72.8720, rohan, "In Progress",
+                "https://images.unsplash.com/photo-1584463673335-85309d94924b?q=80&w=1000&auto=format&fit=crop", // Broken road
+                andheriRoad, null);
 
-        // --- Ratings ---
-        Rating rating1 = createRating(citizenUser, contractorA, project2, 2,
-                "Work was okay, but the final cleanup was poor and left debris.", ZonedDateTime.now().minusDays(3));
+        // 4. Mumbai - Dadar (Resolved)
+        Complaint c4 = createComplaint(
+                "Streetlights switching off every night in Dadar West",
+                "Main junction lights go off around 10 PM. Safety hazard.",
+                2, 19.0200, 72.8400, rohan, "Resolved",
+                "https://images.unsplash.com/photo-1623945114138-164724248454?q=80&w=1000&auto=format&fit=crop", // Light
+                dadarLighting, Instant.now().minus(5, ChronoUnit.DAYS));
 
-        Rating rating2 = createRating(citizenUser2, contractorA, project2, 5,
-                "Excellent completion! Very happy with the new tracks.", ZonedDateTime.now().minusDays(1));
+        // 5. Delhi - Lajpat Nagar
+        Complaint c5 = createComplaint(
+                "Drain water entering houses during rain",
+                "Drain blockage causes backflow into residential compounds.",
+                4, 28.5690, 77.2420, aman, "In Progress",
+                "https://images.unsplash.com/photo-1579611504958-39cb32e5256e?q=80&w=1000&auto=format&fit=crop", // Drain pipe
+                lajpatDrain, null);
 
-        Rating rating3 = createRating(citizenUser3, contractorA, project5, 4,
-                "Lighting upgrade looks great and feels safer already.", ZonedDateTime.now().minusDays(2));
+        // 6. Delhi - Rohini
+        Complaint c6 = createComplaint(
+                "Cracks visible on pedestrian bridge railing",
+                "The concrete railing has visible cracks and exposed iron rods.",
+                5, 28.7375, 77.1180, aman, "Pending",
+                "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop", // Bridge structure
+                rohiniBridge, null);
 
-        Rating rating4 = createRating(citizenUser, contractorB, project4, 2,
-                "Site safety nets missing; debris spilling onto footpath.", ZonedDateTime.now().minusHours(30));
+        List<Complaint> complaints = complaintRepo.saveAll(List.of(c1, c2, c3, c4, c5, c6));
 
-        Rating rating5 = createRating(citizenUser2, contractorB, project5, 1,
-                "Controller keeps failing every week, maintenance is slow.", ZonedDateTime.now().minusHours(12));
+        // --- 6. Tenders (Consistent Flow) ---
 
-        ratingRepo.saveAll(List.of(rating1, rating2, rating3, rating4, rating5));
+        // Open Tenders linked to specific complaints
+        createOpenTender(c1, "Karve Road Pothole Repair & Resurfacing", new BigDecimal("500000"), 14);
+        createOpenTender(c3, "Andheri East Road Surface Restoration", new BigDecimal("800000"), 21);
+        Tender rohiniTender = createOpenTender(c6, "Rohini Footbridge Structural Strengthening", new BigDecimal("600000"), 30);
 
-        refreshContractorMetrics(contractorA);
-        refreshContractorMetrics(contractorB);
+        // Contractor Bids (UrbanBuild & MetroWorks)
+        // Bids for Karve Road (UrbanBuild vs MetroWorks - MetroWorks wins on price/time usually, but maybe not decided yet)
+        createBid(c1, urbanBuild, "Standard Repair - 3 Year Warranty", new BigDecimal("550000"), 18, "PENDING");
+        createBid(c1, metroWorks, "Express Repair Phase - 1 Year Warranty", new BigDecimal("480000"), 10, "PENDING");
 
-            // --- Sample Tenders ---
-            seedSampleTenders(complaints, contractorA, contractorB);
+        // Bids for Rohini (Both bid)
+        createBid(c6, urbanBuild, "Advanced Structural Polymer Coating", new BigDecimal("700000"), 35, "PENDING");
+        createBid(c6, metroWorks, "Standard Concrete Reinforcement", new BigDecimal("580000"), 25, "PENDING");
 
-            // Seed email templates
-            seedEmailTemplates();
-        } else {
-            // Users exist, but no tenders - create tenders only
-            System.out.println("Users exist, creating tenders only...");
-            
-            // Get existing data
-            List<Complaint> existingComplaints = complaintRepo.findAll();
-            List<Contractor> existingContractors = contractorRepo.findAll();
-            
-            if (!existingComplaints.isEmpty() && !existingContractors.isEmpty()) {
-                seedSampleTenders(existingComplaints, existingContractors.get(0), 
-                    existingContractors.size() > 1 ? existingContractors.get(1) : existingContractors.get(0));
-            } else {
-                System.out.println("No existing complaints or contractors found, skipping tender creation");
-            }
-        }
+        // ACCEPTED Tender for Dadar Streetlight (Completed Project)
+        // This project is already marked completed, so we simulate the accepted tender history
+        createAcceptedTender(c4, metroWorks, "Smart LED Installation & Control System", new BigDecimal("3200000"), "COMPLETED");
 
-        System.out.println("--- Data Seeding Complete. Sample credentials ---");
-        System.out.println("Admin: admin@nagar.gov / password");
-        System.out.println("Citizen: citizen@public.org / password");
-        System.out.println("Contractor: contractor@builds.com / password");
+        // --- 7. Ratings (Post-Resolution) ---
+
+        // Dadar Smart Lighting - 4 Stars - Rohan - MetroWorks
+        createRating(rohan, metroWorks, dadarLighting, 4,
+                "Lighting is much better now. The app control integration took a few days to stabilize but works great.",
+                ZonedDateTime.now().minusDays(2));
+
+        // Karve Flyover - 2 Stars - Aditya - UrbanBuild
+        createRating(aditya, urbanBuild, karveFlyover, 2,
+                "Work is very slow. Traffic jams are increasing every day.",
+                ZonedDateTime.now().minusDays(5));
+
+        // Andheri Road - 2 Stars - Rohan - UrbanBuild
+        createRating(rohan, urbanBuild, andheriRoad, 2,
+                "They started work but left debris everywhere. Very dusty.",
+                ZonedDateTime.now().minusDays(1));
+
+        // Update Contractor Metrics
+        refreshContractorMetrics(urbanBuild);
+        refreshContractorMetrics(metroWorks);
+
+        // Seed Email Templates
+        seedEmailTemplates();
+
+        System.out.println("--- Realistic Data Seeding Complete ---");
     }
 
     private User createUser(String username, String email, String fullName, String password, Set<Role> roles) {
@@ -192,8 +222,8 @@ public class DataSeeder {
         contractor.setUser(user);
         contractor.setCompanyName(companyName);
         contractor.setLicenseNo(licenseNo);
-        contractor.setAvgRating(BigDecimal.ZERO); 
-        contractor.setTotalRatings(0); 
+        contractor.setAvgRating(BigDecimal.ZERO);
+        contractor.setTotalRatings(0);
         return contractorRepo.save(contractor);
     }
 
@@ -207,7 +237,7 @@ public class DataSeeder {
     }
 
     private Project createProject(String title, String description, Long contractorId, BigDecimal budget,
-                                  String status, double lat, double lng) {
+                                  String status, double lat, double lng, String imageUrl) {
         Project project = new Project();
         project.setTitle(title);
         project.setDescription(description);
@@ -216,6 +246,7 @@ public class DataSeeder {
         project.setStatus(status);
         project.setLat(lat);
         project.setLng(lng);
+        project.setProgressPhotos(imageUrl); // Using progressPhotos for seed image
         return project;
     }
 
@@ -229,14 +260,49 @@ public class DataSeeder {
         complaint.setLng(lng);
         complaint.setUser(user);
         complaint.setStatus(status);
-        complaint.setCreatedAt(Instant.now().minus(severity * 6L, ChronoUnit.HOURS));
+        complaint.setCreatedAt(Instant.now().minus(severity * 2L, ChronoUnit.DAYS)); // Varied creation times
         complaint.setPhotoUrl(photoFilename);
         complaint.setProject(project);
         complaint.setResolvedAt(resolvedAt);
         return complaint;
     }
 
-    private Rating createRating(User citizen, Contractor contractor, Project project, int score, String comment, ZonedDateTime createdAt) {
+    private Tender createOpenTender(Complaint complaint, String title, BigDecimal budget, int days) {
+        Tender t = new Tender();
+        t.setComplaint(complaint);
+        t.setTitle(title);
+        t.setDescription("Open tender for: " + complaint.getTitle());
+        t.setBudget(budget);
+        t.setEstimatedDays(days);
+        t.setStatus("OPEN");
+        t.setStartDate(java.time.LocalDateTime.now());
+        t.setEndDate(java.time.LocalDateTime.now().plusDays(15));
+        return tenderRepo.save(t);
+    }
+
+    private void createBid(Complaint complaint, Contractor contractor, String desc, BigDecimal quote, int days, String status) {
+        Tender t = new Tender();
+        t.setComplaint(complaint);
+        t.setContractor(contractor);
+        t.setQuoteAmount(quote);
+        t.setEstimatedDays(days);
+        t.setDescription(desc);
+        t.setStatus(status);
+        tenderRepo.save(t);
+    }
+
+    private void createAcceptedTender(Complaint complaint, Contractor contractor, String desc, BigDecimal quote, String status) {
+        Tender t = new Tender();
+        t.setComplaint(complaint);
+        t.setContractor(contractor);
+        t.setQuoteAmount(quote);
+        t.setDescription(desc);
+        t.setStatus("ACCEPTED");
+        // For completed project, this tender is "closed" logically or "accepted"
+        tenderRepo.save(t);
+    }
+
+    private void createRating(User citizen, Contractor contractor, Project project, int score, String comment, ZonedDateTime createdAt) {
         Rating rating = new Rating();
         rating.setUser(citizen);
         rating.setContractor(contractor);
@@ -244,7 +310,7 @@ public class DataSeeder {
         rating.setScore(score);
         rating.setComment(comment);
         rating.setCreatedAt(createdAt);
-        return rating;
+        ratingRepo.save(rating);
     }
 
     private void refreshContractorMetrics(Contractor contractor) {
@@ -272,9 +338,6 @@ public class DataSeeder {
     private void seedEmailTemplates() {
         if (emailTemplateRepo.count() > 0) return;
 
-        System.out.println("Seeding email templates...");
-
-        // Password Reset Template
         EmailTemplate passwordResetTemplate = EmailTemplate.builder()
                 .type(EmailTemplateType.PASSWORD_RESET)
                 .subject("Password Reset Request - ${appName}")
@@ -283,7 +346,6 @@ public class DataSeeder {
                 .active(true)
                 .build();
 
-        // Security Alert Template
         EmailTemplate securityAlertTemplate = EmailTemplate.builder()
                 .type(EmailTemplateType.SECURITY_ALERT)
                 .subject("Security Alert - ${appName}")
@@ -292,7 +354,6 @@ public class DataSeeder {
                 .active(true)
                 .build();
 
-        // Account Locked Template
         EmailTemplate accountLockedTemplate = EmailTemplate.builder()
                 .type(EmailTemplateType.ACCOUNT_LOCKED)
                 .subject("Account Temporarily Locked - ${appName}")
@@ -301,7 +362,6 @@ public class DataSeeder {
                 .active(true)
                 .build();
 
-        // New Device Login Template
         EmailTemplate newDeviceTemplate = EmailTemplate.builder()
                 .type(EmailTemplateType.NEW_DEVICE_LOGIN)
                 .subject("New Device Login Detected - ${appName}")
@@ -316,74 +376,5 @@ public class DataSeeder {
                 accountLockedTemplate,
                 newDeviceTemplate
         ));
-
-        System.out.println("Email templates seeded successfully!");
-    }
-
-    private void seedSampleTenders(List<Complaint> complaints, Contractor contractorA, Contractor contractorB) {
-        System.out.println("Seeding sample tenders...");
-
-        // Create some published tender opportunities (admin-published)
-        Tender tenderOpportunity1 = new Tender();
-        tenderOpportunity1.setComplaint(complaints.get(0)); // Pothole complaint
-        tenderOpportunity1.setTitle("Road Repair and Pothole Filling - Sector 4");
-        tenderOpportunity1.setDescription("Urgent repair of massive pothole on Sector 4 Main Road including surface leveling and proper drainage.");
-        tenderOpportunity1.setBudget(new BigDecimal("250000"));
-        tenderOpportunity1.setStatus("OPEN");
-        tenderOpportunity1.setStartDate(java.time.LocalDateTime.now().plusDays(7));
-        tenderOpportunity1.setEndDate(java.time.LocalDateTime.now().plusDays(30));
-
-        Tender tenderOpportunity2 = new Tender();
-        tenderOpportunity2.setComplaint(complaints.get(5)); // Garbage overflow complaint
-        tenderOpportunity2.setTitle("Waste Management Enhancement - Market Area");
-        tenderOpportunity2.setDescription("Comprehensive waste management solution including additional bins, scheduled pickups, and area cleaning.");
-        tenderOpportunity2.setBudget(new BigDecimal("180000"));
-        tenderOpportunity2.setStatus("OPEN");
-        tenderOpportunity2.setStartDate(java.time.LocalDateTime.now().plusDays(5));
-        tenderOpportunity2.setEndDate(java.time.LocalDateTime.now().plusDays(45));
-
-        // Create some contractor-submitted tenders
-        Tender contractorTender1 = new Tender();
-        contractorTender1.setComplaint(complaints.get(0)); // Pothole complaint
-        contractorTender1.setContractor(contractorA);
-        contractorTender1.setQuoteAmount(new BigDecimal("220000"));
-        contractorTender1.setEstimatedDays(15);
-        contractorTender1.setDescription("Professional road repair with high-quality asphalt and proper base preparation. Includes 2-year warranty.");
-        contractorTender1.setStatus("PENDING");
-
-        Tender contractorTender2 = new Tender();
-        contractorTender2.setComplaint(complaints.get(0)); // Same pothole complaint
-        contractorTender2.setContractor(contractorB);
-        contractorTender2.setQuoteAmount(new BigDecimal("195000"));
-        contractorTender2.setEstimatedDays(12);
-        contractorTender2.setDescription("Quick and efficient pothole repair using advanced cold-mix technology. Fast completion with minimal traffic disruption.");
-        contractorTender2.setStatus("PENDING");
-
-        Tender contractorTender3 = new Tender();
-        contractorTender3.setComplaint(complaints.get(5)); // Garbage complaint
-        contractorTender3.setContractor(contractorA);
-        contractorTender3.setQuoteAmount(new BigDecimal("165000"));
-        contractorTender3.setEstimatedDays(30);
-        contractorTender3.setDescription("Complete waste management overhaul including new bins, daily collection schedule, and monthly deep cleaning.");
-        contractorTender3.setStatus("PENDING");
-
-        // Create a closed/completed tender
-        Tender closedTender = new Tender();
-        closedTender.setComplaint(complaints.get(2)); // Graffiti complaint (already resolved)
-        closedTender.setContractor(contractorA);
-        closedTender.setTitle("Graffiti Removal and Wall Restoration");
-        closedTender.setQuoteAmount(new BigDecimal("45000"));
-        closedTender.setEstimatedDays(3);
-        closedTender.setDescription("Professional graffiti removal and wall repainting with anti-graffiti coating.");
-        closedTender.setStatus("ACCEPTED");
-        closedTender.setBudget(new BigDecimal("50000"));
-
-        tenderRepo.saveAll(List.of(
-            tenderOpportunity1, tenderOpportunity2, 
-            contractorTender1, contractorTender2, contractorTender3, 
-            closedTender
-        ));
-
-        System.out.println("Sample tenders seeded successfully!");
     }
 }

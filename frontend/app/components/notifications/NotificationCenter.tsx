@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Bell, Trash2, CheckCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api/api";
 
 interface Notification {
   id: number;
@@ -44,7 +45,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/api/notifications?page=${pageNum}&size=20`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications?page=${pageNum}&size=20`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -78,7 +79,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
       const token = localStorage.getItem("jwtToken");
       if (!token) return;
 
-      const response = await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -101,7 +102,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
       const token = localStorage.getItem("jwtToken");
       if (!token) return;
 
-      const response = await fetch("http://localhost:8080/api/notifications/read-all", {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -122,7 +123,7 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
       const token = localStorage.getItem("jwtToken");
       if (!token) return;
 
-      const response = await fetch(`http://localhost:8080/api/notifications/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -239,9 +240,8 @@ export default function NotificationCenter({ isOpen, onClose, onNotificationRead
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 hover:bg-gray-50 transition cursor-pointer ${
-                        !notification.isRead ? "bg-blue-50/50" : ""
-                      }`}
+                      className={`p-4 hover:bg-gray-50 transition cursor-pointer ${!notification.isRead ? "bg-blue-50/50" : ""
+                        }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
                       {notification.actionUrl ? (

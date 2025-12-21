@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 import { Token, UserStore, UserProfile, ComplaintData } from './store';
 export { Token, UserStore };
@@ -630,7 +630,7 @@ export async function fetchMilestones(projectId: number): Promise<Milestone[]> {
 export async function downloadProgressReport(projectId: number): Promise<Blob> {
   const token = Token.get();
   if (!token) throw new Error('Authentication required');
-  
+
   const response = await fetch(`${API_BASE_URL}/projects/${projectId}/progress-report`, {
     headers: {
       'Authorization': `Bearer ${token}`,

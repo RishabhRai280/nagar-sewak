@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 import ProjectProgressTimeline from "@/app/components/projects/ProjectProgressTimeline";
 import ProjectProgressUpdateModal from "@/app/components/projects/ProjectProgressUpdateModal";
 import ShareBar from "@/app/components/shared/ShareBar";
+import { API_BASE_URL } from "@/lib/api/api"; // Added this import based on the instruction's context
 
 // Dynamically import Map component to avoid SSR issues
 // Dynamically import Map component to avoid SSR issues
@@ -61,13 +62,13 @@ export default function ProjectDetailsPage() {
         formData.append('progress', data.progress.toString());
         formData.append('status', data.status);
         formData.append('notes', data.notes);
-        
+
         data.photos.forEach((photo) => {
             formData.append('photos', photo);
         });
 
         try {
-            const response = await fetch(`http://localhost:8080/projects/${project.id}/progress`, {
+            const response = await fetch(`${API_BASE_URL}/projects/${project.id}/progress`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${Token.get()}`
@@ -213,13 +214,13 @@ export default function ProjectDetailsPage() {
                                             {project.progressPhotos.split(',').filter(p => p.trim()).map((photo, index) => (
                                                 <a
                                                     key={index}
-                                                    href={`http://localhost:8080${photo.trim()}`}
+                                                    href={`${API_BASE_URL}${photo.trim()}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="group relative aspect-square rounded-xl overflow-hidden border-2 border-slate-200 hover:border-blue-500 transition"
                                                 >
                                                     <img
-                                                        src={`http://localhost:8080${photo.trim()}`}
+                                                        src={`${API_BASE_URL}${photo.trim()}`}
                                                         alt={`Progress ${index + 1}`}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                                                     />

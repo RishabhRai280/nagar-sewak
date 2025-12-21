@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface NotificationBadgeProps {
@@ -33,7 +34,7 @@ export default function NotificationBadge({ onClick, refreshTrigger = 0 }: Notif
         return;
       }
 
-      const response = await fetch("http://localhost:8080/api/notifications/unread-count", {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

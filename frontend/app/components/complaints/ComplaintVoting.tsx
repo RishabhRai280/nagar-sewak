@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ThumbsUp } from 'lucide-react';
+import { Heart, ThumbsUp } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api/api";
 import { motion } from 'framer-motion';
 
 interface ComplaintVotingProps {
@@ -10,10 +11,10 @@ interface ComplaintVotingProps {
   initialHasVoted?: boolean;
 }
 
-export default function ComplaintVoting({ 
-  complaintId, 
+export default function ComplaintVoting({
+  complaintId,
   initialVoteCount = 0,
-  initialHasVoted = false 
+  initialHasVoted = false
 }: ComplaintVotingProps) {
   const [voteCount, setVoteCount] = useState(initialVoteCount);
   const [hasVoted, setHasVoted] = useState(initialHasVoted);
@@ -32,10 +33,10 @@ export default function ComplaintVoting({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/votes`, {
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/votes`, {
         headers
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setVoteCount(data.voteCount);
@@ -56,7 +57,7 @@ export default function ComplaintVoting({
     setLoading(true);
     try {
       const method = hasVoted ? 'DELETE' : 'POST';
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/vote`, {
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/vote`, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -95,11 +96,10 @@ export default function ComplaintVoting({
       whileTap={{ scale: 0.95 }}
       onClick={handleVote}
       disabled={loading}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-        hasVoted
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-          : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600'
-      } disabled:opacity-50 disabled:cursor-not-allowed`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${hasVoted
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+        : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600'
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       <ThumbsUp size={18} className={hasVoted ? 'fill-current' : ''} />
       <span>{voteCount}</span>

@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, X, Eye, EyeOff, Building2, FileText, Mail, Lock, User } from 'lucide-react';
+import { UserPlus, X, Eye, EyeOff, Building2, FileText, Mail, Lock, User, Shield, AlertTriangle, CheckCircle, Search, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { API_BASE_URL } from "@/lib/api/api";
 
 interface ContractorFormData {
     username: string;
@@ -53,7 +54,7 @@ export default function ContractorManagement({ onContractorCreated }: Contractor
             const token = localStorage.getItem('jwtToken');
             if (!token) throw new Error('Authentication required');
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/admin/contractors`, {
+            const response = await fetch(`${API_BASE_URL}/admin/contractors`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

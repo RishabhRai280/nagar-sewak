@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Token, fetchTenderById, TenderData, acceptTender, fetchComplaintById, ComplaintDetail, UserStore } from "@/lib/api";
+import { Token, fetchTenderById, TenderData, acceptTender, fetchComplaintById, ComplaintDetail, API_BASE_URL } from "@/lib/api/api";
+import { UserStore } from "@/lib/api/store";
 import { ArrowLeft, DollarSign, Clock, FileText, Download, User, Star, Building2, CheckCircle, AlertCircle, MapPin, Calendar, Eye } from "lucide-react";
 import Link from "next/link";
 import { getRoleBasedBackUrl } from "@/lib/utils/navigation";
@@ -157,8 +158,8 @@ export default function TenderDetailPage() {
               <div className="flex items-start justify-between mb-3">
                 <h3 className="text-lg font-bold text-slate-900">{complaint.title}</h3>
                 <span className={`px-2 py-1 rounded-full text-xs font-bold border ${complaint.severity >= 4 ? 'bg-red-100 text-red-700 border-red-200' :
-                    complaint.severity >= 3 ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                      'bg-yellow-100 text-yellow-700 border-yellow-200'
+                  complaint.severity >= 3 ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                    'bg-yellow-100 text-yellow-700 border-yellow-200'
                   }`}>
                   Severity {complaint.severity}/5
                 </span>
@@ -258,7 +259,7 @@ export default function TenderDetailPage() {
                           <p className="text-xs text-slate-500 uppercase">{extension} file</p>
                         </div>
                         <a
-                          href={`http://localhost:8080${url}`}
+                          href={`${API_BASE_URL}${url}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-2 bg-white hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition border border-blue-200 group-hover:border-blue-400"

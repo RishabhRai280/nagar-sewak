@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, DollarSign, FileText, Download, ExternalLink, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { fetchAllTenders, TenderData } from '@/lib/api/api';
+import { fetchAllTenders, TenderData, API_BASE_URL } from '@/lib/api/api';
 
 // Mixed type for both API and mock data
 type DisplayTender = TenderData | {
@@ -300,7 +300,7 @@ export default function TendersPage() {
                               (tender as TenderData).documentUrls.map((doc: string, docIndex: number) => (
                                 <a
                                   key={docIndex}
-                                  href={`http://localhost:8080${doc}`}
+                                  href={`${API_BASE_URL}${doc}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium hover:bg-slate-200 transition-colors"

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { 
-  MessageCircle, Send, Edit2, Trash2, X, ThumbsUp, ThumbsDown, 
-  Heart, Paperclip, Image, FileText, Download, AtSign, Users 
+import {
+  MessageCircle, Send, Edit2, Trash2, X, ThumbsUp, ThumbsDown,
+  Heart, Paperclip, Image, FileText, Download, AtSign, Users, Smile, ChevronDown, Check
 } from 'lucide-react';
+import { API_BASE_URL } from "@/lib/api/api";
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Comment {
@@ -60,7 +61,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:8080/auth/me', {
+      const res = await fetch('${API_BASE_URL}/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -75,7 +76,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('jwtToken');
-      const res = await fetch('http://localhost:8080/admin/users', {
+      const res = await fetch('${API_BASE_URL}/admin/users', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       if (res.ok) {
@@ -89,7 +90,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
 
   const fetchComments = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments`);
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments`);
       if (res.ok) {
         const data = await res.json();
         // Fetch reactions for each comment
@@ -108,7 +109,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
 
   const fetchReactions = async (commentId: number) => {
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${commentId}/reactions`);
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${commentId}/reactions`);
       if (res.ok) {
         const reactionCounts = await res.json();
         return { reactionCounts };
@@ -131,7 +132,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments`, {
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,12 +143,12 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
 
       if (res.ok) {
         const comment = await res.json();
-        
+
         // Upload attachments if any
         if (uploadingFiles.length > 0) {
           await uploadAttachments(comment.id);
         }
-        
+
         setComments([comment, ...comments]);
         setNewComment('');
         setUploadingFiles([]);
@@ -178,7 +179,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
       formData.append('file', file);
 
       try {
-        await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${commentId}/attachments`, {
+        await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${commentId}/attachments`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: formData
@@ -199,19 +200,19 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
     try {
       const comment = comments.find(c => c.id === commentId);
       let res;
-      
+
       if (comment?.userReaction === type) {
         // Remove reaction
-        res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${commentId}/reactions`, {
+        res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${commentId}/reactions`, {
           method: 'DELETE',
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
       } else {
         // Add/update reaction
-        res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${commentId}/reactions`, {
+        res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${commentId}/reactions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -220,7 +221,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
           body: JSON.stringify({ type })
         });
       }
-      
+
       if (res.ok) {
         // Refresh comments
         fetchComments();
@@ -255,15 +256,15 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
     const cursorPos = textarea.selectionStart;
     const textBefore = newComment.substring(0, cursorPos);
     const textAfter = newComment.substring(cursorPos);
-    
+
     // Find the last @ symbol
     const lastAtIndex = textBefore.lastIndexOf('@');
     const beforeMention = textBefore.substring(0, lastAtIndex);
-    
+
     setNewComment(`${beforeMention}@${username} ${textAfter}`);
     setShowMentions(false);
     setMentionSearch('');
-    
+
     // Focus back on textarea
     setTimeout(() => textarea.focus(), 0);
   };
@@ -276,7 +277,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
     const cursorPos = e.target.selectionStart;
     const textBeforeCursor = value.substring(0, cursorPos);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
-    
+
     if (lastAtIndex !== -1) {
       const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
       if (!textAfterAt.includes(' ')) {
@@ -335,7 +336,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
             rows={3}
             disabled={loading}
           />
-          
+
           {/* Mention Dropdown */}
           {showMentions && filteredUsers.length > 0 && (
             <div className="absolute bottom-full left-0 mb-1 w-64 bg-white border border-slate-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
@@ -479,7 +480,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
                         const token = localStorage.getItem('jwtToken');
                         if (!token) return;
                         try {
-                          const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${comment.id}`, {
+                          const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${comment.id}`, {
                             method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${token}` }
                           });
@@ -512,9 +513,9 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
                     onClick={async () => {
                       const token = localStorage.getItem('jwtToken');
                       if (!token || !editContent.trim()) return;
-                      
+
                       try {
-                        const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${comment.id}`, {
+                        const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${comment.id}`, {
                           method: 'PUT',
                           headers: {
                             'Content-Type': 'application/json',
@@ -522,7 +523,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
                           },
                           body: JSON.stringify({ content: editContent })
                         });
-                        
+
                         if (res.ok) {
                           const updated = await res.json();
                           setComments(comments.map(c => c.id === comment.id ? { ...c, content: updated.content, edited: true } : c));
@@ -559,7 +560,7 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
                   {comment.attachments.map(attachment => (
                     <a
                       key={attachment.id}
-                      href={`http://localhost:8080${attachment.fileUrl}`}
+                      href={`${API_BASE_URL}${attachment.fileUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-sm group"
@@ -585,33 +586,30 @@ export default function EnhancedComplaintComments({ complaintId }: ComplaintComm
               <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => handleReaction(comment.id, 'LIKE')}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    comment.userReaction === 'LIKE'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors ${comment.userReaction === 'LIKE'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   <ThumbsUp size={14} />
                   {comment.reactionCounts?.like || 0}
                 </button>
                 <button
                   onClick={() => handleReaction(comment.id, 'HEART')}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    comment.userReaction === 'HEART'
-                      ? 'bg-red-100 text-red-700'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors ${comment.userReaction === 'HEART'
+                    ? 'bg-red-100 text-red-700'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   <Heart size={14} />
                   {comment.reactionCounts?.heart || 0}
                 </button>
                 <button
                   onClick={() => handleReaction(comment.id, 'THUMBS_DOWN')}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    comment.userReaction === 'THUMBS_DOWN'
-                      ? 'bg-slate-200 text-slate-700'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors ${comment.userReaction === 'THUMBS_DOWN'
+                    ? 'bg-slate-200 text-slate-700'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   <ThumbsDown size={14} />
                   {comment.reactionCounts?.thumbs_down || 0}

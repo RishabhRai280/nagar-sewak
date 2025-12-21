@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MessageCircle, Send, Edit2, Trash2, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Send, Trash2, User, MessageCircle, Edit2, X } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api/api";
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Comment {
@@ -38,7 +39,7 @@ export default function ComplaintComments({ complaintId }: ComplaintCommentsProp
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:8080/auth/me', {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -52,7 +53,7 @@ export default function ComplaintComments({ complaintId }: ComplaintCommentsProp
 
   const fetchComments = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments`);
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments`);
       if (res.ok) {
         const data = await res.json();
         setComments(data);
@@ -74,7 +75,7 @@ export default function ComplaintComments({ complaintId }: ComplaintCommentsProp
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments`, {
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ export default function ComplaintComments({ complaintId }: ComplaintCommentsProp
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${commentId}`, {
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${commentId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ export default function ComplaintComments({ complaintId }: ComplaintCommentsProp
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/complaints/${complaintId}/comments/${commentId}`, {
+      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/comments/${commentId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'nagar_sewak_db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3307:3306'  # Expose on 3307 to avoid conflict if local MySQL is running
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - nagar-network
+    healthcheck:
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 20s
+        retries: 10
+
+  # Backend Service (Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - '8080:8080'
+    environment:
+      # Database Config
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nagar_sewak_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      
+      # JWT Secret (Should match .env)
+      JWT_SECRET: ${JWT_SECRET:-mySecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLongForSecurity}
+      
+      # Mail Config (Can be overridden via .env)
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER:-ismartydummy@gmail.com}
+      EMAIL_PASS: ${EMAIL_PASS:-hrjg afqg pohx hbei}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - nagar-network
+
+  # Frontend Service (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      # Critical: Use http://localhost:8080 for client-side fetches (Browser -> Backend)
+      # If using SSR heavily where Node calls Backend, you might need an internal URL variable too.
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    networks:
+      - nagar-network
+
+volumes:
+  db_data:
+
+networks:
+  nagar-network:
+    driver: bridge

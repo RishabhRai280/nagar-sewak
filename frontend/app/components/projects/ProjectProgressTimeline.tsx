@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Clock, User, Camera, Download, Calendar, FileText } from 'lucide-react';
-import { fetchProgressHistory, fetchMilestones, downloadProgressReport } from '@/lib/api/api';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
+import { API_BASE_URL, ProgressHistoryItem, fetchProgressHistory, fetchMilestones, downloadProgressReport } from '@/lib/api/api';
 
 interface Milestone {
   id: number;
@@ -48,7 +46,7 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
       setLoading(true);
       // Use the API utility function
       const data = await fetchProgressHistory(projectId);
-      
+
       // Convert the data to our expected format
       const progressUpdates: ProgressUpdate[] = data.map((item) => {
         // Handle date parsing - backend may return LocalDateTime as string or object
@@ -76,12 +74,12 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
         let photoUrlsArray: string[] = [];
         if (Array.isArray(item.photoUrls)) {
           photoUrlsArray = item.photoUrls;
-        } else if (typeof item.photoUrls === 'string' && item.photoUrls.trim()) {
-          photoUrlsArray = item.photoUrls.split(',').map(p => p.trim()).filter(p => p);
+        } else if (typeof item.photoUrls === 'string' && (item.photoUrls as string).trim()) {
+          photoUrlsArray = (item.photoUrls as string).split(',').map((p: string) => p.trim()).filter((p: string) => p);
         }
 
         return {
-          id: item.id,
+          id: Number(item.id),
           percentage: item.percentage,
           status: item.status,
           notes: item.notes || '',
@@ -93,49 +91,53 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
       });
 
       setProgressHistory(progressUpdates);
-      
+
       // Debug: Log photo URLs to see what we're getting
       if (progressUpdates.length > 0) {
-        console.log('Progress updates photo URLs:', progressUpdates.map(u => ({ 
-          id: u.id, 
+        console.log('Progress updates photo URLs:', progressUpdates.map(u => ({
+          id: u.id,
           photoUrls: u.photoUrls,
-          type: u.type 
+          type: u.type
         })));
       }
-      
+
       // Also set milestones for timeline view
       const milestoneData = progressUpdates.filter(item => item.type === 'milestone');
       const milestonesForTimeline = milestoneData.map(item => ({
         id: typeof item.id === 'string' ? parseInt(String(item.id).replace('current-', '')) : Number(item.id),
         percentage: item.percentage,
-        notes: item.notes,
+        notes: item.notes || '',
         photoUrls: item.photoUrls,
         status: item.status,
         completedAt: item.updatedAt,
         updatedBy: item.updatedBy
       }));
-      
+
       setMilestones(milestonesForTimeline);
     } catch (error) {
       console.error('Error fetching progress history:', error);
       // Fallback to milestones endpoint
       try {
         const milestonesData = await fetchMilestones(projectId);
-        setMilestones(milestonesData);
-        
+        setMilestones(milestonesData.map(m => ({
+          ...m,
+          notes: m.notes || '',
+          photoUrls: Array.isArray(m.photoUrls) ? m.photoUrls : (typeof m.photoUrls === 'string' ? (m.photoUrls as string).split(',') : [])
+        })));
+
         // Convert milestones to progress updates format for history view
         const progressUpdates: ProgressUpdate[] = milestonesData.map((milestone) => ({
           id: milestone.id,
           percentage: milestone.percentage,
           status: milestone.status,
           notes: milestone.notes || '',
-          photoUrls: Array.isArray(milestone.photoUrls) ? milestone.photoUrls : 
-                     (milestone.photoUrls ? String(milestone.photoUrls).split(',') : []),
+          photoUrls: Array.isArray(milestone.photoUrls) ? milestone.photoUrls :
+            (milestone.photoUrls ? String(milestone.photoUrls).split(',') : []),
           updatedAt: milestone.completedAt || milestone.createdAt || new Date().toISOString(),
           updatedBy: milestone.updatedBy || 'System',
           type: 'milestone' as const
         }));
-        
+
         setProgressHistory(progressUpdates);
       } catch (fallbackError) {
         console.error('Error fetching milestones fallback:', fallbackError);
@@ -241,26 +243,24 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
           <div className="flex bg-slate-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('timeline')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-                viewMode === 'timeline'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${viewMode === 'timeline'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Timeline View
             </button>
             <button
               onClick={() => setViewMode('history')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-                viewMode === 'history'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${viewMode === 'history'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               History View
             </button>
           </div>
-          
+
           <button
             onClick={handleDownloadReport}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
@@ -279,25 +279,23 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
           {milestones.map((milestone, index) => (
             <div key={milestone.id} className="relative mb-8 pl-20">
               <div
-                className={`absolute left-4 w-8 h-8 rounded-full flex items-center justify-center text-lg ${
-                  milestone.status === 'COMPLETED'
-                    ? 'bg-green-500 text-white'
-                    : milestone.status === 'IN_PROGRESS'
+                className={`absolute left-4 w-8 h-8 rounded-full flex items-center justify-center text-lg ${milestone.status === 'COMPLETED'
+                  ? 'bg-green-500 text-white'
+                  : milestone.status === 'IN_PROGRESS'
                     ? 'bg-yellow-500 text-white'
                     : 'bg-slate-300 text-slate-600'
-                }`}
+                  }`}
               >
                 {getMilestoneIcon(milestone.percentage)}
               </div>
 
               <div
-                className={`border-2 rounded-xl p-6 ${
-                  milestone.status === 'COMPLETED'
-                    ? 'border-green-200 bg-green-50'
-                    : milestone.status === 'IN_PROGRESS'
+                className={`border-2 rounded-xl p-6 ${milestone.status === 'COMPLETED'
+                  ? 'border-green-200 bg-green-50'
+                  : milestone.status === 'IN_PROGRESS'
                     ? 'border-yellow-200 bg-yellow-50'
                     : 'border-slate-200 bg-slate-50'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -305,13 +303,12 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
                       {milestone.percentage}% - {getMilestoneLabel(milestone.percentage)}
                     </h3>
                     <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${
-                        milestone.status === 'COMPLETED'
-                          ? 'bg-green-200 text-green-800'
-                          : milestone.status === 'IN_PROGRESS'
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${milestone.status === 'COMPLETED'
+                        ? 'bg-green-200 text-green-800'
+                        : milestone.status === 'IN_PROGRESS'
                           ? 'bg-yellow-200 text-yellow-800'
                           : 'bg-slate-200 text-slate-800'
-                      }`}
+                        }`}
                     >
                       {milestone.status}
                     </span>
@@ -393,7 +390,7 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
           <div className="text-sm text-slate-600 mb-6">
             Showing all progress updates in chronological order (most recent first)
           </div>
-          
+
           {progressHistory.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="mx-auto text-slate-400 mb-4" size={48} />
@@ -418,7 +415,7 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="text-right">
                       <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
                         <Calendar size={14} />
@@ -446,14 +443,13 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
                         <User size={14} />
                         <span>By: <span className="font-semibold">{update.updatedBy}</span></span>
                       </div>
-                      
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        update.status === 'COMPLETED'
-                          ? 'bg-green-200 text-green-800'
-                          : update.status === 'IN_PROGRESS'
+
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${update.status === 'COMPLETED'
+                        ? 'bg-green-200 text-green-800'
+                        : update.status === 'IN_PROGRESS'
                           ? 'bg-yellow-200 text-yellow-800'
                           : 'bg-slate-200 text-slate-800'
-                      }`}>
+                        }`}>
                         {update.status}
                       </span>
                     </div>

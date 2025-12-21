@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { X, Upload, Loader2, CheckCircle2 } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api/api";
 
 interface MilestoneUpdateFormProps {
   projectId: number;
@@ -45,7 +47,7 @@ export default function MilestoneUpdateForm({ projectId, onSuccess }: MilestoneU
       });
 
       const response = await fetch(
-        `http://localhost:8080/projects/${projectId}/milestones/${percentage}`,
+        `${API_BASE_URL}/projects/${projectId}/milestones/${percentage}`,
         {
           method: 'POST',
           headers: {
@@ -88,11 +90,10 @@ export default function MilestoneUpdateForm({ projectId, onSuccess }: MilestoneU
                 key={milestone.value}
                 type="button"
                 onClick={() => setPercentage(milestone.value)}
-                className={`p-4 rounded-lg border-2 transition text-center ${
-                  percentage === milestone.value
+                className={`p-4 rounded-lg border-2 transition text-center ${percentage === milestone.value
                     ? 'border-green-500 bg-green-50'
                     : 'border-gray-300 hover:border-green-300'
-                }`}
+                  }`}
               >
                 <div className="text-3xl mb-2">{milestone.icon}</div>
                 <div className="text-sm font-semibold">{milestone.value}%</div>
@@ -160,11 +161,10 @@ export default function MilestoneUpdateForm({ projectId, onSuccess }: MilestoneU
         <button
           type="submit"
           disabled={uploading}
-          className={`w-full py-3 rounded-lg font-semibold text-white transition ${
-            uploading
+          className={`w-full py-3 rounded-lg font-semibold text-white transition ${uploading
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-green-600 hover:bg-green-700'
-          }`}
+            }`}
         >
           {uploading ? 'Uploading...' : `Update ${percentage}% Milestone`}
         </button>
