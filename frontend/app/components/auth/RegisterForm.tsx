@@ -1,11 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { register, fetchCurrentUserProfile, UserStore } from "@/lib/api/api";
-import { User, Mail, Lock, AlertCircle, ArrowRight, CheckCircle, Check, Loader2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import {
+  User,
+  Mail,
+  Lock,
+  AlertCircle,
+  ArrowRight,
+  CheckCircle,
+  Check,
+  Loader2,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function RegisterForm() {
@@ -17,7 +26,7 @@ export default function RegisterForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const t = useTranslations('auth.register');
+  const t = useTranslations("auth.register");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +56,15 @@ export default function RegisterForm() {
     }
   };
 
-  const passwordStrength = password ? Math.min(Math.floor(password.length / 8) * 25 + (/[A-Z]/.test(password) ? 25 : 0) + (/\d/.test(password) ? 25 : 0) + (/[^A-Za-z0-9]/.test(password) ? 25 : 0), 100) : 0;
+  const passwordStrength = password
+    ? Math.min(
+        Math.floor(password.length / 8) * 25 +
+          (/[A-Z]/.test(password) ? 25 : 0) +
+          (/\d/.test(password) ? 25 : 0) +
+          (/[^A-Za-z0-9]/.test(password) ? 25 : 0),
+        100
+      )
+    : 0;
 
   return (
     <div className="w-full">
@@ -57,8 +74,10 @@ export default function RegisterForm() {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <h2 className="text-3xl font-black text-slate-900 mb-2">{t('title')}</h2>
-        <p className="text-slate-600 font-medium">{t('subtitle')}</p>
+        <h2 className="text-3xl font-black text-slate-900 mb-2">
+          {t("title")}
+        </h2>
+        <p className="text-slate-600 font-medium">{t("subtitle")}</p>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -70,7 +89,10 @@ export default function RegisterForm() {
             transition={{ duration: 0.3 }}
             className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-start gap-3 backdrop-blur-sm overflow-hidden"
           >
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+            <AlertCircle
+              className="text-red-600 flex-shrink-0 mt-0.5"
+              size={20}
+            />
             <p className="text-red-700 text-sm font-semibold">{error}</p>
           </motion.div>
         )}
@@ -84,9 +106,14 @@ export default function RegisterForm() {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="space-y-1.5"
         >
-          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('fullName')}</label>
+          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">
+            {t("fullName")}
+          </label>
           <div className="relative group">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110" size={18} />
+            <User
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110"
+              size={18}
+            />
             <input
               type="text"
               value={fullName}
@@ -105,9 +132,14 @@ export default function RegisterForm() {
           transition={{ delay: 0.15, duration: 0.5 }}
           className="space-y-1.5"
         >
-          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('email')}</label>
+          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">
+            {t("email")}
+          </label>
           <div className="relative group">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110" size={18} />
+            <Mail
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110"
+              size={18}
+            />
             <input
               type="email"
               value={email}
@@ -126,9 +158,14 @@ export default function RegisterForm() {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-1.5"
         >
-          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('username')}</label>
+          <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">
+            {t("username")}
+          </label>
           <div className="relative group">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110" size={18} />
+            <User
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110"
+              size={18}
+            />
             <input
               type="text"
               value={username}
@@ -148,9 +185,14 @@ export default function RegisterForm() {
             transition={{ delay: 0.25, duration: 0.5 }}
             className="space-y-1.5"
           >
-            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('password')}</label>
+            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">
+              {t("password")}
+            </label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110" size={18} />
+              <Lock
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110"
+                size={18}
+              />
               <input
                 type="password"
                 value={password}
@@ -167,9 +209,14 @@ export default function RegisterForm() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="space-y-1.5"
           >
-            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">{t('confirm')}</label>
+            <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">
+              {t("confirm")}
+            </label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110" size={18} />
+              <Lock
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-emerald-600 group-focus-within:scale-110"
+                size={18}
+              />
               <input
                 type="password"
                 value={confirmPassword}
@@ -193,13 +240,25 @@ export default function RegisterForm() {
               className="bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-hidden"
             >
               <div className="flex justify-between items-center mb-2.5">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">{t('strength')}</span>
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  {t("strength")}
+                </span>
                 <motion.span
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
-                  className={`text-xs font-bold px-2.5 py-1 rounded-full ${passwordStrength < 40 ? 'bg-red-100 text-red-700' : passwordStrength < 80 ? 'bg-yellow-100 text-yellow-700' : 'bg-emerald-100 text-emerald-700'}`}
+                  className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                    passwordStrength < 40
+                      ? "bg-red-100 text-red-700"
+                      : passwordStrength < 80
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-emerald-100 text-emerald-700"
+                  }`}
                 >
-                  {passwordStrength < 40 ? t('weak') : passwordStrength < 80 ? t('good') : t('strong')}
+                  {passwordStrength < 40
+                    ? t("weak")
+                    : passwordStrength < 80
+                    ? t("good")
+                    : t("strong")}
                 </motion.span>
               </div>
               <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
@@ -207,7 +266,13 @@ export default function RegisterForm() {
                   initial={{ width: 0 }}
                   animate={{ width: `${passwordStrength}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`h-full transition-colors duration-500 ${passwordStrength < 40 ? 'bg-red-500' : passwordStrength < 80 ? 'bg-orange-500' : 'bg-emerald-600'}`}
+                  className={`h-full transition-colors duration-500 ${
+                    passwordStrength < 40
+                      ? "bg-red-500"
+                      : passwordStrength < 80
+                      ? "bg-orange-500"
+                      : "bg-emerald-600"
+                  }`}
                 />
               </div>
             </motion.div>
@@ -221,17 +286,31 @@ export default function RegisterForm() {
           className="flex items-start gap-3 cursor-pointer pt-2"
         >
           <div className="relative flex items-center mt-0.5">
-            <input type="checkbox" required className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border-2 border-slate-300 bg-white transition-all checked:border-emerald-600 checked:bg-emerald-600 hover:border-emerald-500 shadow-sm" />
-            <Check size={14} strokeWidth={3} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+            <input
+              type="checkbox"
+              required
+              className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border-2 border-slate-300 bg-white transition-all checked:border-emerald-600 checked:bg-emerald-600 hover:border-emerald-500 shadow-sm"
+            />
+            <Check
+              size={14}
+              strokeWidth={3}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+            />
           </div>
           <span className="text-sm text-slate-600 select-none font-medium">
-            {t('agreeTerms')}{' '}
-            <a href="#" className="text-emerald-700 font-bold hover:text-emerald-800 hover:underline transition-colors">
-              {t('terms')}
-            </a>
-            {' '}and{' '}
-            <a href="#" className="text-emerald-700 font-bold hover:text-emerald-800 hover:underline transition-colors">
-              {t('privacyPolicy')}
+            {t("agreeTerms")}{" "}
+            <a
+              href="#"
+              className="text-emerald-700 font-bold hover:text-emerald-800 hover:underline transition-colors"
+            >
+              {t("terms")}
+            </a>{" "}
+            and{" "}
+            <a
+              href="#"
+              className="text-emerald-700 font-bold hover:text-emerald-800 hover:underline transition-colors"
+            >
+              {t("privacyPolicy")}
             </a>
           </span>
         </motion.label>
@@ -250,11 +329,11 @@ export default function RegisterForm() {
             {isLoading ? (
               <>
                 <Loader2 className="animate-spin" size={20} />
-                {t('creating')}
+                {t("creating")}
               </>
             ) : (
               <>
-                {t('createAccountButton')}
+                {t("createAccountButton")}
                 <ArrowRight size={20} />
               </>
             )}
@@ -268,8 +347,11 @@ export default function RegisterForm() {
         className="mt-8 text-center"
       >
         <p className="text-slate-600 font-medium">
-          Already have an account?{' '}
-          <Link href="/login" className="text-emerald-700 font-bold hover:underline transition-all">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="text-emerald-700 font-bold hover:underline transition-all"
+          >
             Login Here
           </Link>
         </p>

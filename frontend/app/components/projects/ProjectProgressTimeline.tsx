@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Clock, User, Camera, Download, Calendar, FileText } from 'lucide-react';
 
 interface Milestone {
   id: number;
@@ -11,6 +12,18 @@ interface Milestone {
   status: string;
   completedAt: string | null;
   updatedBy: string | null;
+  createdAt?: string;
+}
+
+interface ProgressUpdate {
+  id: number;
+  percentage: number;
+  status: string;
+  notes: string;
+  photoUrls: string[];
+  updatedAt: string;
+  updatedBy: string;
+  type: 'milestone' | 'progress';
 }
 
 interface ProjectProgressTimelineProps {
@@ -19,24 +32,85 @@ interface ProjectProgressTimelineProps {
 
 export default function ProjectProgressTimeline({ projectId }: ProjectProgressTimelineProps) {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [progressHistory, setProgressHistory] = useState<ProgressUpdate[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'timeline' | 'history'>('timeline');
 
   useEffect(() => {
-    fetchMilestones();
+    fetchProgressHistory();
   }, [projectId]);
 
-  const fetchMilestones = async () => {
+  const fetchProgressHistory = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/projects/${projectId}/milestones`, {
+      // Use the new progress history endpoint
+      const response = await fetch(`http://localhost:8080/projects/${projectId}/progress-history`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch progress history');
+      }
+      
       const data = await response.json();
-      setMilestones(data);
+      
+      // Convert the data to our expected format
+      const progressUpdates: ProgressUpdate[] = data.map((item: any) => ({
+        id: item.id,
+        percentage: item.percentage,
+        status: item.status,
+        notes: item.notes || '',
+        photoUrls: item.photoUrls || [],
+        updatedAt: item.updatedAt,
+        updatedBy: item.updatedBy || 'System',
+        type: item.type || 'progress'
+      }));
+
+      setProgressHistory(progressUpdates);
+      
+      // Also set milestones for timeline view
+      const milestoneData = progressUpdates.filter(item => item.type === 'milestone');
+      const milestonesForTimeline = milestoneData.map(item => ({
+        id: typeof item.id === 'string' ? parseInt(String(item.id).replace('current-', '')) : Number(item.id),
+        percentage: item.percentage,
+        notes: item.notes,
+        photoUrls: item.photoUrls,
+        status: item.status,
+        completedAt: item.updatedAt,
+        updatedBy: item.updatedBy
+      }));
+      
+      setMilestones(milestonesForTimeline);
     } catch (error) {
-      console.error('Error fetching milestones:', error);
+      console.error('Error fetching progress history:', error);
+      // Fallback to milestones endpoint
+      try {
+        const milestonesResponse = await fetch(`http://localhost:8080/projects/${projectId}/milestones`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const milestonesData = await milestonesResponse.json();
+        setMilestones(milestonesData);
+        
+        // Convert milestones to progress updates format for history view
+        const progressUpdates: ProgressUpdate[] = milestonesData.map((milestone: Milestone) => ({
+          id: milestone.id,
+          percentage: milestone.percentage,
+          status: milestone.status,
+          notes: milestone.notes || '',
+          photoUrls: milestone.photoUrls || [],
+          updatedAt: milestone.completedAt || new Date().toISOString(),
+          updatedBy: milestone.updatedBy || 'System',
+          type: 'milestone' as const
+        }));
+        
+        setProgressHistory(progressUpdates);
+      } catch (fallbackError) {
+        console.error('Error fetching milestones fallback:', fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -64,6 +138,22 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
     }
   };
 
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      date: date.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }),
+      time: date.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+    };
+  };
+
   const downloadProgressReport = async () => {
     try {
       const response = await fetch(`http://localhost:8080/projects/${projectId}/progress-report`, {
@@ -83,129 +173,270 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading progress timeline...</div>;
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-slate-600">Loading progress history...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Progress Timeline</h2>
-        <button
-          onClick={downloadProgressReport}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-        >
-          <span>📄</span>
-          Download Report
-        </button>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold text-slate-900">Project Progress</h2>
+        <div className="flex items-center gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex bg-slate-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                viewMode === 'timeline'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Timeline View
+            </button>
+            <button
+              onClick={() => setViewMode('history')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                viewMode === 'history'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              History View
+            </button>
+          </div>
+          
+          <button
+            onClick={downloadProgressReport}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+          >
+            <Download size={16} />
+            Download Report
+          </button>
+        </div>
       </div>
 
-      <div className="relative">
-        {/* Progress Line */}
-        <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-200"></div>
+      {viewMode === 'timeline' ? (
+        // Timeline View (Original)
+        <div className="relative">
+          <div className="absolute left-8 top-0 bottom-0 w-1 bg-slate-200"></div>
 
-        {milestones.map((milestone, index) => (
-          <div key={milestone.id} className="relative mb-8 pl-20">
-            {/* Milestone Dot */}
-            <div
-              className={`absolute left-4 w-8 h-8 rounded-full flex items-center justify-center text-lg ${
-                milestone.status === 'COMPLETED'
-                  ? 'bg-green-500 text-white'
-                  : milestone.status === 'IN_PROGRESS'
-                  ? 'bg-yellow-500 text-white'
-                  : 'bg-gray-300 text-gray-600'
-              }`}
-            >
-              {getMilestoneIcon(milestone.percentage)}
-            </div>
-
-            {/* Milestone Content */}
-            <div
-              className={`border-2 rounded-lg p-4 ${
-                milestone.status === 'COMPLETED'
-                  ? 'border-green-500 bg-green-50'
-                  : milestone.status === 'IN_PROGRESS'
-                  ? 'border-yellow-500 bg-yellow-50'
-                  : 'border-gray-300 bg-gray-50'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-800">
-                    {milestone.percentage}% - {getMilestoneLabel(milestone.percentage)}
-                  </h3>
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${
-                      milestone.status === 'COMPLETED'
-                        ? 'bg-green-200 text-green-800'
-                        : milestone.status === 'IN_PROGRESS'
-                        ? 'bg-yellow-200 text-yellow-800'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
-                  >
-                    {milestone.status}
-                  </span>
-                </div>
-                {milestone.completedAt && (
-                  <span className="text-sm text-gray-600">
-                    {new Date(milestone.completedAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
-                )}
+          {milestones.map((milestone, index) => (
+            <div key={milestone.id} className="relative mb-8 pl-20">
+              <div
+                className={`absolute left-4 w-8 h-8 rounded-full flex items-center justify-center text-lg ${
+                  milestone.status === 'COMPLETED'
+                    ? 'bg-green-500 text-white'
+                    : milestone.status === 'IN_PROGRESS'
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-slate-300 text-slate-600'
+                }`}
+              >
+                {getMilestoneIcon(milestone.percentage)}
               </div>
 
-              {milestone.notes && (
-                <p className="text-gray-700 mb-3">{milestone.notes}</p>
-              )}
-
-              {milestone.updatedBy && (
-                <p className="text-sm text-gray-600 mb-3">
-                  Updated by: <span className="font-semibold">{milestone.updatedBy}</span>
-                </p>
-              )}
-
-              {/* Photo Gallery */}
-              {milestone.photoUrls && milestone.photoUrls.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    Progress Photos ({milestone.photoUrls.length})
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {milestone.photoUrls.map((photo, photoIndex) => (
-                      <div
-                        key={photoIndex}
-                        className="relative h-24 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition"
-                        onClick={() => setSelectedPhoto(`http://localhost:8080/uploads/projects/${photo}`)}
-                      >
-                        <Image
-                          src={`http://localhost:8080/uploads/projects/${photo}`}
-                          alt={`Progress photo ${photoIndex + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
+              <div
+                className={`border-2 rounded-xl p-6 ${
+                  milestone.status === 'COMPLETED'
+                    ? 'border-green-200 bg-green-50'
+                    : milestone.status === 'IN_PROGRESS'
+                    ? 'border-yellow-200 bg-yellow-50'
+                    : 'border-slate-200 bg-slate-50'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">
+                      {milestone.percentage}% - {getMilestoneLabel(milestone.percentage)}
+                    </h3>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${
+                        milestone.status === 'COMPLETED'
+                          ? 'bg-green-200 text-green-800'
+                          : milestone.status === 'IN_PROGRESS'
+                          ? 'bg-yellow-200 text-yellow-800'
+                          : 'bg-slate-200 text-slate-800'
+                      }`}
+                    >
+                      {milestone.status}
+                    </span>
                   </div>
+                  {milestone.completedAt && (
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-slate-900">
+                        {formatDateTime(milestone.completedAt).date}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {formatDateTime(milestone.completedAt).time}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {milestone.notes && (
+                  <div className="mb-4">
+                    <p className="text-slate-700 leading-relaxed">{milestone.notes}</p>
+                  </div>
+                )}
+
+                {milestone.updatedBy && (
+                  <div className="flex items-center gap-2 mb-4 text-sm text-slate-600">
+                    <User size={14} />
+                    <span>Updated by: <span className="font-semibold">{milestone.updatedBy}</span></span>
+                  </div>
+                )}
+
+                {milestone.photoUrls && milestone.photoUrls.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Camera size={16} className="text-slate-600" />
+                      <span className="text-sm font-semibold text-slate-700">
+                        Progress Photos ({milestone.photoUrls.length})
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {milestone.photoUrls.map((photo, photoIndex) => (
+                        <div
+                          key={photoIndex}
+                          className="relative h-24 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition border border-slate-200"
+                          onClick={() => setSelectedPhoto(`http://localhost:8080/uploads/projects/${photo}`)}
+                        >
+                          <Image
+                            src={`http://localhost:8080/uploads/projects/${photo}`}
+                            alt={`Progress photo ${photoIndex + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        // History View (Chronological)
+        <div className="space-y-4">
+          <div className="text-sm text-slate-600 mb-6">
+            Showing all progress updates in chronological order (most recent first)
           </div>
-        ))}
-      </div>
+          
+          {progressHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="mx-auto text-slate-400 mb-4" size={48} />
+              <p className="text-slate-600">No progress updates available yet.</p>
+            </div>
+          ) : (
+            progressHistory.map((update, index) => {
+              const dateTime = formatDateTime(update.updatedAt);
+              return (
+                <div key={`${update.type}-${update.id}-${index}`} className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        {getMilestoneIcon(update.percentage)}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900">
+                          Progress Updated to {update.percentage}%
+                        </h3>
+                        <p className="text-sm text-slate-600">
+                          {getMilestoneLabel(update.percentage)}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right">
+                      <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
+                        <Calendar size={14} />
+                        {dateTime.date}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                        <Clock size={12} />
+                        {dateTime.time}
+                      </div>
+                    </div>
+                  </div>
+
+                  {update.notes && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-slate-700 mb-2">Update Description:</h4>
+                      <p className="text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-slate-200">
+                        {update.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <User size={14} />
+                        <span>By: <span className="font-semibold">{update.updatedBy}</span></span>
+                      </div>
+                      
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        update.status === 'COMPLETED'
+                          ? 'bg-green-200 text-green-800'
+                          : update.status === 'IN_PROGRESS'
+                          ? 'bg-yellow-200 text-yellow-800'
+                          : 'bg-slate-200 text-slate-800'
+                      }`}>
+                        {update.status}
+                      </span>
+                    </div>
+
+                    {update.photoUrls && update.photoUrls.length > 0 && (
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <Camera size={14} />
+                        <span>{update.photoUrls.length} photo{update.photoUrls.length > 1 ? 's' : ''}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {update.photoUrls && update.photoUrls.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-200">
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                        {update.photoUrls.map((photo, photoIndex) => (
+                          <div
+                            key={photoIndex}
+                            className="relative h-16 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition border border-slate-200"
+                            onClick={() => setSelectedPhoto(`http://localhost:8080/uploads/projects/${photo}`)}
+                          >
+                            <Image
+                              src={`http://localhost:8080/uploads/projects/${photo}`}
+                              alt={`Progress photo ${photoIndex + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* Photo Modal */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]">
             <button
-              className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-gray-300"
+              className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-gray-300 z-10"
               onClick={() => setSelectedPhoto(null)}
             >
               ×
