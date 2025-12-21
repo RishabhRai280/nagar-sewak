@@ -71,6 +71,7 @@ export default function MapComponent() {
       zoom={5}
       scrollWheelZoom
       className="h-[80vh] w-full z-0 rounded-lg shadow-xl"
+      style={{ zIndex: 1 }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

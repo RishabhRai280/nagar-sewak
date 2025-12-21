@@ -21,7 +21,7 @@ export default function Footer() {
     <footer className="bg-slate-900 text-slate-300 text-sm border-t-4 border-orange-500 mt-auto relative z-10">
       <div className="max-w-[1400px] mx-auto px-6 py-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
 
           {/* Column 1: Brand & Desc */}
           <div className="col-span-1 md:col-span-1">
@@ -50,7 +50,18 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Important External Links */}
+          {/* Column 3: Support & Help */}
+          <div>
+            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">Support & Help</h3>
+            <ul className="space-y-2">
+              <li><Link href="/support/contact" className="hover:text-green-400 transition">Contact Support</Link></li>
+              <li><Link href="/support/faq" className="hover:text-green-400 transition">FAQ</Link></li>
+              <li><Link href="/support/tender-guidance" className="hover:text-green-400 transition">Tender Guidance</Link></li>
+              <li><Link href="/terms" className="hover:text-green-400 transition">Terms & Conditions</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Important External Links */}
           <div>
             <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">{t('government')}</h3>
             <ul className="space-y-2">
@@ -64,7 +75,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Contact */}
+          {/* Column 5: Contact */}
           <div>
             <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-xs border-b border-slate-700 pb-2 inline-block">{t('contactUs')}</h3>
             <ul className="space-y-3">
