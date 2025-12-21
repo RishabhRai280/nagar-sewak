@@ -37,8 +37,8 @@ import { cn } from "@/lib/utils";
 export default function GovLandingPage() {
   const t = useTranslations('landing');
   const [ctaLink, setCtaLink] = useState("/register");
-  const [dashboardLink, setDashboardLink] = useState("/auth/login");
-  const [analyticsLink, setAnalyticsLink] = useState("/auth/login");
+  const [dashboardLink, setDashboardLink] = useState("/login");
+  const [analyticsLink, setAnalyticsLink] = useState("/login");
   const [currentTime, setCurrentTime] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
@@ -76,8 +76,8 @@ export default function GovLandingPage() {
       setAnalyticsLink(analytics);
     } else {
       // For non-logged users, redirect dashboard actions to login
-      setDashboardLink("/auth/login");
-      setAnalyticsLink("/auth/login");
+      setDashboardLink("/login");
+      setAnalyticsLink("/login");
     }
 
     // Cleanup interval on unmount
@@ -337,7 +337,7 @@ export default function GovLandingPage() {
                 </div>
               </Link>
 
-              <Link href="/auth/login">
+              <Link href="/login">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
                   <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <Shield className="text-white" size={20} />
