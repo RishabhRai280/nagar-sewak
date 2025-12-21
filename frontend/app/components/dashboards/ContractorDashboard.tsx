@@ -291,7 +291,7 @@ export default function ContractorDashboardComponent() {
                                                     Applied
                                                 </button>
                                             ) : (
-                                                <Link href={`/tenders/create?complaintId=${c.id}`} className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">
+                                                <Link href={`/tenders/create?complaintId=${c.id}`} className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition flex items-center justify-center">
                                                     {t('bidNow')}
                                                 </Link>
                                             )}

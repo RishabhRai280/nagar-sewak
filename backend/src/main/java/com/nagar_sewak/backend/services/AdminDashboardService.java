@@ -71,17 +71,20 @@ public class AdminDashboardService {
     }
 
     private BigDecimal calculateAverageResolution(List<Complaint> complaints) {
-        List<Duration> durations = complaints.stream()
+        List<Long> hoursList = complaints.stream()
                 .filter(c -> c.getCreatedAt() != null && c.getResolvedAt() != null)
-                .map(c -> Duration.between(c.getCreatedAt(), c.getResolvedAt()))
+                .map(c -> {
+                    long hours = Duration.between(c.getCreatedAt(), c.getResolvedAt()).toHours();
+                    return Math.abs(hours); // Handle negative duration from bad test data
+                })
                 .toList();
 
-        if (durations.isEmpty()) {
+        if (hoursList.isEmpty()) {
             return BigDecimal.ZERO.setScale(1, RoundingMode.HALF_UP);
         }
 
-        double averageHours = durations.stream()
-                .mapToLong(Duration::toHours)
+        double averageHours = hoursList.stream()
+                .mapToLong(Long::longValue)
                 .average()
                 .orElse(0.0);
 

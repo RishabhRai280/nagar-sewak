@@ -59,7 +59,7 @@ public class SecurityConfig {
                     .requestMatchers("/tenders/complaints/*/submit").hasAuthority(Role.CONTRACTOR.name())
                     .requestMatchers("/tenders/my").hasAuthority(Role.CONTRACTOR.name())
                     .requestMatchers("/tenders/*/accept").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name())
-                    .requestMatchers("/tenders/complaints/*").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.CONTRACTOR.name())
+                    .requestMatchers("/tenders/complaints/*").hasAnyAuthority(Role.ADMIN.name(), Role.SUPER_ADMIN.name(), Role.CONTRACTOR.name(), Role.CITIZEN.name())
 
                     // ================= CITIZEN WRITE/REPORTING =================
                     .requestMatchers(POST, "/complaints").hasAuthority(Role.CITIZEN.name())

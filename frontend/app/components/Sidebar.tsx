@@ -100,6 +100,7 @@ export default function Sidebar() {
     { label: t('tenders'), href: "/dashboard/admin/tenders", icon: ClipboardList },
     { label: t('complaints'), href: "/dashboard/admin/complaints", icon: Bell },
     { label: t('contractors'), href: "/dashboard/admin/contractors", icon: Users },
+    { label: t('profile'), href: "/dashboard/citizen/profile", icon: User },
     { label: t('myReports'), href: "/dashboard/citizen/reports", icon: ClipboardList },
     { label: t('reportIssue'), href: "/report", icon: FileEdit },
     { label: t('liveMap'), href: "/map", icon: Map },
@@ -111,6 +112,7 @@ export default function Sidebar() {
     { label: t('dashboard'), href: "/dashboard/contractor", icon: LayoutDashboard },
     { label: t('projects'), href: "/dashboard/contractor/projects", icon: BarChart3 },
     { label: t('availableWorks'), href: "/dashboard/contractor/available", icon: FileEdit },
+    { label: t('profile'), href: "/dashboard/citizen/profile", icon: User },
     { label: t('myReports'), href: "/dashboard/citizen/reports", icon: ClipboardList },
     { label: t('reportIssue'), href: "/report", icon: FileEdit },
     { label: t('liveMap'), href: "/map", icon: Map },
@@ -245,14 +247,14 @@ export default function Sidebar() {
             </Link>
 
             {/* Right: User Profile */}
-            <div className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-lg transition-colors">
+            <Link href="/dashboard/citizen/profile" className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
               <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center border border-blue-100">
                 <User size={14} className="text-blue-700" />
               </div>
               <div className="hidden md:block text-left">
                 <div className="text-xs font-bold text-slate-900">{t('userProfile')}</div>
               </div>
-            </div>
+            </Link>
           </div>
         </header>
       </div>

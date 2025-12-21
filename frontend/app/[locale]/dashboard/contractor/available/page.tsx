@@ -101,9 +101,8 @@ export default function ContractorAvailablePage() {
   return (
     <div className="flex min-h-screen relative bg-slate-50 overflow-hidden">
       <div
-        className={`${
-          collapsed ? "w-16" : "w-64"
-        } flex-shrink-0 hidden lg:block transition-all duration-300`}
+        className={`${collapsed ? "w-16" : "w-64"
+          } flex-shrink-0 hidden lg:block transition-all duration-300`}
       ></div>
 
       <Sidebar />
@@ -225,7 +224,7 @@ export default function ContractorAvailablePage() {
                   </div>
 
                   <button
-                    onClick={() => setSelectedComplaint(c)}
+                    onClick={() => router.push(`/tenders/create?complaintId=${c.id}`)}
                     className="w-full py-3 bg-[#1e3a8a] text-white font-bold text-xs uppercase rounded-lg hover:bg-blue-900 transition flex items-center justify-center gap-2 shadow-sm shadow-blue-900/20"
                   >
                     {t("card.placeTender")}
