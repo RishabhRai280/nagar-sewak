@@ -189,17 +189,25 @@ public class ProjectController {
                     .updatedBy(userDetails.getUsername())
                     .build();
 
-            // Handle photo URLs for the milestone
+            // Handle photo URLs for the milestone - use the same filenames that were saved
             if (photos != null && !photos.isEmpty()) {
                 java.util.List<String> photoFilenames = new java.util.ArrayList<>();
-                for (org.springframework.web.multipart.MultipartFile photo : photos) {
-                    String filename = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-                    photoFilenames.add(filename);
-                    
-                    try {
-                        Thread.sleep(10); // Ensure unique timestamps
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                // Extract filenames from the photoUrls that were already saved to project
+                String savedPhotos = project.getProgressPhotos();
+                if (savedPhotos != null && !savedPhotos.isEmpty()) {
+                    String[] savedPhotoArray = savedPhotos.split(",");
+                    // Get the most recent photos (the ones we just uploaded)
+                    int startIndex = Math.max(0, savedPhotoArray.length - photos.size());
+                    for (int i = startIndex; i < savedPhotoArray.length; i++) {
+                        String photoPath = savedPhotoArray[i].trim();
+                        // Extract filename from path like "/uploads/projects/filename.png"
+                        if (photoPath.startsWith("/uploads/projects/")) {
+                            photoFilenames.add(photoPath.substring("/uploads/projects/".length()));
+                        } else if (photoPath.contains("/")) {
+                            photoFilenames.add(photoPath.substring(photoPath.lastIndexOf("/") + 1));
+                        } else {
+                            photoFilenames.add(photoPath);
+                        }
                     }
                 }
                 progressRecord.setPhotoUrls(String.join(",", photoFilenames));
@@ -343,7 +351,7 @@ public class ProjectController {
                 java.util.Arrays.asList(milestone.getPhotoUrls().split(",")) : 
                 java.util.Collections.emptyList());
             historyItem.put("updatedAt", milestone.getCompletedAt() != null ? 
-                milestone.getCompletedAt() : milestone.getCreatedAt());
+                milestone.getCompletedAt() : java.time.LocalDateTime.now());
             historyItem.put("updatedBy", milestone.getUpdatedBy());
             historyItem.put("type", "milestone");
             progressHistory.add(historyItem);

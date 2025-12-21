@@ -35,7 +35,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     // ================= PUBLIC READ ACCESS =================
                     // FIX: Added "/uploads/complaints/**" and "/uploads/projects/**" to allow public access to images
-                    .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect", "/uploads/complaints/**", "/uploads/projects/**").permitAll() 
+                    .requestMatchers(GET, "/projects", "/projects/**", "/complaints", "/api/map/data", "/api/wards/detect", "/uploads/**").permitAll()
+                    .requestMatchers("/uploads/**").permitAll() // Allow all uploads access (GET, POST, etc.) 
                     .requestMatchers("/auth/**", "/login", "/register", "/test/**").permitAll()
                     
                     // ================= REPORTS ACCESS =================
