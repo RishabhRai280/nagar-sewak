@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchProjectById, updateProject, ProjectDetail, Token, UserStore } from "@/lib/api";
-import { Construction, DollarSign, MapPin, CheckCircle, ArrowLeft, Clock, AlertTriangle, Edit2 } from "lucide-react";
+import { fetchProjectById, ProjectDetail, Token, UserStore } from "@/lib/api";
+import { Construction, DollarSign, ArrowLeft, Clock, AlertTriangle, Plus } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ProjectProgressTimeline from "@/app/components/projects/ProjectProgressTimeline";
+import ProjectProgressUpdateModal from "@/app/components/projects/ProjectProgressUpdateModal";
 import ShareBar from "@/app/components/shared/ShareBar";
 
 // Dynamically import Map component to avoid SSR issues
@@ -20,17 +21,15 @@ export default function ProjectDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
-    const [userId, setUserId] = useState<number | null>(null);
-    const [updating, setUpdating] = useState(false);
+    const [showProgressModal, setShowProgressModal] = useState(false);
+    const [timelineKey, setTimelineKey] = useState(0);
 
     useEffect(() => {
-        const token = Token.get();
         const user = UserStore.get();
         if (user) {
             if (user.roles.includes("CONTRACTOR")) setUserRole("CONTRACTOR");
             else if (user.roles.includes("ADMIN") || user.roles.includes("SUPER_ADMIN")) setUserRole("ADMIN");
             else setUserRole("CITIZEN");
-            setUserId(user.id);
         }
 
         if (params.id) {
@@ -50,19 +49,43 @@ export default function ProjectDetailsPage() {
         }
     };
 
-    const handleStatusUpdate = async (newStatus: string) => {
+    const handleProgressUpdate = async (data: {
+        progress: number;
+        status: string;
+        notes: string;
+        photos: File[];
+    }) => {
         if (!project) return;
-        if (!confirm(`Are you sure you want to mark this project as ${newStatus}?`)) return;
+
+        const formData = new FormData();
+        formData.append('progress', data.progress.toString());
+        formData.append('status', data.status);
+        formData.append('notes', data.notes);
+        
+        data.photos.forEach((photo) => {
+            formData.append('photos', photo);
+        });
 
         try {
-            setUpdating(true);
-            const updated = await updateProject(project.id, { status: newStatus });
-            setProject(updated);
-            alert("Project status updated successfully!");
-        } catch (err) {
-            alert("Failed to update status.");
-        } finally {
-            setUpdating(false);
+            const response = await fetch(`http://localhost:8080/projects/${project.id}/progress`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${Token.get()}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update progress');
+            }
+
+            const updatedProject = await response.json();
+            setProject(updatedProject);
+            setTimelineKey(prev => prev + 1); // Force timeline refresh
+            alert("Project progress updated successfully!");
+        } catch (error) {
+            console.error('Error updating progress:', error);
+            throw error;
         }
     };
 
@@ -87,16 +110,6 @@ export default function ProjectDetailsPage() {
         );
     }
 
-    const isAssignedContractor = userRole === "CONTRACTOR" && project.contractorId === userId; // Note: userId check might need adjustment based on how contractorId maps to userId
-    // Actually, project.contractorId is the Contractor ID, not User ID. 
-    // We need to check if the current user is the contractor for this project.
-    // For MVP, we'll assume if they are a contractor and have access, they can edit (or we rely on backend validation if implemented).
-    // Better: Check if the user is a contractor. If so, let them try. Backend should enforce ownership.
-    // But wait, UserStore stores `id` which is User ID. `project.contractorId` is Contractor ID.
-    // We don't have Contractor ID in UserStore easily without fetching profile.
-    // Let's just allow "CONTRACTOR" role to see the button, and backend will reject if not owner (if implemented).
-    // Or simpler: If they are a contractor, show the button.
-
     const statusColors = {
         "Pending": "bg-yellow-100 text-yellow-800 border-yellow-200",
         "In Progress": "bg-blue-100 text-blue-800 border-blue-200",
@@ -105,26 +118,22 @@ export default function ProjectDetailsPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-[2000] shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534]"></div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => router.back()} className="p-2 hover:bg-slate-100 rounded-full transition text-[#1e3a8a]">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 lg:pt-28">
+                {/* Project Header Section */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-4 mb-4">
+                        <button onClick={() => router.back()} className="p-2 hover:bg-white rounded-full transition text-[#1e3a8a] shadow-sm border border-slate-200">
                             <ArrowLeft size={20} />
                         </button>
-                        <h1 className="text-xl font-bold text-slate-900 truncate max-w-md">{project.title}</h1>
+                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 truncate max-w-2xl">{project.title}</h1>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wide ${statusColors}`}>
                             {project.status}
                         </span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-end">
                         <ShareBar title={project.title} summary={project.description} />
                     </div>
                 </div>
-            </div>
-
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                     {/* Main Content */}
@@ -232,7 +241,7 @@ export default function ProjectDetailsPage() {
                                 )}
 
                                 <div className="mt-6">
-                                    <ProjectProgressTimeline projectId={project.id} />
+                                    <ProjectProgressTimeline key={timelineKey} projectId={project.id} />
                                 </div>
                             </div>
                         )}
@@ -243,27 +252,15 @@ export default function ProjectDetailsPage() {
                         {userRole === "CONTRACTOR" && project.status !== "Completed" && (
                             <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
                                 <h3 className="text-lg font-bold text-blue-900 mb-2">Contractor Actions</h3>
-                                <p className="text-blue-700 mb-4">Update the status of this project as work progresses.</p>
+                                <p className="text-blue-700 mb-4">Update the progress and status of this project as work progresses.</p>
                                 <div className="flex gap-4">
-                                    {project.status === "Pending" && (
-                                        <button
-                                            onClick={() => handleStatusUpdate("In Progress")}
-                                            disabled={updating}
-                                            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 disabled:opacity-50"
-                                        >
-                                            {updating ? "Updating..." : "Start Work"}
-                                        </button>
-                                    )}
-                                    {project.status === "In Progress" && (
-                                        <button
-                                            onClick={() => handleStatusUpdate("Completed")}
-                                            disabled={updating}
-                                            className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-500/30 disabled:opacity-50 flex items-center gap-2"
-                                        >
-                                            <CheckCircle size={18} />
-                                            {updating ? "Updating..." : "Mark as Completed"}
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setShowProgressModal(true)}
+                                        className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 flex items-center gap-2"
+                                    >
+                                        <Plus size={18} />
+                                        Update Progress
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -276,11 +273,12 @@ export default function ProjectDetailsPage() {
                         <div
                             className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-80 relative group cursor-pointer"
                             onClick={() => router.push(`/map?lat=${project.lat}&lng=${project.lng}&zoom=16`)}
+                            style={{ zIndex: 1 }}
                         >
                             <MiniMap lat={project.lat} lng={project.lng} />
 
                             {/* Overlay on hover */}
-                            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors z-[1000] flex items-center justify-center">
+                            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors z-[10] flex items-center justify-center">
                                 <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-sm font-bold text-slate-700 text-sm transform scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all">
                                     Click to View on Main Map
                                 </div>
@@ -309,6 +307,15 @@ export default function ProjectDetailsPage() {
 
                 </div>
             </main>
+
+            {/* Progress Update Modal */}
+            <ProjectProgressUpdateModal
+                isOpen={showProgressModal}
+                onClose={() => setShowProgressModal(false)}
+                onUpdate={handleProgressUpdate}
+                currentProgress={project?.progressPercentage || 0}
+                currentStatus={project?.status || "Pending"}
+            />
         </div>
     );
 }

@@ -19,11 +19,24 @@ export default function TenderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (!Token.get()) {
       router.push("/login");
       return;
+    }
+
+    // Get user role
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.roles) {
+      if (user.roles.includes("ADMIN") || user.roles.includes("SUPER_ADMIN")) {
+        setUserRole("ADMIN");
+      } else if (user.roles.includes("CONTRACTOR")) {
+        setUserRole("CONTRACTOR");
+      } else {
+        setUserRole("CITIZEN");
+      }
     }
 
     const loadTender = async () => {
@@ -313,8 +326,8 @@ export default function TenderDetailPage() {
               </div>
             </motion.div>
 
-            {/* Accept Tender Button */}
-            {tender.status === "PENDING" && (
+            {/* Accept Tender Button - Only for Admins */}
+            {tender.status === "PENDING" && userRole === "ADMIN" && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
