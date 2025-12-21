@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Token, fetchTenderById, TenderData, acceptTender, fetchComplaintById, ComplaintDetail } from "@/lib/api";
+import { Token, fetchTenderById, TenderData, acceptTender, fetchComplaintById, ComplaintDetail, UserStore } from "@/lib/api";
 import { ArrowLeft, DollarSign, Clock, FileText, Download, User, Star, Building2, CheckCircle, AlertCircle, MapPin, Calendar, Eye } from "lucide-react";
 import Link from "next/link";
 import { getRoleBasedBackUrl } from "@/lib/utils/navigation";
@@ -28,8 +28,8 @@ export default function TenderDetailPage() {
     }
 
     // Get user role
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.roles) {
+    const user = UserStore.get();
+    if (user?.roles) {
       if (user.roles.includes("ADMIN") || user.roles.includes("SUPER_ADMIN")) {
         setUserRole("ADMIN");
       } else if (user.roles.includes("CONTRACTOR")) {
@@ -43,7 +43,7 @@ export default function TenderDetailPage() {
       try {
         const tenderData = await fetchTenderById(Number(id));
         setTender(tenderData);
-        
+
         // Fetch complaint details if complaintId is available
         if (tenderData.complaintId) {
           try {
@@ -65,7 +65,7 @@ export default function TenderDetailPage() {
 
   const handleAccept = async () => {
     if (!tender || !confirm("Are you sure you want to accept this tender? This will create a project and reject other tenders.")) return;
-    
+
     setAccepting(true);
     try {
       await acceptTender(tender.id);
@@ -107,8 +107,8 @@ export default function TenderDetailPage() {
     tender.status === "ACCEPTED"
       ? "bg-emerald-100 text-emerald-700 border-emerald-200"
       : tender.status === "REJECTED"
-      ? "bg-red-100 text-red-700 border-red-200"
-      : "bg-orange-100 text-orange-700 border-orange-200";
+        ? "bg-red-100 text-red-700 border-red-200"
+        : "bg-orange-100 text-orange-700 border-orange-200";
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
@@ -152,21 +152,20 @@ export default function TenderDetailPage() {
                 </button>
               </Link>
             </div>
-            
+
             <div className="bg-white rounded-xl p-4 border border-blue-100">
               <div className="flex items-start justify-between mb-3">
                 <h3 className="text-lg font-bold text-slate-900">{complaint.title}</h3>
-                <span className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                  complaint.severity >= 4 ? 'bg-red-100 text-red-700 border-red-200' :
-                  complaint.severity >= 3 ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                  'bg-yellow-100 text-yellow-700 border-yellow-200'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-bold border ${complaint.severity >= 4 ? 'bg-red-100 text-red-700 border-red-200' :
+                    complaint.severity >= 3 ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                      'bg-yellow-100 text-yellow-700 border-yellow-200'
+                  }`}>
                   Severity {complaint.severity}/5
                 </span>
               </div>
-              
+
               <p className="text-slate-700 mb-4 leading-relaxed">{complaint.description}</p>
-              
+
               <div className="flex flex-wrap gap-4 text-sm text-slate-600">
                 <div className="flex items-center gap-1">
                   <MapPin size={14} />
@@ -248,7 +247,7 @@ export default function TenderDetailPage() {
                   {tender.documentUrls.map((url, index) => {
                     const filename = url.split('/').pop() || `document-${index + 1}`;
                     const extension = filename.split('.').pop()?.toLowerCase();
-                    
+
                     return (
                       <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition group">
                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
