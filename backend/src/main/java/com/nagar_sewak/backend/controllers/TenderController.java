@@ -50,7 +50,20 @@ public class TenderController {
 
     // POST /tenders/{id}/accept - Admin accepts a tender
     @PostMapping("/{tenderId}/accept")
-    public ResponseEntity<?> acceptTender(@PathVariable Long tenderId) {
+    public ResponseEntity<?> acceptTender(
+            @PathVariable Long tenderId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        // Check if user has admin role
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || 
+                                auth.getAuthority().equals("ROLE_SUPER_ADMIN"));
+        
+        if (!isAdmin) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                HttpStatus.FORBIDDEN, "Only administrators can accept tenders");
+        }
+        
         tenderService.acceptTender(tenderId);
         return ResponseEntity.ok(Map.of("message", "Tender accepted and project created"));
     }

@@ -173,48 +173,53 @@ public class ProjectController {
 
         Project savedProject = repo.save(project);
 
-        // Check if this progress update corresponds to a milestone
-        if (List.of(25, 50, 75, 100).contains(progress)) {
-            try {
-                // Find or create milestone to record this achievement
-                com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
-                    projectService.milestoneRepo;
-                
-                com.nagar_sewak.backend.entities.ProjectMilestone milestone = 
-                    milestoneRepo.findByProjectIdAndPercentage(id, progress)
-                        .orElseGet(() -> {
-                            com.nagar_sewak.backend.entities.ProjectMilestone newMilestone = 
-                                com.nagar_sewak.backend.entities.ProjectMilestone.builder()
-                                    .project(savedProject)
-                                    .percentage(progress)
-                                    .status("COMPLETED")
-                                    .build();
-                            return milestoneRepo.save(newMilestone);
-                        });
+        // Create a milestone record for EVERY progress update to maintain history
+        try {
+            com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
+                projectService.milestoneRepo;
+            
+            // Create a new milestone record for this progress update
+            com.nagar_sewak.backend.entities.ProjectMilestone progressRecord = 
+                com.nagar_sewak.backend.entities.ProjectMilestone.builder()
+                    .project(savedProject)
+                    .percentage(progress)
+                    .status("COMPLETED")
+                    .notes(notes)
+                    .completedAt(java.time.LocalDateTime.now())
+                    .updatedBy(userDetails.getUsername())
+                    .build();
 
-                // Update milestone details if they differ (ensure it's marked completed)
-                if (!"COMPLETED".equals(milestone.getStatus())) {
-                    milestone.setStatus("COMPLETED");
-                    milestone.setCompletedAt(java.time.LocalDateTime.now());
-                    milestone.setUpdatedBy(userDetails.getUsername());
-                    if (notes != null && !notes.isEmpty()) {
-                        milestone.setNotes(notes);
+            // Handle photo URLs for the milestone
+            if (photos != null && !photos.isEmpty()) {
+                java.util.List<String> photoFilenames = new java.util.ArrayList<>();
+                for (org.springframework.web.multipart.MultipartFile photo : photos) {
+                    String filename = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
+                    photoFilenames.add(filename);
+                    
+                    try {
+                        Thread.sleep(10); // Ensure unique timestamps
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
-                    milestoneRepo.save(milestone);
                 }
+                progressRecord.setPhotoUrls(String.join(",", photoFilenames));
+            }
 
-                // Trigger notification event
+            milestoneRepo.save(progressRecord);
+
+            // Also trigger notification event for major milestones
+            if (List.of(25, 50, 75, 100).contains(progress)) {
                 org.springframework.context.ApplicationEventPublisher eventPublisher = 
                     projectService.eventPublisher;
                 if (eventPublisher != null) {
                     eventPublisher.publishEvent(new com.nagar_sewak.backend.events.ProjectMilestoneCompletedEvent(
-                        this, savedProject, milestone));
+                        this, savedProject, progressRecord));
                 }
-            } catch (Exception e) {
-                // Log but don't fail the request if notification fails
-                System.err.println("Failed to process milestone notification: " + e.getMessage());
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            // Log but don't fail the request if milestone creation fails
+            System.err.println("Failed to create progress milestone: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return ResponseEntity.ok(savedProject);
@@ -312,6 +317,84 @@ public class ProjectController {
             "milestone", milestone,
             "project", project
         ));
+    }
+
+    @GetMapping("/{id}/progress-history")
+    public ResponseEntity<List<java.util.Map<String, Object>>> getProgressHistory(@PathVariable Long id) {
+        Project project = repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        java.util.List<java.util.Map<String, Object>> progressHistory = new java.util.ArrayList<>();
+
+        // Get milestones
+        com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
+            projectService.milestoneRepo;
+        List<com.nagar_sewak.backend.entities.ProjectMilestone> milestones = 
+            milestoneRepo.findByProjectIdOrderByPercentageAsc(id);
+
+        // Convert milestones to progress history format
+        for (com.nagar_sewak.backend.entities.ProjectMilestone milestone : milestones) {
+            java.util.Map<String, Object> historyItem = new java.util.HashMap<>();
+            historyItem.put("id", milestone.getId());
+            historyItem.put("percentage", milestone.getPercentage());
+            historyItem.put("status", milestone.getStatus());
+            historyItem.put("notes", milestone.getNotes());
+            historyItem.put("photoUrls", milestone.getPhotoUrls() != null ? 
+                java.util.Arrays.asList(milestone.getPhotoUrls().split(",")) : 
+                java.util.Collections.emptyList());
+            historyItem.put("updatedAt", milestone.getCompletedAt() != null ? 
+                milestone.getCompletedAt() : milestone.getCreatedAt());
+            historyItem.put("updatedBy", milestone.getUpdatedBy());
+            historyItem.put("type", "milestone");
+            progressHistory.add(historyItem);
+        }
+
+        // Add current project state as the latest update if it has progress
+        if (project.getProgressPercentage() != null && project.getProgressPercentage() > 0) {
+            java.util.Map<String, Object> currentState = new java.util.HashMap<>();
+            currentState.put("id", "current-" + project.getId());
+            currentState.put("percentage", project.getProgressPercentage());
+            currentState.put("status", project.getStatus());
+            currentState.put("notes", project.getProgressNotes());
+            
+            // Parse progress photos
+            java.util.List<String> photoList = new java.util.ArrayList<>();
+            if (project.getProgressPhotos() != null && !project.getProgressPhotos().isEmpty()) {
+                String[] photos = project.getProgressPhotos().split(",");
+                for (String photo : photos) {
+                    if (photo.trim().startsWith("/uploads/")) {
+                        // Extract just the filename from the full path
+                        String filename = photo.trim().substring(photo.lastIndexOf("/") + 1);
+                        photoList.add(filename);
+                    } else if (!photo.trim().isEmpty()) {
+                        photoList.add(photo.trim());
+                    }
+                }
+            }
+            currentState.put("photoUrls", photoList);
+            currentState.put("updatedAt", project.getUpdatedAt());
+            currentState.put("updatedBy", "Contractor"); // You might want to store actual user info
+            currentState.put("type", "progress");
+            
+            // Only add if it's not already covered by a milestone
+            boolean alreadyExists = milestones.stream()
+                .anyMatch(m -> m.getPercentage().equals(project.getProgressPercentage()));
+            if (!alreadyExists) {
+                progressHistory.add(currentState);
+            }
+        }
+
+        // Sort by date (most recent first)
+        progressHistory.sort((a, b) -> {
+            java.time.LocalDateTime dateA = (java.time.LocalDateTime) a.get("updatedAt");
+            java.time.LocalDateTime dateB = (java.time.LocalDateTime) b.get("updatedAt");
+            if (dateA == null && dateB == null) return 0;
+            if (dateA == null) return 1;
+            if (dateB == null) return -1;
+            return dateB.compareTo(dateA);
+        });
+
+        return ResponseEntity.ok(progressHistory);
     }
 
     @GetMapping("/{id}/milestones")
