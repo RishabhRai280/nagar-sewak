@@ -4,7 +4,7 @@ export function getRoleBasedDashboardUrl(): string {
   const user = UserStore.get();
   
   if (!user) {
-    return '/auth/login';
+    return '/login';
   }
 
   const hasAdminAccess = user.roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');

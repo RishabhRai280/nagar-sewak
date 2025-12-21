@@ -597,6 +597,53 @@ export async function fetchProjectById(projectId: number): Promise<ProjectDetail
   return request<ProjectDetail>(`/projects/${projectId}`, { method: 'GET' }, true);
 }
 
+export interface ProgressHistoryItem {
+  id: number | string;
+  percentage: number;
+  status: string;
+  notes: string | null;
+  photoUrls: string[];
+  updatedAt: string;
+  updatedBy: string | null;
+  type: 'milestone' | 'progress';
+}
+
+export interface Milestone {
+  id: number;
+  percentage: number;
+  notes: string | null;
+  photoUrls: string[] | string; // Can be array or comma-separated string
+  status: string;
+  completedAt: string | null;
+  updatedBy: string | null;
+  createdAt?: string;
+}
+
+export async function fetchProgressHistory(projectId: number): Promise<ProgressHistoryItem[]> {
+  return request<ProgressHistoryItem[]>(`/projects/${projectId}/progress-history`, { method: 'GET' }, true);
+}
+
+export async function fetchMilestones(projectId: number): Promise<Milestone[]> {
+  return request<Milestone[]>(`/projects/${projectId}/milestones`, { method: 'GET' }, true);
+}
+
+export async function downloadProgressReport(projectId: number): Promise<Blob> {
+  const token = Token.get();
+  if (!token) throw new Error('Authentication required');
+  
+  const response = await fetch(`${API_BASE_URL}/projects/${projectId}/progress-report`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to download progress report');
+  }
+
+  return response.blob();
+}
+
 // ===================== CONTRACTOR MANAGEMENT =====================
 
 export interface ContractorProfile {

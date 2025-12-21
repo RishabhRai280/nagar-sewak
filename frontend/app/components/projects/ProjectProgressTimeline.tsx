@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Clock, User, Camera, Download, Calendar, FileText } from 'lucide-react';
+import { fetchProgressHistory, fetchMilestones, downloadProgressReport } from '@/lib/api/api';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 interface Milestone {
   id: number;
@@ -38,37 +40,68 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
   const [viewMode, setViewMode] = useState<'timeline' | 'history'>('timeline');
 
   useEffect(() => {
-    fetchProgressHistory();
+    loadProgressHistory();
   }, [projectId]);
 
-  const fetchProgressHistory = async () => {
+  const loadProgressHistory = async () => {
     try {
-      // Use the new progress history endpoint
-      const response = await fetch(`http://localhost:8080/projects/${projectId}/progress-history`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch progress history');
-      }
-      
-      const data = await response.json();
+      setLoading(true);
+      // Use the API utility function
+      const data = await fetchProgressHistory(projectId);
       
       // Convert the data to our expected format
-      const progressUpdates: ProgressUpdate[] = data.map((item: any) => ({
-        id: item.id,
-        percentage: item.percentage,
-        status: item.status,
-        notes: item.notes || '',
-        photoUrls: item.photoUrls || [],
-        updatedAt: item.updatedAt,
-        updatedBy: item.updatedBy || 'System',
-        type: item.type || 'progress'
-      }));
+      const progressUpdates: ProgressUpdate[] = data.map((item) => {
+        // Handle date parsing - backend may return LocalDateTime as string or object
+        let updatedAtStr = '';
+        if (typeof item.updatedAt === 'string') {
+          updatedAtStr = item.updatedAt;
+        } else if (item.updatedAt && typeof item.updatedAt === 'object') {
+          // Handle LocalDateTime object format from backend
+          const dt = item.updatedAt as any;
+          if (dt.year && dt.month && dt.dayOfMonth) {
+            const month = String(dt.monthValue || dt.month).padStart(2, '0');
+            const day = String(dt.dayOfMonth || dt.day).padStart(2, '0');
+            const hour = String(dt.hour || 0).padStart(2, '0');
+            const minute = String(dt.minute || 0).padStart(2, '0');
+            const second = String(dt.second || 0).padStart(2, '0');
+            updatedAtStr = `${dt.year}-${month}-${day}T${hour}:${minute}:${second}`;
+          } else {
+            updatedAtStr = new Date().toISOString();
+          }
+        } else {
+          updatedAtStr = new Date().toISOString();
+        }
+
+        // Handle photoUrls - could be array or comma-separated string
+        let photoUrlsArray: string[] = [];
+        if (Array.isArray(item.photoUrls)) {
+          photoUrlsArray = item.photoUrls;
+        } else if (typeof item.photoUrls === 'string' && item.photoUrls.trim()) {
+          photoUrlsArray = item.photoUrls.split(',').map(p => p.trim()).filter(p => p);
+        }
+
+        return {
+          id: item.id,
+          percentage: item.percentage,
+          status: item.status,
+          notes: item.notes || '',
+          photoUrls: photoUrlsArray,
+          updatedAt: updatedAtStr,
+          updatedBy: item.updatedBy || 'System',
+          type: item.type || 'progress'
+        };
+      });
 
       setProgressHistory(progressUpdates);
+      
+      // Debug: Log photo URLs to see what we're getting
+      if (progressUpdates.length > 0) {
+        console.log('Progress updates photo URLs:', progressUpdates.map(u => ({ 
+          id: u.id, 
+          photoUrls: u.photoUrls,
+          type: u.type 
+        })));
+      }
       
       // Also set milestones for timeline view
       const milestoneData = progressUpdates.filter(item => item.type === 'milestone');
@@ -87,22 +120,18 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
       console.error('Error fetching progress history:', error);
       // Fallback to milestones endpoint
       try {
-        const milestonesResponse = await fetch(`http://localhost:8080/projects/${projectId}/milestones`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const milestonesData = await milestonesResponse.json();
+        const milestonesData = await fetchMilestones(projectId);
         setMilestones(milestonesData);
         
         // Convert milestones to progress updates format for history view
-        const progressUpdates: ProgressUpdate[] = milestonesData.map((milestone: Milestone) => ({
+        const progressUpdates: ProgressUpdate[] = milestonesData.map((milestone) => ({
           id: milestone.id,
           percentage: milestone.percentage,
           status: milestone.status,
           notes: milestone.notes || '',
-          photoUrls: milestone.photoUrls || [],
-          updatedAt: milestone.completedAt || new Date().toISOString(),
+          photoUrls: Array.isArray(milestone.photoUrls) ? milestone.photoUrls : 
+                     (milestone.photoUrls ? String(milestone.photoUrls).split(',') : []),
+          updatedAt: milestone.completedAt || milestone.createdAt || new Date().toISOString(),
           updatedBy: milestone.updatedBy || 'System',
           type: 'milestone' as const
         }));
@@ -110,6 +139,8 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
         setProgressHistory(progressUpdates);
       } catch (fallbackError) {
         console.error('Error fetching milestones fallback:', fallbackError);
+        setProgressHistory([]);
+        setMilestones([]);
       }
     } finally {
       setLoading(false);
@@ -139,34 +170,52 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
   };
 
   const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return {
-      date: date.toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      }),
-      time: date.toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      })
-    };
+    try {
+      // Handle various date formats from backend
+      let date: Date;
+      if (typeof dateString === 'string') {
+        // Handle ISO format or LocalDateTime string format
+        date = new Date(dateString);
+        // If date is invalid, try parsing as LocalDateTime format
+        if (isNaN(date.getTime()) && dateString.includes('T')) {
+          date = new Date(dateString + 'Z'); // Add Z for UTC if missing
+        }
+        if (isNaN(date.getTime())) {
+          date = new Date(); // Fallback to current date
+        }
+      } else {
+        date = new Date();
+      }
+
+      return {
+        date: date.toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }),
+        time: date.toLocaleTimeString('en-IN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        })
+      };
+    } catch (error) {
+      return {
+        date: 'Invalid date',
+        time: ''
+      };
+    }
   };
 
-  const downloadProgressReport = async () => {
+  const handleDownloadReport = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/projects/${projectId}/progress-report`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const blob = await response.blob();
+      const blob = await downloadProgressReport(projectId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `Project_${projectId}_Progress_Report.pdf`;
       a.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading report:', error);
     }
@@ -213,7 +262,7 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
           </div>
           
           <button
-            onClick={downloadProgressReport}
+            onClick={handleDownloadReport}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
           >
             <Download size={16} />
@@ -301,20 +350,36 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
                       </span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {milestone.photoUrls.map((photo, photoIndex) => (
-                        <div
-                          key={photoIndex}
-                          className="relative h-24 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition border border-slate-200"
-                          onClick={() => setSelectedPhoto(`http://localhost:8080/uploads/projects/${photo}`)}
-                        >
-                          <Image
-                            src={`http://localhost:8080/uploads/projects/${photo}`}
-                            alt={`Progress photo ${photoIndex + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ))}
+                      {milestone.photoUrls.map((photo, photoIndex) => {
+                        const getImageUrl = () => {
+                          // Handle both full paths and filenames
+                          if (photo.startsWith('http')) return photo;
+                          if (photo.startsWith('/uploads/')) return `${API_BASE_URL}${photo}`;
+                          return `${API_BASE_URL}/uploads/projects/${photo}`;
+                        };
+                        const imageUrl = getImageUrl();
+                        return (
+                          <div
+                            key={photoIndex}
+                            className="relative h-24 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition border border-slate-200 bg-slate-100"
+                            onClick={() => setSelectedPhoto(imageUrl)}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={`Progress photo ${photoIndex + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Failed to load image:', imageUrl, e);
+                                // Show placeholder on error
+                                e.currentTarget.style.display = 'none';
+                              }}
+                              onLoad={() => {
+                                console.log('Successfully loaded image:', imageUrl);
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -404,20 +469,36 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
                   {update.photoUrls && update.photoUrls.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-slate-200">
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                        {update.photoUrls.map((photo, photoIndex) => (
-                          <div
-                            key={photoIndex}
-                            className="relative h-16 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition border border-slate-200"
-                            onClick={() => setSelectedPhoto(`http://localhost:8080/uploads/projects/${photo}`)}
-                          >
-                            <Image
-                              src={`http://localhost:8080/uploads/projects/${photo}`}
-                              alt={`Progress photo ${photoIndex + 1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ))}
+                        {update.photoUrls.map((photo, photoIndex) => {
+                          const getImageUrl = () => {
+                            // Handle both full paths and filenames
+                            if (photo.startsWith('http')) return photo;
+                            if (photo.startsWith('/uploads/')) return `${API_BASE_URL}${photo}`;
+                            return `${API_BASE_URL}/uploads/projects/${photo}`;
+                          };
+                          const imageUrl = getImageUrl();
+                          return (
+                            <div
+                              key={photoIndex}
+                              className="relative h-16 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition border border-slate-200 bg-slate-100"
+                              onClick={() => setSelectedPhoto(imageUrl)}
+                            >
+                              <img
+                                src={imageUrl}
+                                alt={`Progress photo ${photoIndex + 1}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  console.error('Failed to load image:', imageUrl, e);
+                                  // Show placeholder on error
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                                onLoad={() => {
+                                  console.log('Successfully loaded image:', imageUrl);
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -441,12 +522,13 @@ export default function ProjectProgressTimeline({ projectId }: ProjectProgressTi
             >
               ×
             </button>
-            <Image
-              src={selectedPhoto}
+            <img
+              src={selectedPhoto || ''}
               alt="Full size"
-              width={1200}
-              height={800}
               className="max-w-full max-h-[90vh] object-contain"
+              onError={(e) => {
+                console.error('Failed to load modal image:', e.currentTarget.src);
+              }}
             />
           </div>
         </div>
