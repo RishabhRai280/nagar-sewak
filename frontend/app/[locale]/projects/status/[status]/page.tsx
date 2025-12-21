@@ -4,101 +4,38 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, BarChart3, Search, MapPin, Calendar, DollarSign, Users, ArrowRight, Filter } from "lucide-react";
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  budget: number;
-  status: string;
-  lat?: number;
-  lng?: number;
-  contractorId?: number;
-  contractor?: {
-    id: number;
-    companyName: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-  progressPercentage?: number;
-}
+import { ArrowLeft, BarChart3, Search, MapPin, Calendar, DollarSign, Users, ArrowRight } from "lucide-react";
+import { fetchProjectsByStatus, ProjectData } from "@/lib/api/api";
 
 export default function ProjectStatusPage() {
   const params = useParams();
   const router = useRouter();
   const status = params.status as string;
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const statusDisplayName = status?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
 
   useEffect(() => {
-    // Mock data based on status - replace with actual API call
-    const mockProjects: Project[] = [
-      {
-        id: 1,
-        title: "Road Infrastructure Development",
-        description: "Upgrading main road infrastructure in downtown area",
-        budget: 5000000,
-        status: "In Progress",
-        lat: 21.1458,
-        lng: 79.0882,
-        contractor: { id: 1, companyName: "ABC Construction" },
-        createdAt: "2025-01-15",
-        updatedAt: "2025-01-20",
-        progressPercentage: 65
-      },
-      {
-        id: 4,
-        title: "Bridge Construction Project",
-        description: "Building new bridge over the river",
-        budget: 8000000,
-        status: "In Progress",
-        lat: 21.1658,
-        lng: 79.1082,
-        contractor: { id: 3, companyName: "Bridge Masters Ltd" },
-        createdAt: "2025-01-12",
-        updatedAt: "2025-01-18",
-        progressPercentage: 30
-      },
-      {
-        id: 2,
-        title: "Water Supply System Upgrade",
-        description: "Installing new water supply pipelines",
-        budget: 3000000,
-        status: "Completed",
-        lat: 21.1558,
-        lng: 79.0982,
-        contractor: { id: 2, companyName: "XYZ Infrastructure" },
-        createdAt: "2025-01-10",
-        updatedAt: "2025-01-25",
-        progressPercentage: 100
-      },
-      {
-        id: 3,
-        title: "Public Park Development",
-        description: "Creating new recreational park with modern facilities",
-        budget: 2000000,
-        status: "Planning",
-        lat: 21.1358,
-        lng: 79.0782,
-        createdAt: "2025-01-20",
-        updatedAt: "2025-01-22",
-        progressPercentage: 0
+    const loadProjects = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchProjectsByStatus(status);
+        setProjects(data);
+      } catch (err: any) {
+        console.error("Failed to fetch projects:", err);
+        setError("Failed to load projects. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    // Filter projects by status
-    const filteredByStatus = mockProjects.filter(project =>
-      project.status.toLowerCase().replace(/ /g, '-') === status
-    );
-
-    setTimeout(() => {
-      setProjects(filteredByStatus);
-      setLoading(false);
-    }, 1000);
+    if (status) {
+      loadProjects();
+    }
   }, [status]);
 
   const filteredProjects = projects.filter(project =>
@@ -138,6 +75,21 @@ export default function ProjectStatusPage() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 pt-20 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 font-bold text-lg mb-4">{error}</p>
+          <Link href="/dashboard/admin/projects">
+            <button className="px-4 py-2 bg-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-300 transition">
+              Back to Dashboard
+            </button>
+          </Link>
         </div>
       </div>
     );
@@ -224,7 +176,7 @@ export default function ProjectStatusPage() {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center gap-2 text-sm text-slate-600">
                     <DollarSign size={16} className="text-emerald-600" />
-                    <span className="font-semibold">₹{project.budget.toLocaleString()}</span>
+                    <span className="font-semibold">₹{Number(project.budget).toLocaleString()}</span>
                   </div>
 
                   {project.contractor && (
@@ -243,7 +195,7 @@ export default function ProjectStatusPage() {
 
                   <div className="flex items-center gap-2 text-sm text-slate-600">
                     <Calendar size={16} className="text-purple-600" />
-                    <span>Updated {new Date(project.updatedAt).toLocaleDateString()}</span>
+                    <span>Updated {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'N/A'}</span>
                   </div>
                 </div>
 

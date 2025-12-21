@@ -47,9 +47,11 @@ export default function CitizenAnalyticsPage() {
   const complaints: DashboardComplaint[] = (userData?.complaints ?? []) as DashboardComplaint[];
 
   const stats = useMemo(() => {
-    const pending = complaints.filter(c => c.status?.toLowerCase() === "pending").length;
-    const inProgress = complaints.filter(c => c.status?.toLowerCase() === "in_progress").length;
-    const resolved = complaints.filter(c => c.status?.toLowerCase() === "resolved").length;
+    const normalize = (s: string | null | undefined) => (s || '').toLowerCase().trim().replace('_', ' ');
+
+    const pending = complaints.filter(c => normalize(c.status) === "pending").length;
+    const inProgress = complaints.filter(c => normalize(c.status) === "in progress").length;
+    const resolved = complaints.filter(c => normalize(c.status) === "resolved").length;
     const highPriority = complaints.filter(c => c.severity >= 4).length;
 
     return {
@@ -135,7 +137,7 @@ export default function CitizenAnalyticsPage() {
 
             <div className="flex-1 flex items-end justify-between gap-4 h-64 border-b border-slate-200 pb-2 px-2">
               {/* Pending Bar */}
-              <div className="flex flex-col items-center gap-2 group w-full">
+              <div className="flex flex-col items-center justify-end gap-2 group w-full h-full">
                 <div className="text-xs font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity mb-1">{stats.pending}</div>
                 <div
                   className="w-full bg-amber-400 rounded-t-sm hover:bg-amber-500 transition-all relative group-hover:scale-y-105 origin-bottom shadow-sm"
@@ -145,7 +147,7 @@ export default function CitizenAnalyticsPage() {
               </div>
 
               {/* In Progress Bar */}
-              <div className="flex flex-col items-center gap-2 group w-full">
+              <div className="flex flex-col items-center justify-end gap-2 group w-full h-full">
                 <div className="text-xs font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity mb-1">{stats.inProgress}</div>
                 <div
                   className="w-full bg-blue-500 rounded-t-sm hover:bg-blue-600 transition-all relative group-hover:scale-y-105 origin-bottom shadow-sm"
@@ -155,7 +157,7 @@ export default function CitizenAnalyticsPage() {
               </div>
 
               {/* Resolved Bar */}
-              <div className="flex flex-col items-center gap-2 group w-full">
+              <div className="flex flex-col items-center justify-end gap-2 group w-full h-full">
                 <div className="text-xs font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity mb-1">{stats.resolved}</div>
                 <div
                   className="w-full bg-[#1e3a8a] rounded-t-sm hover:bg-blue-900 transition-all relative group-hover:scale-y-105 origin-bottom shadow-sm"

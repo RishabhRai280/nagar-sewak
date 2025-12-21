@@ -673,6 +673,7 @@
         "loading": "Loading Contractors...",
         "performance": "Contractor Performance",
         "viewDetails": "View Details",
+        "viewAll": "View All",
         "stats": {
           "total": "Total Contractors",
           "totalDesc": "Registered in system",
@@ -689,7 +690,9 @@
           "status": "Status"
         },
         "noFlagged": "No flagged contractors",
-        "noFlaggedDesc": "All registered contractors are operating within normal compliance parameters."
+        "noFlaggedDesc": "All registered contractors are operating within normal compliance parameters.",
+        "noContractors": "No contractors found",
+        "noContractorsDesc": "No contractors are currently registered in the system."
       },
       "tendersPage": {
         "title": "Tender Management",

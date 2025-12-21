@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import com.nagar_sewak.backend.entities.Role;
+
 import java.util.List;
 import java.util.Map;
 
@@ -56,8 +58,8 @@ public class TenderController {
         
         // Check if user has admin role
         boolean isAdmin = userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || 
-                                auth.getAuthority().equals("ROLE_SUPER_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals(Role.ADMIN.name()) || 
+                                auth.getAuthority().equals(Role.SUPER_ADMIN.name()));
         
         if (!isAdmin) {
             throw new org.springframework.web.server.ResponseStatusException(

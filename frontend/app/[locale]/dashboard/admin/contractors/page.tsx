@@ -163,38 +163,59 @@ export default function AdminContractorsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {data?.flaggedContractors?.map((c, i) => (
-                  <tr key={i} className="hover:bg-slate-50 transition">
-                    <td className="px-6 py-4">
-                      <Link href={`/contractors/${c.id}`} className="font-bold text-[#1e3a8a] hover:underline transition">
-                        {c.companyName}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-slate-600 font-medium">{c.licenseNo}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded w-fit border border-yellow-100">
-                        <span className="font-bold">{c.avgRating.toFixed(1)}</span>
-                        <Star className="text-yellow-500 fill-yellow-500" size={12} />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-slate-700 font-bold">
-                      {/* Calculate active projects for this flagged contractor if possible, else default to 'Check' */}
-                      <Link href={`/contractors/${c.id}`} className="text-blue-600 hover:underline text-xs">{t('viewDetails')}</Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase tracking-wide border border-red-200">
-                        {t('stats.flagged')}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {/* Switch to allContractors to show everyone, not just flagged ones */}
+                {allContractors.map((c, i) => {
+                  const isFlagged = data?.flaggedContractors?.some(fc => fc.id === c.id);
+                  // Check for active projects (In Progress or Assigned)
+                  const pendingProjects = c.projects?.filter(p => p.status === 'In Progress' || p.status === 'Assigned') || [];
+                  const isActive = pendingProjects.length > 0;
+
+                  return (
+                    <tr key={c.id} className="hover:bg-slate-50 transition">
+                      <td className="px-6 py-4">
+                        <Link href={`/contractors/${c.id}`} className="font-bold text-[#1e3a8a] text-sm hover:underline transition">
+                          {c.companyName}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-slate-600 font-medium">{c.licenseNo}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded w-fit border border-yellow-100">
+                          <span className="font-bold text-xs">{c.avgRating.toFixed(1)}</span>
+                          <Star className="text-yellow-500 fill-yellow-500" size={10} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700 font-bold text-xs">
+                        {pendingProjects.length > 0 ? (
+                          <span className="text-emerald-700">{pendingProjects.length} Active</span>
+                        ) : (
+                          <span className="text-slate-400">0 Active</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {isFlagged ? (
+                          <span className="px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase tracking-wide border border-red-200">
+                            {t('stats.flagged')}
+                          </span>
+                        ) : isActive ? (
+                          <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wide border border-emerald-200">
+                            {t('stats.active')}
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-wide border border-blue-100">
+                            Verified
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-            {(!data?.flaggedContractors?.length) && (
+            {(!allContractors.length) && (
               <div className="text-center py-16 text-slate-400 bg-slate-50/50">
                 <Users className="mx-auto mb-3 opacity-50" size={48} />
-                <p className="font-bold text-lg">{t('noFlagged')}</p>
-                <p className="text-sm mt-1 max-w-sm mx-auto">{t('noFlaggedDesc')}</p>
+                <p className="font-bold text-lg">{t('noContractors')}</p>
+                <p className="text-sm mt-1 max-w-sm mx-auto">{t('noContractorsDesc')}</p>
               </div>
             )}
           </div>

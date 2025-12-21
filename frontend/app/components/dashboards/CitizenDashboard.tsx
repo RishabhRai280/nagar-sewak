@@ -66,9 +66,11 @@ export default function CitizenDashboardComponent() {
   const complaints: DashboardComplaint[] = (userData?.complaints ?? []) as DashboardComplaint[];
 
   const stats = useMemo(() => {
-    const pending = complaints.filter(c => c.status?.toLowerCase() === "pending").length;
-    const inProgress = complaints.filter(c => c.status?.toLowerCase() === "in_progress").length;
-    const resolved = complaints.filter(c => c.status?.toLowerCase() === "resolved").length;
+    const normalize = (s: string | null | undefined) => (s || '').toLowerCase().trim().replace('_', ' ');
+
+    const pending = complaints.filter(c => normalize(c.status) === "pending").length;
+    const inProgress = complaints.filter(c => normalize(c.status) === "in progress").length;
+    const resolved = complaints.filter(c => normalize(c.status) === "resolved").length;
     const highPriority = complaints.filter(c => c.severity >= 4).length;
 
     return {
@@ -342,14 +344,14 @@ function StatCard({ label, value, icon: Icon, color, delay, suffix = "" }: any) 
 }
 
 function StatusBadge({ status }: { status?: string | null }) {
-  const s = status?.toLowerCase() || 'pending';
+  const s = (status || 'pending').toLowerCase().replace('_', ' ');
   const styles = s === 'resolved' ? 'bg-emerald-600 text-white' :
-    s === 'in_progress' ? 'bg-blue-600 text-white' :
+    s === 'in progress' ? 'bg-blue-600 text-white' :
       'bg-amber-500 text-white';
 
   return (
     <span className={`px-2 py-1 rounded text-[10px] font-bold border-none uppercase tracking-wider ${styles}`}>
-      {s.replace('_', ' ')}
+      {s}
     </span>
   )
 }
