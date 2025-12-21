@@ -82,21 +82,21 @@ export default function PMAYPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            
+
             {/* Overview */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <h2 className="text-2xl font-bold text-slate-900 mb-4">Scheme Overview</h2>
               <p className="text-slate-600 leading-relaxed mb-4">
-                Pradhan Mantri Awas Yojana (PMAY) is a flagship mission of the Government of India to provide affordable housing to the urban and rural poor. The scheme aims to provide pucca houses to all eligible families by 2022, now extended to 2024.
+                Pradhan Mantri Awas Yojana (PMAY) is a flagship mission of the Government of India to provide affordable housing to the urban and rural poor. The scheme aims to provide pucca houses to all eligible families by 2022, now extended to 2025.
               </p>
               <p className="text-slate-600 leading-relaxed mb-4">
                 Under this scheme, the government provides interest subsidy on home loans to make housing affordable for economically weaker sections, lower income groups, and middle income groups.
               </p>
-              
+
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                 <h3 className="font-semibold text-orange-800 mb-2">Mission Objective</h3>
                 <p className="text-orange-700 text-sm">
-                  "Housing for All by 2024" - To ensure every family has access to adequate, safe, and affordable housing with basic amenities.
+                  "Housing for All by 2025" - To ensure every family has access to adequate, safe, and affordable housing with basic amenities.
                 </p>
               </div>
             </div>
@@ -112,7 +112,7 @@ export default function PMAYPage() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h3 className="font-semibold text-blue-800 mb-2">Special Provisions</h3>
                 <ul className="text-blue-700 text-sm space-y-1">
@@ -201,32 +201,32 @@ export default function PMAYPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            
+
             {/* Apply Now Card */}
-<div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-xl p-6">
-  <h3 className="text-xl font-bold mb-4">Apply for PMAY</h3>
-  <p className="text-orange-100 mb-6 text-sm">
-    Apply directly on the official government site for Pradhan Mantri Awas Yojana.
-  </p>
-  <a
-    href="https://pmaymis.gov.in/"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block w-full bg-white text-orange-600 text-center py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors"
-  >
-    <span className="flex items-center justify-center gap-2">
-      Apply Now <ExternalLink size={16} />
-    </span>
-  </a>
-  <a
-    href="https://pmaymis.gov.in/PMAYMIS2_2024/TrackApplication.aspx"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block w-full mt-3 border-2 border-white text-white text-center py-2 rounded-lg font-semibold hover:bg-white hover:text-orange-600 transition-colors text-sm"
-  >
-    Track Application Status
-  </a>
-</div>
+            <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-xl p-6">
+              <h3 className="text-xl font-bold mb-4">Apply for PMAY</h3>
+              <p className="text-orange-100 mb-6 text-sm">
+                Apply directly on the official government site for Pradhan Mantri Awas Yojana.
+              </p>
+              <a
+                href="https://pmaymis.gov.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-white text-orange-600 text-center py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  Apply Now <ExternalLink size={16} />
+                </span>
+              </a>
+              <a
+                href="https://pmaymis.gov.in/PMAYMIS2_2024/TrackApplication.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full mt-3 border-2 border-white text-white text-center py-2 rounded-lg font-semibold hover:bg-white hover:text-orange-600 transition-colors text-sm"
+              >
+                Track Application Status
+              </a>
+            </div>
 
 
 
@@ -282,38 +282,38 @@ export default function PMAYPage() {
             </div>
 
             {/* Related Links */}
-<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-  <h3 className="text-lg font-bold text-slate-900 mb-4">Useful Links</h3>
-  <div className="space-y-2">
-    <a
-      href="https://pmaymis.gov.in/PMAYMIS2_2024/PDF/Operational_Guidelines_of_PMAY-U.pdf"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
-    >
-      <Download size={14} />
-      PMAY Operational Guidelines (PDF)
-    </a>
-    <a
-      href="https://pmaymis.gov.in/PMAYMIS2_2024/Open/Find_Ben_Fund_Released.aspx"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
-    >
-      <FileText size={14} />
-      Beneficiary Funds Released
-    </a>
-    <a
-      href="https://pmayuclap.gov.in/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
-    >
-      <FileText size={14} />
-      CLSS Awas Portal (Subsidy Status)
-    </a>
-  </div>
-</div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Useful Links</h3>
+              <div className="space-y-2">
+                <a
+                  href="https://pmaymis.gov.in/PMAYMIS2_2024/PDF/Operational_Guidelines_of_PMAY-U.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  <Download size={14} />
+                  PMAY Operational Guidelines (PDF)
+                </a>
+                <a
+                  href="https://pmaymis.gov.in/PMAYMIS2_2024/Open/Find_Ben_Fund_Released.aspx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  <FileText size={14} />
+                  Beneficiary Funds Released
+                </a>
+                <a
+                  href="https://pmayuclap.gov.in/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  <FileText size={14} />
+                  CLSS Awas Portal (Subsidy Status)
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -47,21 +47,21 @@ export default function GovLandingPage() {
   useEffect(() => {
     // Set current time to avoid hydration mismatch
     setCurrentTime(new Date().toLocaleTimeString());
-    
+
     // Update time every minute
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 60000);
-    
+
     if (Token.get()) {
       const user = UserStore.get();
       let target = "/dashboard/citizen";
       let analytics = "/dashboard/citizen/reports";
-      
+
       if (user) {
         const hasAdminAccess = user.roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN');
         const isContractor = user.roles.includes('CONTRACTOR');
-        
+
         if (hasAdminAccess) {
           target = "/dashboard/admin";
           analytics = "/dashboard/admin"; // Admin dashboard has analytics built-in
@@ -70,7 +70,7 @@ export default function GovLandingPage() {
           analytics = "/dashboard/contractor"; // Contractor dashboard has analytics built-in
         }
       }
-      
+
       setCtaLink(target);
       setDashboardLink(target);
       setAnalyticsLink(analytics);
@@ -135,30 +135,30 @@ export default function GovLandingPage() {
 
   // Government Schemes
   const govSchemes = [
-    { 
-      title: "Pradhan Mantri Awas Yojana", 
-      category: "Housing", 
+    {
+      title: "Pradhan Mantri Awas Yojana",
+      category: "Housing",
       description: "Affordable housing for all",
       color: "bg-orange-500",
       link: "/schemes/pmay"
     },
-    { 
-      title: "Jan Aushadhi Scheme", 
-      category: "Healthcare", 
+    {
+      title: "Jan Aushadhi Scheme",
+      category: "Healthcare",
       description: "Generic medicines at small prices",
       color: "bg-green-500",
       link: "/schemes/jan-aushadhi"
     },
-    { 
-      title: "Swachh Bharat Mission", 
-      category: "Sanitation", 
+    {
+      title: "Swachh Bharat Mission",
+      category: "Sanitation",
       description: "Clean India initiative",
       color: "bg-blue-500",
       link: "/schemes/swachh-bharat"
     },
-    { 
-      title: "Ayushman Bharat", 
-      category: "Healthcare", 
+    {
+      title: "Ayushman Bharat",
+      category: "Healthcare",
       description: "Health insurance for all",
       color: "bg-purple-500",
       link: "/schemes/ayushman-bharat"
@@ -173,7 +173,7 @@ export default function GovLandingPage() {
       budget: 2500000,
       description: "Construction of a modern community center with multipurpose hall, library, and recreational facilities.",
       status: "OPEN",
-      createdAt: "2024-12-20T00:00:00"
+      createdAt: "2025-12-20T00:00:00"
     },
     {
       id: 2,
@@ -181,7 +181,7 @@ export default function GovLandingPage() {
       budget: 1500000,
       description: "Supply and installation of energy-efficient LED street lights across Zone A covering 200 locations.",
       status: "OPEN",
-      createdAt: "2024-12-18T00:00:00"
+      createdAt: "2025-12-18T00:00:00"
     },
     {
       id: 3,
@@ -189,7 +189,7 @@ export default function GovLandingPage() {
       budget: 5000000,
       description: "Comprehensive waste collection, transportation, and disposal services for residential areas.",
       status: "CLOSED",
-      createdAt: "2024-12-15T00:00:00"
+      createdAt: "2025-12-15T00:00:00"
     }
   ]);
   const [loading, setLoading] = useState(false);
@@ -226,20 +226,20 @@ export default function GovLandingPage() {
       <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white overflow-hidden min-h-screen">
         {/* Background Image */}
         <div className="absolute inset-0 opacity-20">
-          <img 
-            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" 
+          <img
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80"
             alt="Government Building Background"
             className="w-full h-full object-cover"
           />
         </div>
-        
+
         {/* Background Pattern Overlay */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
           }}></div>
         </div>
-        
+
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-blue-900/60"></div>
 
@@ -296,7 +296,7 @@ export default function GovLandingPage() {
                   <p className="text-blue-200 text-xs">Report civic issues with GPS location</p>
                 </div>
               </Link>
-              
+
               <Link href={dashboardLink}>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
                   <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -306,7 +306,7 @@ export default function GovLandingPage() {
                   <p className="text-blue-200 text-xs">Monitor complaint status in real-time</p>
                 </div>
               </Link>
-              
+
               <Link href={analyticsLink}>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
                   <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -316,7 +316,7 @@ export default function GovLandingPage() {
                   <p className="text-blue-200 text-xs">Access comprehensive dashboards</p>
                 </div>
               </Link>
-              
+
               <Link href="/services">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
                   <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -326,7 +326,7 @@ export default function GovLandingPage() {
                   <p className="text-blue-200 text-xs">Access government services digitally</p>
                 </div>
               </Link>
-              
+
               <Link href="/tenders">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
                   <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -336,7 +336,7 @@ export default function GovLandingPage() {
                   <p className="text-blue-200 text-xs">Browse procurement opportunities</p>
                 </div>
               </Link>
-              
+
               <Link href="/auth/login">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
                   <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -362,7 +362,7 @@ export default function GovLandingPage() {
               Real-time data from our civic engagement platform
             </p>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
               <div key={i} className="text-center group bg-white rounded-xl p-6 border border-slate-200 hover:shadow-lg transition-all">
@@ -385,7 +385,7 @@ export default function GovLandingPage() {
               </div>
             ))}
           </div>
-          
+
           {/* Additional Info */}
           <div className="mt-12 text-center">
             <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600">
@@ -461,7 +461,7 @@ export default function GovLandingPage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            
+
             {/* Enhanced Geographical View - Takes 2 columns */}
             <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
               <div className="p-6 border-b border-slate-200">
@@ -478,10 +478,10 @@ export default function GovLandingPage() {
                   </Link>
                 </div>
               </div>
-              
+
               {/* Enhanced Map Preview */}
               <HomeMapPreview />
-              
+
               <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50 border-t border-slate-200">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
@@ -506,7 +506,7 @@ export default function GovLandingPage() {
                 <h3 className="text-xl font-bold text-slate-900 mb-2">Latest Tenders</h3>
                 <p className="text-slate-600 text-sm">Procurement opportunities and government notifications</p>
               </div>
-              
+
               {loading ? (
                 <div className="p-6 text-center">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
@@ -519,18 +519,17 @@ export default function GovLandingPage() {
                       // Check if this is real API data or mock data
                       const isRealTender = tender.complaintId && tender.complaintId > 0;
                       const linkHref = isRealTender ? `/tenders/${tender.id}` : '/tenders';
-                      
+
                       return (
                         <Link key={tender.id || index} href={linkHref}>
                           <div className="p-4 hover:bg-slate-50 transition-colors cursor-pointer group">
                             <div className="flex justify-between items-start mb-2">
-                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                tender.status === 'OPEN' || tender.status === 'Active'
-                                  ? 'bg-green-100 text-green-800' 
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${tender.status === 'OPEN' || tender.status === 'Active'
+                                  ? 'bg-green-100 text-green-800'
                                   : tender.status === 'CLOSED' || tender.status === 'Closed'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
                                 {tender.status === 'OPEN' ? 'Active' : tender.status === 'CLOSED' ? 'Closed' : tender.status}
                               </span>
                             </div>
@@ -571,7 +570,7 @@ export default function GovLandingPage() {
                   )}
                 </div>
               )}
-              
+
               <div className="p-4 bg-slate-50 border-t border-slate-200 text-center">
                 <Link href="/tenders">
                   <button className="text-blue-600 font-semibold hover:text-blue-700 transition-colors text-sm flex items-center gap-1 mx-auto">
@@ -640,11 +639,11 @@ export default function GovLandingPage() {
 
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            
+
             {/* Contact Information */}
             <div>
               <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -775,7 +774,7 @@ export default function GovLandingPage() {
               </button>
             </Link>
           </div>
-          
+
           {/* Trust Indicators */}
           <div className="mt-12 flex flex-wrap justify-center gap-8 text-blue-200">
             <div className="flex items-center gap-2">

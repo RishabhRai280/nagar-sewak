@@ -34,121 +34,125 @@ public class DataSeeder {
     @EventListener
     @Transactional
     public void seed(ApplicationReadyEvent event) {
+        System.out.println("--- Starting Data Seeding Check ---");
+        
         // Check if tenders already exist to avoid duplicates
         if (tenderRepo.count() > 0) {
             System.out.println("Tenders already exist, skipping tender seeding");
-            return;
         }
         
-        // If no users exist, create all data
-        if (userRepo.count() == 0) {
-            System.out.println("--- Starting Data Seeding ---");
         String hashedPassword = passwordEncoder.encode("password");
 
-        // --- Users ---
-        User adminUser = createUser("admin", "admin@nagar.gov", "Govt Admin", hashedPassword, Set.of(Role.ADMIN, Role.SUPER_ADMIN));
-        User citizenUser = createUser("citizen", "citizen@public.org", "Active Citizen", hashedPassword, Set.of(Role.CITIZEN));
-        User citizenUser2 = createUser("citizen2", "citizen2@public.org", "Local Resident", hashedPassword, Set.of(Role.CITIZEN));
-        User citizenUser3 = createUser("citizen3", "citizen3@public.org", "Ward Volunteer", hashedPassword, Set.of(Role.CITIZEN));
-        User contractorUser = createUser("contractor", "contractor@builds.com", "City Builders Inc.", hashedPassword, Set.of(Role.CONTRACTOR));
-        User contractorUser2 = createUser("contractor2", "contractor2@infra.com", "Urban Infra Works", hashedPassword, Set.of(Role.CONTRACTOR));
+        // --- Users (Idempotent: Create or Update) ---
+        // This ensures that even if data is reset or partially broken, these core users 
+        // will always have the correct roles and existence on startup.
+        User adminUser = createOrUpdateUser("admin", "admin@nagar.gov", "Govt Admin", hashedPassword, Set.of(Role.ADMIN, Role.SUPER_ADMIN));
+        User citizenUser = createOrUpdateUser("citizen", "citizen@public.org", "Active Citizen", hashedPassword, Set.of(Role.CITIZEN));
+        User citizenUser2 = createOrUpdateUser("citizen2", "citizen2@public.org", "Local Resident", hashedPassword, Set.of(Role.CITIZEN));
+        User citizenUser3 = createOrUpdateUser("citizen3", "citizen3@public.org", "Ward Volunteer", hashedPassword, Set.of(Role.CITIZEN));
+        User contractorUser = createOrUpdateUser("contractor", "contractor@builds.com", "City Builders Inc.", hashedPassword, Set.of(Role.CONTRACTOR));
+        User contractorUser2 = createOrUpdateUser("contractor2", "contractor2@infra.com", "Urban Infra Works", hashedPassword, Set.of(Role.CONTRACTOR));
 
-        // --- Contractors ---
-        Contractor contractorA = createContractor(contractorUser, "City Solutions Pvt. Ltd.", "LIC-12345");
-        Contractor contractorB = createContractor(contractorUser2, "Urban Infra Works LLP", "LIC-67890");
+        // Only seed the rest of the content if it looks like the DB is empty (using Projects as a heuristic)
+        if (projectRepo.count() == 0) {
+            System.out.println("--- Seeding Main Core Content ---");
 
-        // --- Wards ---
-        Ward wardA = createWard("Central Ward A", "East", 19.0760, 72.8777);
-        Ward wardB = createWard("North Ward B", "North", 19.2000, 72.8500);
-        Ward wardC = createWard("Riverside Ward C", "West", 19.0500, 72.8200);
-        Ward wardD = createWard("South Ward D", "South", 19.0000, 72.9100);
+            // --- Contractors ---
+            Contractor contractorA = createOrUpdateContractor(contractorUser, "City Solutions Pvt. Ltd.", "LIC-12345");
+            Contractor contractorB = createOrUpdateContractor(contractorUser2, "Urban Infra Works LLP", "LIC-67890");
 
-        // --- Projects ---
-        Project project1 = createProject("Coastal Road Extension Phase 2",
-                "Construction of a 4-lane tunnel extension under the main creek.",
-                contractorA.getId(), new BigDecimal("550000000.00"), "In Progress", 19.0800, 72.8650);
+            // --- Wards ---
+            Ward wardA = createWard("Central Ward A", "East", 19.0760, 72.8777);
+            Ward wardB = createWard("North Ward B", "North", 19.2000, 72.8500);
+            Ward wardC = createWard("Riverside Ward C", "West", 19.0500, 72.8200);
+            Ward wardD = createWard("South Ward D", "South", 19.0000, 72.9100);
 
-        Project project2 = createProject("Sector 4 Community Park Renovation",
-                "Full renovation and landscaping of Sector 4 community park, adding new jogging tracks.",
-                contractorA.getId(), new BigDecimal("5000000.00"), "Completed", 19.0700, 72.9000);
+            // --- Projects ---
+            Project project1 = createProject("Coastal Road Extension Phase 2",
+                    "Construction of a 4-lane tunnel extension under the main creek.",
+                    contractorA.getId(), new BigDecimal("550000000.00"), "In Progress", 19.0800, 72.8650);
 
-        Project project3 = createProject("New Water Treatment Plant",
-                "Construction of a small-scale water purification plant to serve Ward B.",
-                contractorA.getId(), new BigDecimal("80000000.00"), "Pending", 19.1900, 72.8550);
+            Project project2 = createProject("Sector 4 Community Park Renovation",
+                    "Full renovation and landscaping of Sector 4 community park, adding new jogging tracks.",
+                    contractorA.getId(), new BigDecimal("5000000.00"), "Completed", 19.0700, 72.9000);
 
-        Project project4 = createProject("Old Town Drainage Upgrade",
-                "Replacement of 3km sewage lines to eliminate annual flooding.",
-                contractorB.getId(), new BigDecimal("120000000.00"), "In Progress", 19.0220, 72.8600);
+            Project project3 = createProject("New Water Treatment Plant",
+                    "Construction of a small-scale water purification plant to serve Ward B.",
+                    contractorA.getId(), new BigDecimal("80000000.00"), "Pending", 19.1900, 72.8550);
 
-        Project project5 = createProject("Smart LED Street Lighting",
-                "Smart streetlights with fault detection and remote control.",
-                contractorB.getId(), new BigDecimal("30000000.00"), "Completed", 19.0100, 72.9300);
+            Project project4 = createProject("Old Town Drainage Upgrade",
+                    "Replacement of 3km sewage lines to eliminate annual flooding.",
+                    contractorB.getId(), new BigDecimal("120000000.00"), "In Progress", 19.0220, 72.8600);
 
-        Project project6 = createProject("Primary Health Center Retrofit",
-                "HVAC and solar upgrades for the district PHC.",
-                contractorA.getId(), new BigDecimal("15000000.00"), "Pending", 19.1600, 72.8900);
+            Project project5 = createProject("Smart LED Street Lighting",
+                    "Smart streetlights with fault detection and remote control.",
+                    contractorB.getId(), new BigDecimal("30000000.00"), "Completed", 19.0100, 72.9300);
 
-        List<Project> projects = projectRepo.saveAll(List.of(project1, project2, project3, project4, project5, project6));
+            Project project6 = createProject("Primary Health Center Retrofit",
+                    "HVAC and solar upgrades for the district PHC.",
+                    contractorA.getId(), new BigDecimal("15000000.00"), "Pending", 19.1600, 72.8900);
 
-        // --- Complaints ---
-        Complaint complaintA = createComplaint(
-                "Massive Pothole on Sector 4 Main Road",
-                "Pothole has caused two minor accidents this week. Requires urgent repair.",
-                5, 19.0850, 72.8700, citizenUser, "Pending",
-                "1763131283439_blueberry.jpg", null, null);
+            List<Project> projects = projectRepo.saveAll(List.of(project1, project2, project3, project4, project5, project6));
 
-        Complaint complaintB = createComplaint(
-                "Construction Debris Blocking Sidewalk",
-                "Debris from the coastal road project is blocking pedestrian traffic.",
-                3, 19.0810, 72.8655, citizenUser2, "In Progress",
-                null, project1, null);
+            // --- Complaints ---
+            Complaint complaintA = createComplaint(
+                    "Massive Pothole on Sector 4 Main Road",
+                    "Pothole has caused two minor accidents this week. Requires urgent repair.",
+                    5, 19.0850, 72.8700, citizenUser, "Pending",
+                    "1763131283439_blueberry.jpg", null, null);
 
-        Complaint complaintC = createComplaint(
-                "Graffiti on Community Park Wall",
-                "Graffiti was painted on the newly renovated park wall. Quickly cleaned up.",
-                1, 19.0705, 72.9010, citizenUser, "Resolved",
-                "1763141553475_blueberry.jpg", project2, Instant.now().minus(18, ChronoUnit.HOURS));
+            Complaint complaintB = createComplaint(
+                    "Construction Debris Blocking Sidewalk",
+                    "Debris from the coastal road project is blocking pedestrian traffic.",
+                    3, 19.0810, 72.8655, citizenUser2, "In Progress",
+                    null, project1, null);
 
-        Complaint complaintD = createComplaint(
-                "Standing Water near Ward Office",
-                "Drains blocked after light showers; foul smell reported.",
-                4, 19.0230, 72.8610, citizenUser3, "Pending",
-                null, project4, null);
+            Complaint complaintC = createComplaint(
+                    "Graffiti on Community Park Wall",
+                    "Graffiti was painted on the newly renovated park wall. Quickly cleaned up.",
+                    1, 19.0705, 72.9010, citizenUser, "Resolved",
+                    "1763141553475_blueberry.jpg", project2, Instant.now().minus(18, ChronoUnit.HOURS));
 
-        Complaint complaintE = createComplaint(
-                "Streetlight Flickering in Lane 9",
-                "Smart LED unit flickers every 5 seconds causing dark patch.",
-                2, 19.0110, 72.9320, citizenUser2, "Resolved",
-                "1763131283439_blueberry.jpg", project5, Instant.now().minus(3, ChronoUnit.DAYS));
+            Complaint complaintD = createComplaint(
+                    "Standing Water near Ward Office",
+                    "Drains blocked after light showers; foul smell reported.",
+                    4, 19.0230, 72.8610, citizenUser3, "Pending",
+                    null, project4, null);
 
-        Complaint complaintF = createComplaint(
-                "Garbage Overflowing Near Market",
-                "Bins overflowing daily due to delayed pickups; stray dogs everywhere.",
-                4, 19.0600, 72.8800, citizenUser3, "In Progress",
-                null, null, null);
+            Complaint complaintE = createComplaint(
+                    "Streetlight Flickering in Lane 9",
+                    "Smart LED unit flickers every 5 seconds causing dark patch.",
+                    2, 19.0110, 72.9320, citizenUser2, "Resolved",
+                    "1763131283439_blueberry.jpg", project5, Instant.now().minus(3, ChronoUnit.DAYS));
 
-        List<Complaint> complaints = complaintRepo.saveAll(List.of(complaintA, complaintB, complaintC, complaintD, complaintE, complaintF));
+            Complaint complaintF = createComplaint(
+                    "Garbage Overflowing Near Market",
+                    "Bins overflowing daily due to delayed pickups; stray dogs everywhere.",
+                    4, 19.0600, 72.8800, citizenUser3, "In Progress",
+                    null, null, null);
 
-        // --- Ratings ---
-        Rating rating1 = createRating(citizenUser, contractorA, project2, 2,
-                "Work was okay, but the final cleanup was poor and left debris.", ZonedDateTime.now().minusDays(3));
+            List<Complaint> complaints = complaintRepo.saveAll(List.of(complaintA, complaintB, complaintC, complaintD, complaintE, complaintF));
 
-        Rating rating2 = createRating(citizenUser2, contractorA, project2, 5,
-                "Excellent completion! Very happy with the new tracks.", ZonedDateTime.now().minusDays(1));
+            // --- Ratings ---
+            Rating rating1 = createRating(citizenUser, contractorA, project2, 2,
+                    "Work was okay, but the final cleanup was poor and left debris.", ZonedDateTime.now().minusDays(3));
 
-        Rating rating3 = createRating(citizenUser3, contractorA, project5, 4,
-                "Lighting upgrade looks great and feels safer already.", ZonedDateTime.now().minusDays(2));
+            Rating rating2 = createRating(citizenUser2, contractorA, project2, 5,
+                    "Excellent completion! Very happy with the new tracks.", ZonedDateTime.now().minusDays(1));
 
-        Rating rating4 = createRating(citizenUser, contractorB, project4, 2,
-                "Site safety nets missing; debris spilling onto footpath.", ZonedDateTime.now().minusHours(30));
+            Rating rating3 = createRating(citizenUser3, contractorA, project5, 4,
+                    "Lighting upgrade looks great and feels safer already.", ZonedDateTime.now().minusDays(2));
 
-        Rating rating5 = createRating(citizenUser2, contractorB, project5, 1,
-                "Controller keeps failing every week, maintenance is slow.", ZonedDateTime.now().minusHours(12));
+            Rating rating4 = createRating(citizenUser, contractorB, project4, 2,
+                    "Site safety nets missing; debris spilling onto footpath.", ZonedDateTime.now().minusHours(30));
 
-        ratingRepo.saveAll(List.of(rating1, rating2, rating3, rating4, rating5));
+            Rating rating5 = createRating(citizenUser2, contractorB, project5, 1,
+                    "Controller keeps failing every week, maintenance is slow.", ZonedDateTime.now().minusHours(12));
 
-        refreshContractorMetrics(contractorA);
-        refreshContractorMetrics(contractorB);
+            ratingRepo.saveAll(List.of(rating1, rating2, rating3, rating4, rating5));
+
+            refreshContractorMetrics(contractorA);
+            refreshContractorMetrics(contractorB);
 
             // --- Sample Tenders ---
             seedSampleTenders(complaints, contractorA, contractorB);
@@ -156,46 +160,94 @@ public class DataSeeder {
             // Seed email templates
             seedEmailTemplates();
         } else {
-            // Users exist, but no tenders - create tenders only
-            System.out.println("Users exist, creating tenders only...");
-            
-            // Get existing data
-            List<Complaint> existingComplaints = complaintRepo.findAll();
-            List<Contractor> existingContractors = contractorRepo.findAll();
-            
-            if (!existingComplaints.isEmpty() && !existingContractors.isEmpty()) {
-                seedSampleTenders(existingComplaints, existingContractors.get(0), 
-                    existingContractors.size() > 1 ? existingContractors.get(1) : existingContractors.get(0));
-            } else {
-                System.out.println("No existing complaints or contractors found, skipping tender creation");
-            }
+            // Check for tenders specifically again in case projects exist but tenders don't (migrated state)
+             if (tenderRepo.count() == 0) {
+                 // Users exist, creating tenders only
+                 System.out.println("Users and Projects exist, but checking if tenders need seeding...");
+                 
+                 List<Complaint> existingComplaints = complaintRepo.findAll();
+                 List<Contractor> existingContractors = contractorRepo.findAll();
+                 
+                 if (!existingComplaints.isEmpty() && !existingContractors.isEmpty()) {
+                     seedSampleTenders(existingComplaints, existingContractors.get(0), 
+                         existingContractors.size() > 1 ? existingContractors.get(1) : existingContractors.get(0));
+                 }
+             }
+             if (emailTemplateRepo.count() == 0) {
+                 seedEmailTemplates();
+             }
         }
 
-        System.out.println("--- Data Seeding Complete. Sample credentials ---");
-        System.out.println("Admin: admin@nagar.gov / password");
-        System.out.println("Citizen: citizen@public.org / password");
-        System.out.println("Contractor: contractor@builds.com / password");
+        System.out.println("--- Data Seeding Check Complete. ---");
     }
 
-    private User createUser(String username, String email, String fullName, String password, Set<Role> roles) {
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setFullName(fullName);
-        user.setPassword(password);
-        user.setRoles(roles);
-        return userRepo.save(user);
+    private User createOrUpdateUser(String username, String email, String fullName, String password, Set<Role> roles) {
+        // Try to find by email first, then username
+        return userRepo.findByEmail(email)
+                .map(existingUser -> {
+                    // Start of Documentation: Data Reset Safety
+                    // Even if you reset data or if the user was created manually with incorrect roles,
+                    // this block ensures that the core 'seed' users always have the correct roles 
+                    // and active status on every application startup.
+                    // This prevents the "Contractor is treated as Citizen" bug.
+                    boolean modified = false;
+                    // Note: We are strictly enforcing roles for these seed accounts.
+                    // Use new HashSet to ensure mutability for Hibernate
+                    if (!existingUser.getRoles().equals(roles)) {
+                        existingUser.setRoles(new java.util.HashSet<>(roles));
+                        modified = true;
+                    }
+
+                    // Ensure key fields are correct
+                    if (!existingUser.getFullName().equals(fullName)) {
+                        existingUser.setFullName(fullName);
+                        modified = true;
+                    }
+                    
+                    if (modified) {
+                        System.out.println("Updating seed user: " + username);
+                        return userRepo.save(existingUser);
+                    }
+                    return existingUser;
+                })
+                .orElseGet(() -> {
+                    // If not found by email, check username to avoid duplicate error
+                    if (userRepo.existsByUsername(username)) {
+                         User byUser = userRepo.findByUsername(username).orElseThrow();
+                         boolean modified = false;
+                         if (!byUser.getRoles().equals(roles)) {
+                            byUser.setRoles(roles);
+                            modified = true;
+                         }
+                         if (modified) return userRepo.save(byUser);
+                         return byUser;
+                    }
+                    
+                    System.out.println("Creating seed user: " + username);
+                    User user = new User();
+                    user.setUsername(username);
+                    user.setEmail(email);
+                    user.setFullName(fullName);
+                    user.setPassword(password);
+                    user.setRoles(new java.util.HashSet<>(roles));
+                    return userRepo.save(user);
+                });
     }
 
-    private Contractor createContractor(User user, String companyName, String licenseNo) {
-        Contractor contractor = new Contractor();
-        contractor.setUser(user);
-        contractor.setCompanyName(companyName);
-        contractor.setLicenseNo(licenseNo);
-        contractor.setAvgRating(BigDecimal.ZERO); 
-        contractor.setTotalRatings(0); 
-        return contractorRepo.save(contractor);
+    private Contractor createOrUpdateContractor(User user, String companyName, String licenseNo) {
+        return contractorRepo.findByUserUsername(user.getUsername())
+            .orElseGet(() -> {
+                Contractor contractor = new Contractor();
+                contractor.setUser(user);
+                contractor.setCompanyName(companyName);
+                contractor.setLicenseNo(licenseNo);
+                contractor.setAvgRating(BigDecimal.ZERO); 
+                contractor.setTotalRatings(0); 
+                return contractorRepo.save(contractor);
+            });
     }
+
+
 
     private Ward createWard(String name, String zone, double lat, double lng) {
         Ward ward = new Ward();

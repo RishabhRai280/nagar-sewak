@@ -50,8 +50,8 @@ export default function CitizenGuidePage() {
                 key={section.id}
                 onClick={() => setActiveSection(section.id as any)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wide transition-all ${activeSection === section.id
-                    ? 'bg-[#1e3a8a] text-white shadow-md'
-                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  ? 'bg-[#1e3a8a] text-white shadow-md'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
                   }`}
               >
                 <section.icon size={16} />
@@ -150,7 +150,7 @@ export default function CitizenGuidePage() {
                   <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-600 border-4 border-slate-50"></div>
                   <h3 className="text-lg font-bold text-[#111827] mb-2 uppercase tracking-wide">Step 3: Submit & Verify</h3>
                   <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
-                    <p className="text-xs text-slate-500">Review your information and click submit. You will receive a unique Complaint ID (e.g., #CMP-2024-001) for tracking.</p>
+                    <p className="text-xs text-slate-500">Review your information and click submit. You will receive a unique Complaint ID (e.g., #CMP-2025-001) for tracking.</p>
                   </div>
                 </div>
               </div>

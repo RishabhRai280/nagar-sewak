@@ -74,7 +74,7 @@ export default function AuthLayout({ children, title, subtitle, illustration, th
 
                         {/* Footer Links */}
                         <div className="mt-12 text-center text-xs text-slate-400 flex flex-col gap-2">
-                            <p>© 2024 Nagar Sewak. All rights reserved.</p>
+                            <p>© 2025 Nagar Sewak. All rights reserved.</p>
                             <div className="flex justify-center gap-4">
                                 <Link href="/privacy" className="hover:text-blue-800 underline transition-colors">Privacy Policy</Link>
                                 <Link href="/terms" className="hover:text-blue-800 underline transition-colors">Terms of Service</Link>

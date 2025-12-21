@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
@@ -226,9 +227,15 @@ export default function Sidebar() {
         <header className="w-full bg-white py-2 shadow-sm border-b border-slate-200">
           <div className="container mx-auto px-4 lg:px-6 flex justify-between items-center">
             {/* Logo Area */}
-            <Link href="/" className="group flex items-center gap-2">
-              <div className="flex flex-col items-center justify-center">
-                <div className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Satyamev Jayate</div>
+            <Link href="/" className="group flex items-center gap-3">
+              <div className="flex flex-col items-center justify-center pb-1">
+                <Image
+                  src="/images/ashoka-emblem.svg"
+                  alt="Satyamev Jayate"
+                  width={24}
+                  height={36}
+                  className="h-9 w-auto object-contain opacity-90"
+                />
               </div>
               <div className="h-8 w-[1px] bg-slate-300"></div>
               <div className="flex flex-col">

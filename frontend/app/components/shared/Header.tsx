@@ -15,11 +15,19 @@ import { useAccessibility } from '@/app/contexts/AccessibilityContext';
 import NotificationWrapper from '../notifications/NotificationWrapper';
 import { useLocale } from 'next-intl';
 
+import Image from 'next/image';
+
 // Emblem/Logo Component
 const GovLogo = () => (
-  <div className="flex items-center gap-2">
-    <div className="flex flex-col items-center justify-center">
-      <div className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Satyamev Jayate</div>
+  <div className="flex items-center gap-3">
+    <div className="flex flex-col items-center justify-center pb-1">
+      <Image
+        src="/images/ashoka-emblem.svg"
+        alt="Satyamev Jayate"
+        width={24}
+        height={36}
+        className="h-9 w-auto object-contain opacity-90"
+      />
     </div>
     <div className="h-8 w-[1px] bg-slate-300"></div>
     <div className="flex flex-col">

@@ -46,8 +46,8 @@ export default function ProjectStatusPage() {
         lat: 21.1458,
         lng: 79.0882,
         contractor: { id: 1, companyName: "ABC Construction" },
-        createdAt: "2024-01-15",
-        updatedAt: "2024-01-20",
+        createdAt: "2025-01-15",
+        updatedAt: "2025-01-20",
         progressPercentage: 65
       },
       {
@@ -59,8 +59,8 @@ export default function ProjectStatusPage() {
         lat: 21.1658,
         lng: 79.1082,
         contractor: { id: 3, companyName: "Bridge Masters Ltd" },
-        createdAt: "2024-01-12",
-        updatedAt: "2024-01-18",
+        createdAt: "2025-01-12",
+        updatedAt: "2025-01-18",
         progressPercentage: 30
       },
       {
@@ -72,8 +72,8 @@ export default function ProjectStatusPage() {
         lat: 21.1558,
         lng: 79.0982,
         contractor: { id: 2, companyName: "XYZ Infrastructure" },
-        createdAt: "2024-01-10",
-        updatedAt: "2024-01-25",
+        createdAt: "2025-01-10",
+        updatedAt: "2025-01-25",
         progressPercentage: 100
       },
       {
@@ -84,17 +84,17 @@ export default function ProjectStatusPage() {
         status: "Planning",
         lat: 21.1358,
         lng: 79.0782,
-        createdAt: "2024-01-20",
-        updatedAt: "2024-01-22",
+        createdAt: "2025-01-20",
+        updatedAt: "2025-01-22",
         progressPercentage: 0
       }
     ];
 
     // Filter projects by status
-    const filteredByStatus = mockProjects.filter(project => 
+    const filteredByStatus = mockProjects.filter(project =>
       project.status.toLowerCase().replace(/ /g, '-') === status
     );
-    
+
     setTimeout(() => {
       setProjects(filteredByStatus);
       setLoading(false);
@@ -152,7 +152,7 @@ export default function ProjectStatusPage() {
             <ArrowLeft size={20} />
             Back to All Projects
           </Link>
-          
+
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <BarChart3 className="text-blue-600" size={24} />
@@ -213,7 +213,7 @@ export default function ProjectStatusPage() {
                       <span className="text-slate-900 font-bold">{project.progressPercentage}%</span>
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full rounded-full transition-all duration-500 ${getProgressColor(project.progressPercentage)}`}
                         style={{ width: `${project.progressPercentage}%` }}
                       />
@@ -226,7 +226,7 @@ export default function ProjectStatusPage() {
                     <DollarSign size={16} className="text-emerald-600" />
                     <span className="font-semibold">₹{project.budget.toLocaleString()}</span>
                   </div>
-                  
+
                   {project.contractor && (
                     <div className="flex items-center gap-2 text-sm text-slate-600">
                       <Users size={16} className="text-blue-600" />
@@ -272,7 +272,7 @@ export default function ProjectStatusPage() {
               No {statusDisplayName.toLowerCase()} projects found
             </h3>
             <p className="text-slate-600 mb-4">
-              {searchTerm 
+              {searchTerm
                 ? "Try adjusting your search criteria"
                 : `There are currently no projects with ${statusDisplayName.toLowerCase()} status`
               }

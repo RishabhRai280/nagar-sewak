@@ -47,39 +47,39 @@ export default function TendersPage() {
 
   const mockTenders = [
     {
-      id: "TNR-2024-001",
+      id: "TNR-2025-001",
       title: "Construction of Community Center in Ward 12",
       department: "Public Works Department",
       category: "Construction",
       estimatedValue: "₹25,00,000",
-      publishDate: "2024-12-20",
-      lastDate: "2025-01-15",
+      publishDate: "2025-12-20",
+      lastDate: "2026-01-15",
       status: "Active",
       description: "Construction of a modern community center with multipurpose hall, library, and recreational facilities.",
       eligibility: "Class A contractors with minimum 5 years experience",
       documents: ["Tender Notice", "Technical Specifications", "BOQ"]
     },
     {
-      id: "TNR-2024-002",
+      id: "TNR-2025-002",
       title: "Supply of LED Street Lights for Zone A",
       department: "Electrical Department",
       category: "Supply",
       estimatedValue: "₹15,00,000",
-      publishDate: "2024-12-18",
-      lastDate: "2025-01-10",
+      publishDate: "2025-12-18",
+      lastDate: "2026-01-10",
       status: "Active",
       description: "Supply and installation of energy-efficient LED street lights across Zone A covering 200 locations.",
       eligibility: "Registered electrical contractors",
       documents: ["Tender Notice", "Technical Specifications", "Terms & Conditions"]
     },
     {
-      id: "TNR-2024-003",
+      id: "TNR-2025-003",
       title: "Waste Management Services Contract",
       department: "Sanitation Department",
       category: "Services",
       estimatedValue: "₹50,00,000",
-      publishDate: "2024-12-15",
-      lastDate: "2024-12-30",
+      publishDate: "2025-12-15",
+      lastDate: "2025-12-30",
       status: "Closed",
       description: "Comprehensive waste collection, transportation, and disposal services for residential areas.",
       eligibility: "Companies with waste management license",
@@ -195,7 +195,7 @@ export default function TendersPage() {
               tenders.map((tender, index) => {
                 // Check if this is real API data or mock data
                 const isRealTender = 'complaintId' in tender && tender.complaintId;
-                const displayTitle = isRealTender 
+                const displayTitle = isRealTender
                   ? ((tender as TenderData).title || (tender as TenderData).complaintTitle || `Tender #${tender.id}`)
                   : (tender as any).title;
                 const displayValue = isRealTender
@@ -236,7 +236,7 @@ export default function TendersPage() {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="lg:text-right">
                         <div className="text-2xl font-bold text-slate-900 mb-1">{displayValue}</div>
                         <div className="text-sm text-slate-500 mb-3">Estimated Value</div>
@@ -258,13 +258,13 @@ export default function TendersPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="border-t border-slate-200 pt-4">
                       <div className="grid md:grid-cols-3 gap-4 text-sm">
                         <div>
                           <span className="font-semibold text-slate-700">Published:</span>
                           <span className="text-slate-600 ml-2">
-                            {isRealTender 
+                            {isRealTender
                               ? new Date((tender as TenderData).createdAt).toLocaleDateString()
                               : new Date((tender as any).publishDate).toLocaleDateString()
                             }
@@ -273,7 +273,7 @@ export default function TendersPage() {
                         <div>
                           <span className="font-semibold text-slate-700">Last Date:</span>
                           <span className="text-slate-600 ml-2">
-                            {isRealTender 
+                            {isRealTender
                               ? ((tender as TenderData).endDate ? new Date((tender as TenderData).endDate!).toLocaleDateString() : 'TBD')
                               : new Date((tender as any).lastDate).toLocaleDateString()
                             }
@@ -284,14 +284,14 @@ export default function TendersPage() {
                             {isRealTender ? 'Complaint' : 'Eligibility'}:
                           </span>
                           <span className="text-slate-600 ml-2">
-                            {isRealTender 
+                            {isRealTender
                               ? ((tender as TenderData).complaintTitle || `Complaint #${(tender as TenderData).complaintId}`)
                               : (tender as any).eligibility
                             }
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="mt-3">
                         <span className="font-semibold text-slate-700 text-sm">Documents:</span>
                         <div className="flex flex-wrap gap-2 mt-1">
