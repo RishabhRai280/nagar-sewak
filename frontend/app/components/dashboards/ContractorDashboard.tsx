@@ -8,6 +8,7 @@ import { Construction, AlertTriangle, CheckCircle, Star, RefreshCcw, LogOut, Dol
 import Link from "next/link";
 import Sidebar from "../Sidebar";
 import { useSidebar } from "@/app/contexts/SidebarContext";
+import NotificationWrapper from "../notifications/NotificationWrapper";
 
 export default function ContractorDashboardComponent() {
     const t = useTranslations('dashboard.contractor');
@@ -135,6 +136,11 @@ export default function ContractorDashboardComponent() {
             <div className={`${collapsed ? 'w-16' : 'w-64'} flex-shrink-0 hidden lg:block transition-all duration-300`}></div>
 
             <Sidebar />
+
+            {/* Notification UI */}
+            <div className="fixed top-4 right-4 z-50">
+                <NotificationWrapper />
+            </div>
 
             <main
                 className="relative z-10 flex-1 px-6 pb-12 pt-32 lg:px-12 lg:pb-16 lg:pt-36 space-y-12 overflow-y-auto transition-all duration-300"
@@ -279,9 +285,16 @@ export default function ContractorDashboardComponent() {
                                         <div className="flex items-center justify-between mt-3">
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${c.severity >= 4 ? 'bg-red-50 text-red-700 border-red-200' : 'bg-orange-50 text-orange-700 border-orange-200'
                                                 }`}>{t('severity')} {c.severity}</span>
-                                            <Link href={`/tenders/create?complaintId=${c.id}`} className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">
-                                                {t('bidNow')}
-                                            </Link>
+
+                                            {myTenders.some(t => t.complaintId === c.id) ? (
+                                                <button disabled className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded uppercase tracking-wide cursor-not-allowed border border-slate-200">
+                                                    Applied
+                                                </button>
+                                            ) : (
+                                                <Link href={`/tenders/create?complaintId=${c.id}`} className="text-[10px] font-bold text-white bg-[#1e3a8a] px-3 py-1 rounded uppercase tracking-wide hover:bg-blue-900 transition">
+                                                    {t('bidNow')}
+                                                </Link>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

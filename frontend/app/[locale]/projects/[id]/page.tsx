@@ -10,7 +10,8 @@ import ProjectProgressTimeline from "@/app/components/projects/ProjectProgressTi
 import ShareBar from "@/app/components/shared/ShareBar";
 
 // Dynamically import Map component to avoid SSR issues
-const MiniMap = dynamic(() => import("@/app/components/map/Map"), { ssr: false });
+// Dynamically import Map component to avoid SSR issues
+const MiniMap = dynamic(() => import("@/app/components/shared/MiniMap"), { ssr: false });
 
 export default function ProjectDetailsPage() {
     const params = useParams();
@@ -105,7 +106,7 @@ export default function ProjectDetailsPage() {
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm relative overflow-hidden">
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-[2000] shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1e3a8a] via-[#f97316] to-[#166534]"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -272,18 +273,17 @@ export default function ProjectDetailsPage() {
                     {/* Sidebar */}
                     <div className="space-y-8">
                         {/* Location Map */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-80 relative">
-                            {/* Note: Reusing the main Map component might be heavy. Ideally we'd use a MiniMap component. 
-                   For now, we'll just show a placeholder or a static map if possible, or the full map centered.
-                   Since we don't have a dedicated MiniMap, we'll skip the map render here to avoid complexity 
-                   or use a simple link to the map.
-               */}
-                            <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center p-6 text-center">
-                                <MapPin className="text-slate-400 mb-2" size={32} />
-                                <p className="text-slate-500 font-medium mb-4">View project location on the main map</p>
-                                <Link href={`/map?projectId=${project.id}`} className="px-4 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">
-                                    Open Map
-                                </Link>
+                        <div
+                            className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-80 relative group cursor-pointer"
+                            onClick={() => router.push(`/map?lat=${project.lat}&lng=${project.lng}&zoom=16`)}
+                        >
+                            <MiniMap lat={project.lat} lng={project.lng} />
+
+                            {/* Overlay on hover */}
+                            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors z-[1000] flex items-center justify-center">
+                                <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-sm font-bold text-slate-700 text-sm transform scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all">
+                                    Click to View on Main Map
+                                </div>
                             </div>
                         </div>
 

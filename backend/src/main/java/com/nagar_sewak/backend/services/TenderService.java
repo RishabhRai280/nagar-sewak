@@ -71,6 +71,10 @@ public class TenderService {
         }
 
         Tender saved = tenderRepo.save(tender);
+        
+        // Publish event for tender submission
+        eventPublisher.publishEvent(new com.nagar_sewak.backend.events.TenderSubmittedEvent(this, saved));
+
         return mapToDTO(saved);
     }
 

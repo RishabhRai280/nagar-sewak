@@ -19,6 +19,19 @@ interface LocationPickerProps {
   onLocationSelect: (lat: number, lng: number) => void;
 }
 
+// Component to handle map resizing issues in modals
+function MapInvalidator() {
+  const map = useMapEvents({});
+  useEffect(() => {
+    // Wait for modal animation to finish
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+}
+
 function LocationMarker({ onLocationSelect }: { onLocationSelect: (lat: number, lng: number) => void }) {
   const [position, setPosition] = useState<L.LatLng | null>(null);
 
@@ -63,6 +76,7 @@ export default function LocationPicker({ lat, lng, onLocationSelect }: LocationP
       />
       {lat && lng && <Marker position={[lat, lng]} />}
       <LocationMarker onLocationSelect={onLocationSelect} />
+      <MapInvalidator />
     </MapContainer>
   );
 }

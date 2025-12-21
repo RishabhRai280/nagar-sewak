@@ -6,16 +6,22 @@ import NotificationCenter from "./NotificationCenter";
 
 export default function NotificationWrapper() {
   const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleNotificationRead = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   return (
     <>
-      <NotificationBadge onClick={() => setNotificationCenterOpen(true)} />
-      <NotificationCenter 
-        isOpen={notificationCenterOpen} 
+      <NotificationBadge
+        onClick={() => setNotificationCenterOpen(true)}
+        refreshTrigger={refreshTrigger}
+      />
+      <NotificationCenter
+        isOpen={notificationCenterOpen}
         onClose={() => setNotificationCenterOpen(false)}
-        onNotificationRead={() => {
-          // This will trigger the badge to refresh
-        }}
+        onNotificationRead={handleNotificationRead}
       />
     </>
   );

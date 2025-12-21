@@ -1151,6 +1151,7 @@ interface MapProps {
   setSearch: (search: string) => void;
   filtered: MarkerItem[];
   autoSelectProcessed: boolean;
+  initialLocationTarget?: { lat: number; lng: number; zoom: number } | null;
 }
 
 export default function Map({
@@ -1174,6 +1175,7 @@ export default function Map({
   setSearch,
   filtered,
   autoSelectProcessed,
+  initialLocationTarget,
 }: MapProps) {
   const [currentLayer, setCurrentLayer] = useState<MapLayer>("osm");
   const [activeOverlays, setActiveOverlays] = useState<MapOverlay[]>([]);
@@ -1222,6 +1224,13 @@ export default function Map({
     zoom: number;
   } | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Sync initial location target from props
+  useEffect(() => {
+    if (initialLocationTarget) {
+      setLocationTarget(initialLocationTarget);
+    }
+  }, [initialLocationTarget]);
 
   const applyMobileFilters = () => {
     setStatusFilter(mobileStatusFilter);
@@ -1586,7 +1595,7 @@ export default function Map({
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}
           center={center}
-          locationTarget={locationTarget}
+          locationTarget={locationTarget ?? null}
           currentLayer={currentLayer}
           setCurrentLayer={setCurrentLayer}
           activeOverlays={activeOverlays}

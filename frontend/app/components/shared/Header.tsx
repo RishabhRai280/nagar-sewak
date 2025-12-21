@@ -122,7 +122,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex flex-col w-full fixed top-0 left-0 right-0 z-[100]">
+      <div className="flex flex-col w-full fixed top-0 left-0 right-0 z-[2000]">
         {/* Government Top Strip - Compact */}
         <div className="bg-slate-900 text-white border-b border-slate-700 py-1 px-4 lg:px-6 flex justify-between items-center text-[11px]">
           {/* Left: Government Identity */}
@@ -179,7 +179,7 @@ export default function Header() {
 
         {/* Main Header - Compact */}
         <header
-          className="w-full bg-white py-2 shadow-sm border-b border-slate-200"
+          className="w-full bg-white py-2 shadow-sm border-b border-slate-200 relative z-[2000]"
           role="banner"
           aria-label="Main navigation"
         >

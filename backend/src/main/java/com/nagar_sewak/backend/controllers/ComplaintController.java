@@ -185,6 +185,24 @@ public class ComplaintController {
         }
 
         Complaint saved = complaintRepo.save(complaint);
+        
+        // Notify user about successful submission
+        try {
+            notificationService.createNotification(
+                com.nagar_sewak.backend.services.NotificationService.NotificationDTO.builder()
+                    .userId(citizen.getId())
+                    .type(NotificationType.COMPLAINT_CREATED)
+                    .priority(com.nagar_sewak.backend.entities.NotificationPriority.MEDIUM)
+                    .title("Complaint Submitted")
+                    .message("Your complaint '" + saved.getTitle() + "' has been successfully submitted.")
+                    .actionUrl("/complaints/" + saved.getId())
+                    .build()
+            );
+        } catch (Exception e) {
+            // Log error but don't fail the request
+            System.err.println("Failed to send complaint creation notification: " + e.getMessage());
+        }
+
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 

@@ -553,4 +553,50 @@ public class NotificationEventListener {
             notificationService.createNotification(adminDto);
         }
     }
+
+    @EventListener
+    @Async
+    public void handleTenderSubmitted(com.nagar_sewak.backend.events.TenderSubmittedEvent event) {
+        Tender tender = event.getTender();
+        log.info("Handling tender submission event for tender ID: {}", tender.getId());
+
+        // 1. Notify Contractor (Confirmation)
+        try {
+            NotificationService.NotificationDTO contractorDto = NotificationService.NotificationDTO.builder()
+                .userId(tender.getContractor().getUser().getId())
+                .type(NotificationType.TENDER_SUBMITTED)
+                .priority(NotificationPriority.MEDIUM)
+                .title("Bid Submitted Successfully")
+                .message(String.format("Your bid for tender '%s' has been successfully submitted.", tender.getComplaint().getTitle()))
+                .actionUrl("/dashboard/contractor#tenders")
+                .build();
+
+            notificationService.createNotification(contractorDto);
+        } catch (Exception e) {
+            log.error("Failed to notify contractor about bid submission", e);
+        }
+
+        // 2. Notify Admins (New Bid Alert)
+        try {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("tenderId", tender.getId());
+            metadata.put("contractorId", tender.getContractor().getId());
+            metadata.put("amount", tender.getQuoteAmount());
+
+            NotificationService.NotificationDTO adminBaseDto = NotificationService.NotificationDTO.builder()
+                .userId(0L) // placeholder
+                .type(NotificationType.TENDER_SUBMITTED)
+                .priority(NotificationPriority.MEDIUM)
+                .title("New Tender Bid Received")
+                .message(String.format("Contractor '%s' placed a bid of ₹%s on '%s'.", 
+                    tender.getContractor().getCompanyName(), tender.getQuoteAmount(), tender.getComplaint().getTitle()))
+                .actionUrl("/complaints/" + tender.getComplaint().getId() + "/tenders")
+                .metadata(metadata)
+                .build();
+
+            notifyAllAdmins(adminBaseDto);
+        } catch (Exception e) {
+            log.error("Failed to notify admins about new bid", e);
+        }
+    }
 }

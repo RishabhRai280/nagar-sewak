@@ -6,15 +6,20 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface NotificationBadgeProps {
   onClick: () => void;
+  refreshTrigger?: number;
 }
 
-export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
+export default function NotificationBadge({ onClick, refreshTrigger = 0 }: NotificationBadgeProps) {
   const [count, setCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     fetchUnreadCount();
-    
+  }, [refreshTrigger]);
+
+  useEffect(() => {
+    fetchUnreadCount();
+
     // Poll for updates every 5 seconds for demo
     const interval = setInterval(fetchUnreadCount, 5000);
     return () => clearInterval(interval);
@@ -37,14 +42,14 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
       if (response.ok) {
         const data = await response.json();
         const newCount = data.count || 0;
-        
+
         console.log("Unread count:", newCount);
-        
+
         if (newCount > count) {
           setIsAnimating(true);
           setTimeout(() => setIsAnimating(false), 500);
         }
-        
+
         setCount(newCount);
       } else {
         // Silently fail - notification service may not be fully configured
@@ -72,7 +77,7 @@ export default function NotificationBadge({ onClick }: NotificationBadgeProps) {
       >
         <Bell size={20} className="text-gray-700" />
       </motion.div>
-      
+
       <AnimatePresence>
         {count > 0 && (
           <motion.div

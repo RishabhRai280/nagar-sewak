@@ -172,6 +172,51 @@ public class ProjectController {
         }
 
         Project savedProject = repo.save(project);
+
+        // Check if this progress update corresponds to a milestone
+        if (List.of(25, 50, 75, 100).contains(progress)) {
+            try {
+                // Find or create milestone to record this achievement
+                com.nagar_sewak.backend.repositories.ProjectMilestoneRepository milestoneRepo = 
+                    projectService.milestoneRepo;
+                
+                com.nagar_sewak.backend.entities.ProjectMilestone milestone = 
+                    milestoneRepo.findByProjectIdAndPercentage(id, progress)
+                        .orElseGet(() -> {
+                            com.nagar_sewak.backend.entities.ProjectMilestone newMilestone = 
+                                com.nagar_sewak.backend.entities.ProjectMilestone.builder()
+                                    .project(savedProject)
+                                    .percentage(progress)
+                                    .status("COMPLETED")
+                                    .build();
+                            return milestoneRepo.save(newMilestone);
+                        });
+
+                // Update milestone details if they differ (ensure it's marked completed)
+                if (!"COMPLETED".equals(milestone.getStatus())) {
+                    milestone.setStatus("COMPLETED");
+                    milestone.setCompletedAt(java.time.LocalDateTime.now());
+                    milestone.setUpdatedBy(userDetails.getUsername());
+                    if (notes != null && !notes.isEmpty()) {
+                        milestone.setNotes(notes);
+                    }
+                    milestoneRepo.save(milestone);
+                }
+
+                // Trigger notification event
+                org.springframework.context.ApplicationEventPublisher eventPublisher = 
+                    projectService.eventPublisher;
+                if (eventPublisher != null) {
+                    eventPublisher.publishEvent(new com.nagar_sewak.backend.events.ProjectMilestoneCompletedEvent(
+                        this, savedProject, milestone));
+                }
+            } catch (Exception e) {
+                // Log but don't fail the request if notification fails
+                System.err.println("Failed to process milestone notification: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
         return ResponseEntity.ok(savedProject);
     }
 

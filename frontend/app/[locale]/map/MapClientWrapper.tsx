@@ -142,7 +142,12 @@ export default function MapClientWrapper() {
         const targetLat = parseFloat(lat);
         const targetLng = parseFloat(lng);
 
+        // Even if no item found, we might want to center here (handled by Map component if passed)
+        // Ideally MapClientWrapper shouldn't just "find closest". 
+        // But for now, let's keep existing logic.
+
         let closestItem: MarkerItem | null = null;
+        // ... (rest of logic)
         let minDistance = Infinity;
 
         items.forEach(item => {
@@ -164,9 +169,28 @@ export default function MapClientWrapper() {
           if (validItem.kind === 'project') setShowProjects(true);
           setAutoSelectProcessed(true);
         }
+      } else if (lat && lng) {
+        // ... existing closest item logic ...
+        const targetLat = parseFloat(lat);
+        const targetLng = parseFloat(lng);
+        // ... (keep finding closest item logic if you want auto-select)
+
+        // ADDED: Set view target even if no item selected yet
+        // This state needs to be passed to Map component
       }
     }
   }, [items, searchParams, autoSelectProcessed]);
+
+  // NEW: target for map view
+  const locationTarget = useMemo(() => {
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
+    const zoom = searchParams.get('zoom');
+    if (lat && lng) {
+      return { lat: parseFloat(lat), lng: parseFloat(lng), zoom: zoom ? parseInt(zoom) : 16 };
+    }
+    return null;
+  }, [searchParams]);
 
 
   return (
@@ -192,6 +216,7 @@ export default function MapClientWrapper() {
         setSearch={setSearch}
         filtered={filtered}
         autoSelectProcessed={autoSelectProcessed}
+        initialLocationTarget={locationTarget} // Pass as initialLocationTarget
       />
     </Suspense>
   );
