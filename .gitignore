@@ -68,12 +68,12 @@ target/
 *.sqlite3
 
 # Uploads (user-generated content)
-backend/uploads/**
-!backend/uploads/.gitkeep
-!backend/uploads/complaints/.gitkeep
-!backend/uploads/projects/.gitkeep
-!backend/uploads/tenders/.gitkeep
-!backend/uploads/comments/.gitkeep
+# backend/uploads/**
+# !backend/uploads/.gitkeep
+# !backend/uploads/complaints/.gitkeep
+# !backend/uploads/projects/.gitkeep
+# !backend/uploads/tenders/.gitkeep
+# !backend/uploads/comments/.gitkeep
 
 # Package Manager Locks (keep the one you use, ignore others)
 # Uncomment the ones you DON'T use:
