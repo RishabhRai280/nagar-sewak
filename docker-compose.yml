@@ -50,7 +50,7 @@ services:
     volumes:
       # COPY your firebase json to root as 'firebase-service-account.json' and uncomment below:
       # - ./firebase-service-account.json:/app/firebase-service-account.json
-
+      - ./backend/uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy

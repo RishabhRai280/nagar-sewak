@@ -77,34 +77,34 @@ public class DataSeeder {
         Project karveFlyover = createProject("Karve Road Flyover Expansion",
                 "Expansion to reduce traffic congestion and repair structural cracks.",
                 urbanBuild.getId(), new BigDecimal("120000000.00"), "In Progress", 18.5089, 73.8142,
-                "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"); // Construction
+                "project-1.jpg,project-2.jpg"); // Construction
 
         Project shivajinagarDrain = createProject("Shivajinagar Storm Drain Upgrade",
                 "Upgrading drainage capacity in flood-prone bus stand area.",
                 metroWorks.getId(), new BigDecimal("60000000.00"), "Pending", 18.5311, 73.8459,
-                "https://images.unsplash.com/photo-1585645620949-a2e6f40409a8?q=80&w=1000&auto=format&fit=crop"); // Drain/Water
+                "project-2.jpg,project-3.jpg"); // Drain/Water
 
         // Mumbai Projects
         Project andheriRoad = createProject("Andheri East Road Resurfacing",
                 "Heavy duty resurfacing to address recurring pothole complaints.",
                 urbanBuild.getId(), new BigDecimal("90000000.00"), "In Progress", 19.1148, 72.8719,
-                "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=1000&auto=format&fit=crop"); // Road work
+                "project-1.jpg,project-3.jpg"); // Road work
 
         Project dadarLighting = createProject("Dadar West Streetlight Smart Upgrade",
                 "Installation of smart LED streetlights with centralized control.",
                 metroWorks.getId(), new BigDecimal("35000000.00"), "Completed", 19.0202, 72.8405,
-                "https://images.unsplash.com/photo-1623945114138-164724248454?q=80&w=1000&auto=format&fit=crop"); // Streetlight
+                "project-2.jpg,project-1.jpg"); // Streetlight
 
         // Delhi Projects
         Project lajpatDrain = createProject("Lajpat Nagar Drainage Repair",
                 "Fixing monsoon water logging issues in low-lying residential blocks.",
                 urbanBuild.getId(), new BigDecimal("40000000.00"), "In Progress", 28.5689, 77.2418,
-                "https://images.unsplash.com/photo-1579611504958-39cb32e5256e?q=80&w=1000&auto=format&fit=crop"); // Drain pipe
+                "project-3.jpg,project-2.jpg"); // Drain pipe
 
         Project rohiniBridge = createProject("Rohini Footbridge Structural Repair",
                 "Repairing cracks and rusted beams on the pedestrian footbridge.",
                 metroWorks.getId(), new BigDecimal("70000000.00"), "Pending", 28.7372, 77.1184,
-                "https://images.unsplash.com/photo-1584463673335-85309d94924b?q=80&w=1000&auto=format&fit=crop"); // Concrete/Bridge
+                "project-1.jpg,project-2.jpg"); // Concrete/Bridge
 
         projectRepo.saveAll(List.of(karveFlyover, shivajinagarDrain, andheriRoad, dadarLighting, lajpatDrain, rohiniBridge));
 
@@ -115,7 +115,7 @@ public class DataSeeder {
                 "Deep potholes near Karve Road Flyover",
                 "The potholes are getting bigger and causing traffic slowdowns. Dangerous for two-wheelers.",
                 5, 18.5085, 73.8140, aditya, "In Progress",
-                "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=1000&auto=format&fit=crop", // Pothole
+                "complaint-1.jpg", "complaint-1.jpg,complaint-2.jpg", // Pothole
                 karveFlyover, null);
 
         // 2. Pune - Shivajinagar
@@ -123,7 +123,7 @@ public class DataSeeder {
                 "Storm water overflowing near Shivajinagar Bus Stand",
                 "Every minor rain causes flooding near the entrance. Needs immediate drain cleaning.",
                 4, 18.5315, 73.8460, suresh, "Pending",
-                "https://images.unsplash.com/photo-1585645620949-a2e6f40409a8?q=80&w=1000&auto=format&fit=crop", // Drain
+                "complaint-2.jpg", "complaint-2.jpg,complaint-3.jpg", // Drain
                 shivajinagarDrain, null);
 
         // 3. Mumbai - Andheri
@@ -131,7 +131,7 @@ public class DataSeeder {
                 "Road surface completely damaged near MIDC Andheri",
                 "The entire stretch is damaged. Vehicles damaging their suspensions.",
                 5, 19.1150, 72.8720, rohan, "In Progress",
-                "https://images.unsplash.com/photo-1584463673335-85309d94924b?q=80&w=1000&auto=format&fit=crop", // Broken road
+                "complaint-3.jpg", "complaint-3.jpg,complaint-1.jpg", // Broken road
                 andheriRoad, null);
 
         // 4. Mumbai - Dadar (Resolved)
@@ -139,7 +139,7 @@ public class DataSeeder {
                 "Streetlights switching off every night in Dadar West",
                 "Main junction lights go off around 10 PM. Safety hazard.",
                 2, 19.0200, 72.8400, rohan, "Resolved",
-                "https://images.unsplash.com/photo-1623945114138-164724248454?q=80&w=1000&auto=format&fit=crop", // Light
+                "complaint-4.jpg", "complaint-4.jpg,complaint-2.jpg", // Light
                 dadarLighting, Instant.now().minus(5, ChronoUnit.DAYS));
 
         // 5. Delhi - Lajpat Nagar
@@ -147,7 +147,7 @@ public class DataSeeder {
                 "Drain water entering houses during rain",
                 "Drain blockage causes backflow into residential compounds.",
                 4, 28.5690, 77.2420, aman, "In Progress",
-                "https://images.unsplash.com/photo-1579611504958-39cb32e5256e?q=80&w=1000&auto=format&fit=crop", // Drain pipe
+                "complaint-2.jpg", "complaint-2.jpg,complaint-4.jpg", // Drain pipe
                 lajpatDrain, null);
 
         // 6. Delhi - Rohini
@@ -155,7 +155,7 @@ public class DataSeeder {
                 "Cracks visible on pedestrian bridge railing",
                 "The concrete railing has visible cracks and exposed iron rods.",
                 5, 28.7375, 77.1180, aman, "Pending",
-                "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop", // Bridge structure
+                "complaint-1.jpg", "complaint-1.jpg,complaint-3.jpg", // Bridge structure
                 rohiniBridge, null);
 
         List<Complaint> complaints = complaintRepo.saveAll(List.of(c1, c2, c3, c4, c5, c6));
@@ -251,7 +251,7 @@ public class DataSeeder {
     }
 
     private Complaint createComplaint(String title, String description, int severity, double lat, double lng,
-                                      User user, String status, String photoFilename, Project project, Instant resolvedAt) {
+                                      User user, String status, String photoFilename, String photoUrls, Project project, Instant resolvedAt) {
         Complaint complaint = new Complaint();
         complaint.setTitle(title);
         complaint.setDescription(description);
@@ -262,6 +262,7 @@ public class DataSeeder {
         complaint.setStatus(status);
         complaint.setCreatedAt(Instant.now().minus(severity * 2L, ChronoUnit.DAYS)); // Varied creation times
         complaint.setPhotoUrl(photoFilename);
+        complaint.setPhotoUrls(photoUrls); // Set multiple photos
         complaint.setProject(project);
         complaint.setResolvedAt(resolvedAt);
         return complaint;
