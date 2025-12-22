@@ -20,6 +20,7 @@ We have detailed documentation located in the `docs/` directory:
 - 🛡️ **[Backend API Guide](docs/03-backend-api.md)**: authentication flow, API endpoints, and configuration.
 - 💻 **[Frontend Developer Guide](docs/04-frontend-guide.md)**: Component structure, state management, and styling.
 - 🌐 **[Deployment Guide](docs/05-deployment.md)**: Production setup, Nginx config, and scaling.
+- ☁️ **[AWS Free Tier Hosting](docs/07-aws-hosting-guide.md)**: Host everything for $0 using EC2 t2.micro.
 - 📖 **[User Manual](docs/06-user-manual.md)**: Usage guides for Citizens, Admins, and Contractors.
 
 ---

@@ -43,6 +43,14 @@ services:
       EMAIL_PORT: ${EMAIL_PORT:-587}
       EMAIL_USER: ${EMAIL_USER:-ismartydummy@gmail.com}
       EMAIL_PASS: ${EMAIL_PASS:-hrjg afqg pohx hbei}
+      
+      # Firebase Config
+      FIREBASE_CREDENTIALS_PATH: /app/firebase-service-account.json
+
+    volumes:
+      # COPY your firebase json to root as 'firebase-service-account.json' and uncomment below:
+      # - ./firebase-service-account.json:/app/firebase-service-account.json
+
     depends_on:
       db:
         condition: service_healthy
