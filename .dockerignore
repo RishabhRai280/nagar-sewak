@@ -1,0 +1,35 @@
+# Git and Docker build context
+.git
+.gitignore
+.dockerignore
+LICENSE
+README.md
+
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+**/pnpm-lock.yaml
+
+# Build output
+dist
+build
+target
+out
+.next
+
+# IDE
+.idea
+.vscode
+*.swp
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log

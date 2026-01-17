@@ -1,0 +1,61 @@
+# --- Stage 1: Build Backend ---
+FROM maven:3.9-eclipse-temurin-21-alpine AS backend-build
+WORKDIR /app
+COPY backend/pom.xml .
+COPY backend/src ./src
+RUN mvn clean package -DskipTests
+
+# --- Stage 2: Build Frontend ---
+FROM node:20-alpine AS frontend-build
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm ci
+COPY frontend/ .
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+# --- Stage 3: Final Monolithic Image ---
+FROM ubuntu:22.04
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Java 21, Node.js 20, and MySQL Server in a single layer to reduce size
+# Added --no-install-recommends to reduce size
+# Added rm -rf /var/lib/apt/lists/* to clean up apt cache
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-21-jre-headless \
+    curl \
+    mysql-server \
+    ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up working directory
+WORKDIR /app
+
+# Copy Backend artifact from Stage 1
+COPY --from=backend-build /app/target/backend-0.0.1-SNAPSHOT.jar /app/backend/app.jar
+
+# Copy Frontend standalone files from Stage 2
+COPY --from=frontend-build /app/.next/standalone /app/frontend/
+COPY --from=frontend-build /app/public /app/frontend/public
+COPY --from=frontend-build /app/.next/static /app/frontend/.next/static
+
+# Copy and prepare the startup script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Environment Variables for Backend (Connect to localhost)
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/nagar_sewak_db
+ENV DB_USERNAME=root
+ENV DB_PASSWORD=root@123
+ENV NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+
+# Expose ports: 3306 (DB), 8080 (Backend), 3000 (Frontend)
+EXPOSE 3306 8080 3000
+
+# Run everything through the entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"]

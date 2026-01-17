@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   # MySQL Database Service
@@ -6,20 +6,20 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: 'nagar_sewak_db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: '${MYSQL_DATABASE:-nagar_sewak_db}'
+      MYSQL_USER: '${DB_USERNAME:-user}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:-password}'
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD:-root}'
     ports:
-      - '3307:3306'  # Expose on 3307 to avoid conflict if local MySQL is running
+      - '3307:3306'
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - nagar-network
     healthcheck:
-        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-        timeout: 20s
-        retries: 10
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   # Backend Service (Spring Boot)
   backend:
@@ -31,25 +31,23 @@ services:
       - '8080:8080'
     environment:
       # Database Config
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nagar_sewak_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-nagar_sewak_db}?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
       
       # JWT Secret (Should match .env)
-      JWT_SECRET: ${JWT_SECRET:-mySecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLongForSecurity}
+      JWT_SECRET: ${JWT_SECRET}
       
       # Mail Config (Can be overridden via .env)
       EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
       EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USER: ${EMAIL_USER:-ismartydummy@gmail.com}
-      EMAIL_PASS: ${EMAIL_PASS:-hrjg afqg pohx hbei}
+      EMAIL_USER: ${EMAIL_USER:-example@gmail.com}
+      EMAIL_PASS: ${EMAIL_PASS}
       
       # Firebase Config
       FIREBASE_CREDENTIALS_PATH: /app/firebase-service-account.json
 
     volumes:
-      # COPY your firebase json to root as 'firebase-service-account.json' and uncomment below:
-      # - ./firebase-service-account.json:/app/firebase-service-account.json
       - ./backend/uploads:/app/uploads
     depends_on:
       db:
@@ -66,8 +64,6 @@ services:
     ports:
       - '3000:3000'
     environment:
-      # Critical: Use http://localhost:8080 for client-side fetches (Browser -> Backend)
-      # If using SSR heavily where Node calls Backend, you might need an internal URL variable too.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
     networks:
       - nagar-network
