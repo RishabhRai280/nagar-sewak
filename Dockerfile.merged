@@ -9,7 +9,11 @@ RUN mvn clean package -DskipTests
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json* ./
-RUN npm ci
+# Increase network timeout for npm to prevent ECONNRESET
+RUN npm config set fetch-retry-maxtimeout 600000 \
+    && npm config set fetch-retry-mintimeout 10000 \
+    && npm config set fetch-retries 5 \
+    && npm ci
 COPY frontend/ .
 ENV NEXT_TELEMETRY_DISABLED 1
 
