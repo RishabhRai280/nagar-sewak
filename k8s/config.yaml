@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nagar-sewak-config
+data:
+  # Database Configuration (Internal MySQL in Monolith)
+  SPRING_DATASOURCE_URL: "jdbc:mysql://localhost:3306/nagar_sewak_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false"
+  DB_USERNAME: "root"
+  DB_PASSWORD: "root@123"
+  MYSQL_ROOT_PASSWORD: "root@123"
+  
+  # JWT Configuration
+  JWT_SECRET: "mySecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLongForSecurity"
+  
+  # Frontend Configuration
+  NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080"
+  
+  # Email Configuration (Required by backend/application.properties)
+  EMAIL_HOST: "smtp.gmail.com"
+  EMAIL_PORT: "587"
+  EMAIL_USER: "example@gmail.com" # Dummy value to prevent startup error
+  EMAIL_PASS: "dummy_password"    # Dummy value to prevent startup error
+  
+  # Firebase (Required placeholder)
+  FIREBASE_CREDENTIALS_PATH: "/app/firebase-dummy.json"

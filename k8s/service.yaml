@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nagar-sewak-service
+spec:
+  selector:
+    app: nagar-sewak
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      name: frontend
+      nodePort: 30000
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: backend
+      nodePort: 30080
+  type: NodePort

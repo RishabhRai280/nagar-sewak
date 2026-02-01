@@ -4,12 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "notification_preferences", 
-    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "notification_type"}),
-    indexes = {
-        @Index(name = "idx_pref_user_id", columnList = "user_id")
-    }
-)
+@Table(name = "notification_preferences", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id",
+        "notification_type" }), indexes = {
+                @Index(name = "idx_pref_user_id", columnList = "user_id")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,12 +27,15 @@ public class NotificationPreference {
     @Column(name = "notification_type", nullable = false, length = 50)
     private NotificationType notificationType;
 
+    @Builder.Default
     @Column(name = "in_app_enabled", nullable = false)
     private Boolean inAppEnabled = true;
 
+    @Builder.Default
     @Column(name = "email_enabled", nullable = false)
     private Boolean emailEnabled = true;
 
+    @Builder.Default
     @Column(name = "push_enabled", nullable = false)
     private Boolean pushEnabled = false;
 }

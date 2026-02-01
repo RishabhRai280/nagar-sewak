@@ -35,7 +35,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function GovLandingPage() {
-  const t = useTranslations('landing');
+  const t = useTranslations();
   const [ctaLink, setCtaLink] = useState("/register");
   const [dashboardLink, setDashboardLink] = useState("/login");
   const [analyticsLink, setAnalyticsLink] = useState("/login");
@@ -115,54 +115,30 @@ export default function GovLandingPage() {
 
 
   const stats = [
-    { number: "12.5L", label: "activeUsers", icon: Users, color: "blue", suffix: "" },
-    { number: "142", label: "projectsTracked", icon: Building2, color: "orange", suffix: "" },
-    { number: "94%", label: "satisfactionRate", icon: Star, color: "green", suffix: "" },
-    { number: "24/7", label: "support", icon: Headphones, color: "purple", suffix: "" },
+    { id: "activeUsers", number: "12.5L", icon: Users, color: "blue" },
+    { id: "projectsTracked", number: "142", icon: Building2, color: "orange" },
+    { id: "satisfactionRate", number: "94%", icon: Star, color: "green" },
+    { id: "support", number: "24/7", icon: Headphones, color: "purple" },
   ];
 
   // Online Services Data
   const onlineServices = [
-    { title: "Property Tax", icon: Home, description: "Pay property taxes online", link: "/services/property-tax" },
-    { title: "Water Charges", icon: Zap, description: "View and pay water bills", link: "/services/water-charges" },
-    { title: "Trade License", icon: FileText, description: "Apply for trade licenses", link: "/services/trade-license" },
-    { title: "Birth/Death", icon: FileCheck, description: "Birth & death certificates", link: "/services/certificates" },
-    { title: "Building Plan", icon: Building, description: "Submit building plans", link: "/services/building-plan" },
-    { title: "Fire NOC", icon: Shield, description: "Fire safety clearance", link: "/services/fire-noc" },
-    { title: "Grievances", icon: MessageSquare, description: "File complaints online", link: "/report" },
-    { title: "RTI", icon: Eye, description: "Right to Information", link: "/services/rti" }
+    { id: "propertyTax", icon: Home, link: "/services/property-tax" },
+    { id: "waterCharges", icon: Zap, link: "/services/water-charges" },
+    { id: "tradeLicense", icon: FileText, link: "/services/trade-license" },
+    { id: "certificates", icon: FileCheck, link: "/services/certificates" },
+    { id: "buildingPlan", icon: Building, link: "/services/building-plan" },
+    { id: "fireNoc", icon: Shield, link: "/services/fire-noc" },
+    { id: "grievances", icon: MessageSquare, link: "/report" },
+    { id: "rti", icon: Eye, link: "/services/rti" }
   ];
 
   // Government Schemes
   const govSchemes = [
-    {
-      title: "Pradhan Mantri Awas Yojana",
-      category: "Housing",
-      description: "Affordable housing for all",
-      color: "bg-orange-500",
-      link: "/schemes/pmay"
-    },
-    {
-      title: "Jan Aushadhi Scheme",
-      category: "Healthcare",
-      description: "Generic medicines at small prices",
-      color: "bg-green-500",
-      link: "/schemes/jan-aushadhi"
-    },
-    {
-      title: "Swachh Bharat Mission",
-      category: "Sanitation",
-      description: "Clean India initiative",
-      color: "bg-blue-500",
-      link: "/schemes/swachh-bharat"
-    },
-    {
-      title: "Ayushman Bharat",
-      category: "Healthcare",
-      description: "Health insurance for all",
-      color: "bg-purple-500",
-      link: "/schemes/ayushman-bharat"
-    }
+    { id: "pmay", category: "Housing", color: "bg-orange-500", link: "/schemes/pmay" },
+    { id: "janAushadhi", category: "Healthcare", color: "bg-green-500", link: "/schemes/jan-aushadhi" },
+    { id: "swachhBharat", category: "Sanitation", color: "bg-blue-500", link: "/schemes/swachh-bharat" },
+    { id: "ayushman", category: "Healthcare", color: "bg-purple-500", link: "/schemes/ayushman-bharat" }
   ];
 
   // Tenders & Circulars - State for real data
@@ -255,31 +231,30 @@ export default function GovLandingPage() {
                   className="w-16 h-16 invert brightness-0"
                 />
                 <div>
-                  <h2 className="text-2xl font-bold">Government of India</h2>
-                  <p className="text-blue-200 text-sm">Ministry of Urban Affairs</p>
+                  <h2 className="text-2xl font-bold">{t('common.govIndia')}</h2>
+                  <p className="text-blue-200 text-sm">{t('common.ministry')}</p>
                 </div>
               </div>
 
               <div>
                 <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
-                  Empowering<br />
-                  <span className="text-orange-400">Every Citizen.</span>
+                  <span dangerouslySetInnerHTML={{ __html: t.raw('landing.hero.empowering') }} />
                 </h1>
                 <p className="text-xl text-blue-100 mb-8 leading-relaxed max-w-lg">
-                  Digital India initiative for transparent governance and efficient public service delivery through technology.
+                  {t('landing.hero.description')}
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href={ctaLink}>
                   <button className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
-                    Get Started
+                    {t('landing.hero.getStarted')}
                     <ArrowRight size={20} />
                   </button>
                 </Link>
                 <Link href="/services">
                   <button className="px-8 py-4 border-2 border-white/30 text-white hover:bg-white/10 rounded-lg font-bold text-lg transition-all">
-                    View Services
+                    {t('landing.hero.viewServices')}
                   </button>
                 </Link>
               </div>
@@ -292,8 +267,8 @@ export default function GovLandingPage() {
                   <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <FileText className="text-white" size={20} />
                   </div>
-                  <h3 className="font-semibold mb-1 text-white text-sm">File Complaints</h3>
-                  <p className="text-blue-200 text-xs">Report civic issues with GPS location</p>
+                  <h3 className="font-semibold mb-1 text-white text-sm">{t('landing.hero.cards.complaints.title')}</h3>
+                  <p className="text-blue-200 text-xs">{t('landing.hero.cards.complaints.desc')}</p>
                 </div>
               </Link>
 
@@ -302,8 +277,8 @@ export default function GovLandingPage() {
                   <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <MapPin className="text-white" size={20} />
                   </div>
-                  <h3 className="font-semibold mb-1 text-white text-sm">Track Progress</h3>
-                  <p className="text-blue-200 text-xs">Monitor complaint status in real-time</p>
+                  <h3 className="font-semibold mb-1 text-white text-sm">{t('landing.hero.cards.track.title')}</h3>
+                  <p className="text-blue-200 text-xs">{t('landing.hero.cards.track.desc')}</p>
                 </div>
               </Link>
 
@@ -312,8 +287,8 @@ export default function GovLandingPage() {
                   <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <BarChart3 className="text-white" size={20} />
                   </div>
-                  <h3 className="font-semibold mb-1 text-white text-sm">View Analytics</h3>
-                  <p className="text-blue-200 text-xs">Access comprehensive dashboards</p>
+                  <h3 className="font-semibold mb-1 text-white text-sm">{t('landing.hero.cards.analytics.title')}</h3>
+                  <p className="text-blue-200 text-xs">{t('landing.hero.cards.analytics.desc')}</p>
                 </div>
               </Link>
 
@@ -322,8 +297,8 @@ export default function GovLandingPage() {
                   <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <Settings className="text-white" size={20} />
                   </div>
-                  <h3 className="font-semibold mb-1 text-white text-sm">Online Services</h3>
-                  <p className="text-blue-200 text-xs">Access government services digitally</p>
+                  <h3 className="font-semibold mb-1 text-white text-sm">{t('landing.hero.cards.services.title')}</h3>
+                  <p className="text-blue-200 text-xs">{t('landing.hero.cards.services.desc')}</p>
                 </div>
               </Link>
 
@@ -332,8 +307,8 @@ export default function GovLandingPage() {
                   <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <Briefcase className="text-white" size={20} />
                   </div>
-                  <h3 className="font-semibold mb-1 text-white text-sm">Tenders</h3>
-                  <p className="text-blue-200 text-xs">Browse procurement opportunities</p>
+                  <h3 className="font-semibold mb-1 text-white text-sm">{t('landing.hero.cards.tenders.title')}</h3>
+                  <p className="text-blue-200 text-xs">{t('landing.hero.cards.tenders.desc')}</p>
                 </div>
               </Link>
 
@@ -342,8 +317,8 @@ export default function GovLandingPage() {
                   <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <Shield className="text-white" size={20} />
                   </div>
-                  <h3 className="font-semibold mb-1 text-white text-sm">Secure Access</h3>
-                  <p className="text-blue-200 text-xs">Multi-factor authentication System</p>
+                  <h3 className="font-semibold mb-1 text-white text-sm">{t('landing.hero.cards.secure.title')}</h3>
+                  <p className="text-blue-200 text-xs">{t('landing.hero.cards.secure.desc')}</p>
                 </div>
               </Link>
             </div>
@@ -357,9 +332,9 @@ export default function GovLandingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Platform Statistics</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">{t('landing.platformStats.title')}</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Real-time data from our civic engagement platform
+              {t('landing.platformStats.subtitle')}
             </p>
           </div>
 
@@ -377,10 +352,7 @@ export default function GovLandingPage() {
                 </div>
                 <div className="text-3xl font-black text-slate-900 mb-2">{stat.number}</div>
                 <div className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
-                  {stat.label === "activeUsers" && "Active Users"}
-                  {stat.label === "projectsTracked" && "Projects Tracked"}
-                  {stat.label === "satisfactionRate" && "Satisfaction Rate"}
-                  {stat.label === "support" && "Support Available"}
+                  {t(`landing.platformStats.${stat.id}`)}
                 </div>
               </div>
             ))}
@@ -391,15 +363,15 @@ export default function GovLandingPage() {
             <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>System Status: Online</span>
+                <span>{t('landing.platformStats.systemStatus')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Last Updated: {currentTime || "Loading..."}</span>
+                <span>{t('landing.platformStats.lastUpdated')}: {currentTime || t('common.loading')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span>Response Time: &lt;2s</span>
+                <span>{t('landing.platformStats.responseTime')}</span>
               </div>
             </div>
           </div>
@@ -412,9 +384,9 @@ export default function GovLandingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Online Services</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">{t('landing.onlineServices.title')}</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Access government services digitally. Fast, secure, and available 24/7.
+              {t('landing.onlineServices.subtitle')}
             </p>
           </div>
 
@@ -426,11 +398,11 @@ export default function GovLandingPage() {
                     <service.icon className="text-blue-600 group-hover:text-white" size={24} />
                   </div>
                   <h3 className="font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
-                    {service.title}
+                    {t(`landing.onlineServices.${service.id}.title`)}
                   </h3>
-                  <p className="text-sm text-slate-600">{service.description}</p>
+                  <p className="text-sm text-slate-600">{t(`landing.onlineServices.${service.id}.desc`)}</p>
                   <div className="mt-4 flex items-center text-blue-600 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                    Access Service <ArrowRight size={16} className="ml-1" />
+                    {t('landing.onlineServices.access')} <ArrowRight size={16} className="ml-1" />
                   </div>
                 </div>
               </Link>
@@ -440,7 +412,7 @@ export default function GovLandingPage() {
           <div className="text-center mt-12">
             <Link href="/services">
               <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                View All Services
+                {t('landing.onlineServices.viewAll')}
               </button>
             </Link>
           </div>
@@ -454,9 +426,9 @@ export default function GovLandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {/* Section Header */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">City Overview & Opportunities</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">{t('landing.cityOverview.title')}</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Explore our interactive city map and discover the latest procurement opportunities
+              {t('landing.cityOverview.subtitle')}
             </p>
           </div>
 
@@ -467,13 +439,13 @@ export default function GovLandingPage() {
               <div className="p-6 border-b border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Interactive City Map</h3>
-                    <p className="text-slate-600">Real-time view of complaints, projects, and civic activities</p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('landing.cityOverview.mapTitle')}</h3>
+                    <p className="text-slate-600">{t('landing.cityOverview.mapDesc')}</p>
                   </div>
                   <Link href="/map">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2">
                       <Maximize2 size={16} />
-                      Full Map
+                      {t('landing.cityOverview.fullMap')}
                     </button>
                   </Link>
                 </div>
@@ -486,15 +458,15 @@ export default function GovLandingPage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold text-slate-900">25</div>
-                    <div className="text-sm text-slate-600">Ward Boundaries</div>
+                    <div className="text-sm text-slate-600">{t('landing.cityOverview.wardBoundaries')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-slate-900">142</div>
-                    <div className="text-sm text-slate-600">Active Complaints</div>
+                    <div className="text-sm text-slate-600">{t('landing.cityOverview.activeComplaints')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-slate-900">38</div>
-                    <div className="text-sm text-slate-600">Ongoing Projects</div>
+                    <div className="text-sm text-slate-600">{t('landing.cityOverview.ongoingProjects')}</div>
                   </div>
                 </div>
               </div>
@@ -503,14 +475,14 @@ export default function GovLandingPage() {
             {/* Tenders & Circulars - Takes 1 column */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
               <div className="p-6 border-b border-slate-200">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Latest Tenders</h3>
-                <p className="text-slate-600 text-sm">Procurement opportunities and government notifications</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">{t('landing.latestTenders.title')}</h3>
+                <p className="text-slate-600 text-sm">{t('landing.latestTenders.subtitle')}</p>
               </div>
 
               {loading ? (
                 <div className="p-6 text-center">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
-                  <p className="text-slate-500 text-sm">Loading tenders...</p>
+                  <p className="text-slate-500 text-sm">{t('landing.latestTenders.loading')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-200 max-h-96 overflow-y-auto">
@@ -525,10 +497,10 @@ export default function GovLandingPage() {
                           <div className="p-4 hover:bg-slate-50 transition-colors cursor-pointer group">
                             <div className="flex justify-between items-start mb-2">
                               <span className={`px-2 py-1 text-xs font-semibold rounded-full ${tender.status === 'OPEN' || tender.status === 'Active'
-                                  ? 'bg-green-100 text-green-800'
-                                  : tender.status === 'CLOSED' || tender.status === 'Closed'
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-800'
+                                : tender.status === 'CLOSED' || tender.status === 'Closed'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
                                 }`}>
                                 {tender.status === 'OPEN' ? 'Active' : tender.status === 'CLOSED' ? 'Closed' : tender.status}
                               </span>
@@ -546,7 +518,7 @@ export default function GovLandingPage() {
                               <span>{new Date(tender.createdAt).toLocaleDateString()}</span>
                             </div>
                             <div className="mt-2 flex items-center text-blue-600 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                              {isRealTender ? 'View Details' : 'Browse Tenders'} <ArrowRight size={12} className="ml-1" />
+                              {isRealTender ? t('landing.latestTenders.viewDetails') : t('landing.latestTenders.browse')} <ArrowRight size={12} className="ml-1" />
                             </div>
                           </div>
                         </Link>
@@ -557,13 +529,13 @@ export default function GovLandingPage() {
                       <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <FileText className="text-slate-400" size={24} />
                       </div>
-                      <h4 className="font-semibold text-slate-700 mb-2">No Active Tenders</h4>
+                      <h4 className="font-semibold text-slate-700 mb-2">{t('landing.latestTenders.noActive')}</h4>
                       <p className="text-sm text-slate-500 mb-4">
-                        New procurement opportunities will appear here when available.
+                        {t('landing.latestTenders.noActiveDesc')}
                       </p>
                       <Link href="/tenders">
                         <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-                          View All Tenders
+                          {t('landing.latestTenders.viewAll')}
                         </button>
                       </Link>
                     </div>
@@ -574,7 +546,7 @@ export default function GovLandingPage() {
               <div className="p-4 bg-slate-50 border-t border-slate-200 text-center">
                 <Link href="/tenders">
                   <button className="text-blue-600 font-semibold hover:text-blue-700 transition-colors text-sm flex items-center gap-1 mx-auto">
-                    View All Tenders <ArrowRight size={14} />
+                    {t('landing.latestTenders.viewAll')} <ArrowRight size={14} />
                   </button>
                 </Link>
               </div>
@@ -589,9 +561,9 @@ export default function GovLandingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Government Schemes</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">{t('landing.govSchemes.title')}</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Explore various government initiatives and welfare schemes for citizens
+              {t('landing.govSchemes.subtitle')}
             </p>
           </div>
 
@@ -608,9 +580,9 @@ export default function GovLandingPage() {
                       <ArrowRight className="text-slate-400 group-hover:text-blue-600 transition-colors" size={16} />
                     </div>
                     <h3 className="font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {scheme.title}
+                      {t(`landing.govSchemes.${scheme.id}.title`)}
                     </h3>
-                    <p className="text-sm text-slate-600 line-clamp-2">{scheme.description}</p>
+                    <p className="text-sm text-slate-600 line-clamp-2">{t(`landing.govSchemes.${scheme.id}.desc`)}</p>
                   </div>
                 </div>
               </Link>

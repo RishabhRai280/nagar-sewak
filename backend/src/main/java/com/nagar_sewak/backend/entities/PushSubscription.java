@@ -5,12 +5,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "push_subscriptions",
-    indexes = {
+@Table(name = "push_subscriptions", indexes = {
         @Index(name = "idx_push_user_id", columnList = "user_id"),
         @Index(name = "idx_push_endpoint", columnList = "endpoint")
-    }
-)
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,6 +39,7 @@ public class PushSubscription {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 

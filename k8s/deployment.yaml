@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nagar-sewak-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nagar-sewak
+  template:
+    metadata:
+      labels:
+        app: nagar-sewak
+    spec:
+      containers:
+        - name: nagar-sewak
+          image: rishabhrai12/nagar-sewak-monolith:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: frontend
+            - containerPort: 8080
+              name: backend
+            - containerPort: 3306
+              name: mysql
+          envFrom:
+            - configMapRef:
+                name: nagar-sewak-config
+          # Liveness probe to check if backend is up
+          # livenessProbe:
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8080
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +40,8 @@ public class SecurityRepositoryTests {
         assertThat(saved.getAttemptTime()).isNotNull();
 
         // Test query methods
-        List<LoginAttempt> attempts = loginAttemptRepository.findByEmailOrderByAttemptTimeDesc("test@example.com", null);
+        List<LoginAttempt> attempts = loginAttemptRepository.findByEmailOrderByAttemptTimeDesc("test@example.com",
+                null);
         assertThat(attempts).hasSize(1);
         assertThat(attempts.get(0).getEmail()).isEqualTo("test@example.com");
     }

@@ -16,7 +16,9 @@
     "backToHome": "Back to Home",
     "admin": "Admin",
     "contractor": "Contractor",
-    "citizen": "Citizen"
+    "citizen": "Citizen",
+    "govIndia": "Government of India",
+    "ministry": "Ministry of Urban Affairs"
   },
   "validation": {
     "required": "This field is required",
@@ -119,7 +121,19 @@
       "startReporting": "Start Reporting",
       "viewLiveMap": "View Live Map",
       "realTimeUpdates": "Gov Secured",
-      "geoTagging": "Geo-Tagging"
+      "geoTagging": "Geo-Tagging",
+      "empowering": "Empowering Every Citizen.",
+      "description": "Digital India initiative for transparent governance and efficient public service delivery through technology.",
+      "getStarted": "Get Started",
+      "viewServices": "View Services",
+      "cards": {
+        "complaints": { "title": "File Complaints", "desc": "Report civic issues with GPS location" },
+        "track": { "title": "Track Progress", "desc": "Monitor complaint status in real-time" },
+        "analytics": { "title": "View Analytics", "desc": "Access comprehensive dashboards" },
+        "services": { "title": "Online Services", "desc": "Access government services digitally" },
+        "tenders": { "title": "Tenders", "desc": "Browse procurement opportunities" },
+        "secure": { "title": "Secure Access", "desc": "Multi-factor authentication System" }
+      }
     },
     "stats": {
       "activeUsers": "Active Users",
@@ -167,6 +181,229 @@
         "tags": ["Rating System", "Quality Check", "Feedback"]
       },
       "cta": "Start Your First Report"
+    },
+      "onlineServices": {
+        "title": "Online Services",
+        "subtitle": "Access government services digitally. Fast, secure, and available 24/7.",
+        "propertyTax": { "title": "Property Tax", "desc": "Pay property taxes online" },
+        "waterCharges": { "title": "Water Charges", "desc": "View and pay water bills" },
+        "tradeLicense": { "title": "Trade License", "desc": "Apply for trade licenses" },
+        "certificates": { "title": "Birth/Death", "desc": "Birth & death certificates" },
+        "buildingPlan": { "title": "Building Plan", "desc": "Submit building plans" },
+        "fireNoc": { "title": "Fire NOC", "desc": "Fire safety clearance" },
+        "grievances": { "title": "Grievances", "desc": "File complaints online" },
+        "rti": { "title": "RTI", "desc": "Right to Information" },
+        "viewAll": "View All Services",
+        "access": "Access Service"
+      },
+      "govSchemes": {
+        "title": "Government Schemes",
+        "subtitle": "Explore various government initiatives and welfare schemes for citizens",
+        "pmay": { "title": "Pradhan Mantri Awas Yojana", "desc": "Affordable housing for all" },
+        "janAushadhi": { "title": "Jan Aushadhi Scheme", "desc": "Generic medicines at small prices" },
+        "swachhBharat": { "title": "Swachh Bharat Mission", "desc": "Clean India initiative" },
+        "ayushman": { "title": "Ayushman Bharat", "desc": "Health insurance for all" }
+      },
+      "cityOverview": {
+        "title": "City Overview & Opportunities",
+        "subtitle": "Explore our interactive city map and discover the latest procurement opportunities",
+        "mapTitle": "Interactive City Map",
+        "mapDesc": "Real-time view of complaints, projects, and civic activities",
+        "fullMap": "Full Map",
+        "wardBoundaries": "Ward Boundaries",
+        "activeComplaints": "Active Complaints",
+        "ongoingProjects": "Ongoing Projects"
+      },
+      "latestTenders": {
+        "title": "Latest Tenders",
+        "subtitle": "Procurement opportunities and government notifications",
+        "loading": "Loading tenders...",
+        "noActive": "No Active Tenders",
+        "noActiveDesc": "New procurement opportunities will appear here when available.",
+        "viewAll": "View All Tenders",
+        "browse": "Browse Tenders",
+        "viewDetails": "View Details"
+      },
+      "platformStats": {
+        "title": "Platform Statistics",
+        "subtitle": "Real-time data from our civic engagement platform",
+        "systemStatus": "System Status: Online",
+        "lastUpdated": "Last Updated",
+        "responseTime": "Response Time: <2s",
+        "activeUsers": "Active Users",
+        "projectsTracked": "Projects Tracked",
+        "satisfactionRate": "Satisfaction Rate",
+        "supportAvailable": "Support Available"
+      }
+    },
+    "schemesPage": {
+      "title": "Government Schemes",
+      "subtitle": "Explore various government initiatives and welfare schemes designed for citizen welfare.",
+      "backHome": "Back to Home",
+      "items": {
+        "pmay": {
+          "title": "Pradhan Mantri Awas Yojana",
+          "category": "Housing",
+          "desc": "Affordable housing scheme for economically weaker sections and low-income groups",
+          "eligibility": "Annual income up to ₹18 lakh",
+          "benefits": "Interest subsidy up to ₹2.67 lakh"
+        },
+        "ayushman-bharat": {
+          "title": "Ayushman Bharat",
+          "category": "Healthcare",
+          "desc": "Health insurance scheme providing coverage up to ₹5 lakh per family per year",
+          "eligibility": "Families listed in SECC 2011",
+          "benefits": "Cashless treatment at empaneled hospitals"
+        },
+        "jan-aushadhi": {
+          "title": "Jan Aushadhi Scheme",
+          "category": "Healthcare",
+          "desc": "Generic medicines at affordable prices through dedicated stores",
+          "eligibility": "All citizens",
+          "benefits": "Medicines at 50-90% lower cost"
+        },
+        "swachh-bharat": {
+          "title": "Swachh Bharat Mission",
+          "category": "Sanitation",
+          "desc": "Clean India initiative focusing on sanitation and waste management",
+          "eligibility": "All households and communities",
+          "benefits": "Toilet construction subsidy"
+        },
+        "pm-kisan": {
+          "title": "PM Kisan Samman Nidhi",
+          "category": "Agriculture",
+          "desc": "Direct income support to farmer families",
+          "eligibility": "Small and marginal farmers",
+          "benefits": "₹6,000 per year in three installments"
+        },
+        "beti-bachao": {
+          "title": "Beti Bachao Beti Padhao",
+          "category": "Women Empowerment",
+          "desc": "Scheme to address declining child sex ratio and empower girl children",
+          "eligibility": "Girl children and their families",
+          "benefits": "Educational support and awareness"
+        }
+      },
+      "common": {
+        "eligibility": "Eligibility:",
+        "benefits": "Benefits:",
+        "active": "Active",
+        "learnMore": "Learn More"
+      },
+      "applyProcess": {
+        "title": "How to Apply",
+        "steps": {
+          "step1": { "title": "Check Eligibility", "desc": "Verify if you meet the scheme requirements" },
+          "step2": { "title": "Gather Documents", "desc": "Collect required documents and certificates" },
+          "step3": { "title": "Submit Application", "desc": "Apply online or visit nearest office" }
+        }
+      }
+    },
+    "servicesPage": {
+      "title": "Online Services",
+      "subtitle": "Access government services digitally. Fast, secure, and available 24/7.",
+      "backHome": "Back to Home",
+      "items": {
+        "propertyTax": { "title": "Property Tax", "desc": "Pay property taxes online with ease", "status": "Available" },
+        "waterCharges": { "title": "Water Charges", "desc": "View and pay water bills online", "status": "Available" },
+        "tradeLicense": { "title": "Trade License", "desc": "Apply for new trade licenses", "status": "Available" },
+        "certificates": { "title": "Birth/Death Certificates", "desc": "Apply for birth and death certificates", "status": "Available" },
+        "buildingPlan": { "title": "Building Plan Approval", "desc": "Submit building plans for approval", "status": "Available" },
+        "fireNoc": { "title": "Fire NOC", "desc": "Apply for fire safety clearance", "status": "Available" },
+        "grievances": { "title": "Grievances", "desc": "File complaints and grievances", "status": "Available" },
+        "rti": { "title": "RTI Applications", "desc": "Right to Information requests", "status": "Available" }
+      },
+      "access": "Access",
+      "help": {
+        "title": "Need Help?",
+        "desc": "Our support team is available 24/7 to assist you with any service-related queries.",
+        "contact": "Contact Support",
+        "faq": "View FAQ"
+      }
+    },
+    "pmayPage": {
+      "backLink": "Back to Government Schemes",
+      "title": "Pradhan Mantri Awas Yojana (PMAY)",
+      "subtitle": "Housing for All - Affordable Housing Scheme",
+      "launched": "Launched: 2015",
+      "beneficiaries": "Beneficiaries: 1+ Crore",
+      "overview": {
+        "title": "Scheme Overview",
+        "p1": "Pradhan Mantri Awas Yojana (PMAY) is a flagship mission of the Government of India to provide affordable housing to the urban and rural poor. The scheme aims to provide pucca houses to all eligible families by 2022, now extended to 2025.",
+        "p2": "Under this scheme, the government provides interest subsidy on home loans to make housing affordable for economically weaker sections, lower income groups, and middle income groups.",
+        "mission": {
+          "title": "Mission Objective",
+          "desc": "\"Housing for All by 2025\" - To ensure every family has access to adequate, safe, and affordable housing with basic amenities."
+        }
+      },
+      "eligibility": {
+        "title": "Eligibility Criteria",
+        "c1": "Family should not own a pucca house anywhere in India",
+        "c2": "No family member should have availed central assistance under any housing scheme",
+        "c3": "Annual household income should be within prescribed limits",
+        "c4": "Family should not have availed loan under any housing scheme from any financial institution",
+        "special": {
+          "title": "Special Provisions",
+          "l1": "Priority to women, SC/ST, OBC, minorities, and differently-abled persons",
+          "l2": "Mandatory to have at least one adult woman member as owner/co-owner",
+          "l3": "Senior citizens (60+) get additional benefits"
+        }
+      },
+      "benefits": {
+        "title": "Benefits & Interest Subsidy",
+        "income": "Annual Income:",
+        "loan": "Max Loan Amount:",
+        "categories": {
+          "ews": { "name": "EWS (Economically Weaker Section)", "income": "Up to ₹3 lakh", "subsidy": "₹2.67 lakh interest subsidy", "loan": "Up to ₹6 lakh" },
+          "lig": { "name": "LIG (Lower Income Group)", "income": "₹3-6 lakh", "subsidy": "₹2.67 lakh interest subsidy", "loan": "Up to ₹6 lakh" },
+          "mig1": { "name": "MIG-I (Middle Income Group-I)", "income": "₹6-12 lakh", "subsidy": "₹2.35 lakh interest subsidy", "loan": "Up to ₹9 lakh" },
+          "mig2": { "name": "MIG-II (Middle Income Group-II)", "income": "₹12-18 lakh", "subsidy": "₹2.30 lakh interest subsidy", "loan": "Up to ₹12 lakh" }
+        }
+      },
+      "documents": {
+        "title": "Required Documents",
+        "d1": "Aadhaar Card of all family members",
+        "d2": "Income Certificate",
+        "d3": "Caste Certificate (if applicable)",
+        "d4": "Bank Account Details",
+        "d5": "Property Documents (if any)",
+        "d6": "Affidavit for not owning house"
+      },
+      "apply": {
+        "title": "How to Apply",
+        "s1": { "title": "Visit Official Website", "desc": "Go to the official PMAY website and register yourself" },
+        "s2": { "title": "Fill Application Form", "desc": "Complete the online application form with accurate details" },
+        "s3": { "title": "Upload Documents", "desc": "Upload all required documents in the specified format" },
+        "s4": { "title": "Submit & Track", "desc": "Submit application and track status using application number" }
+      },
+      "sidebar": {
+        "applyBox": {
+          "title": "Apply for PMAY",
+          "desc": "Apply directly on the official government site for Pradhan Mantri Awas Yojana.",
+          "btnApply": "Apply Now",
+          "btnTrack": "Track Application Status"
+        },
+        "stats": {
+          "title": "Scheme Statistics",
+          "s1": { "label": "Houses Sanctioned", "val": "1.2+ Crore" },
+          "s2": { "label": "Houses Completed", "val": "80+ Lakh" },
+          "s3": { "label": "Investment", "val": "₹7+ Lakh Crore" },
+          "s4": { "label": "States Covered", "val": "All 36" }
+        },
+        "help": {
+          "title": "Need Help?",
+          "helpline": "Helpline",
+          "email": "Email Support",
+          "address": "Address",
+          "addrVal": "Ministry of Housing & Urban Affairs, Nirman Bhawan, New Delhi"
+        },
+        "links": {
+          "title": "Useful Links",
+          "l1": "PMAY Operational Guidelines (PDF)",
+          "l2": "Beneficiary Funds Released",
+          "l3": "CLSS Awas Portal (Subsidy Status)"
+        }
+      }
     },
     "powerfulFeatures": {
       "title": "Powerful",
@@ -235,21 +472,7 @@
         }
       }
     },
-    "security": {
-      "title": "Security &",
-      "titleHighlight": "Compliance",
-      "subtitle": "Your data is protected with enterprise-grade security",
-      "list": {
-        "jwt": { "title": "JWT Authentication", "desc": "Secure token-based auth with automatic expiry" },
-        "fingerprint": { "title": "Device Fingerprinting", "desc": "Track and trust known devices for enhanced security" },
-        "spring": { "title": "Spring Security", "desc": "Industry-standard security framework" },
-        "encryption": { "title": "Encrypted Storage", "desc": "All data encrypted at rest and in transit" },
-        "rbac": { "title": "Role-Based Access", "desc": "Granular permissions for each user role" },
-        "db": { "title": "Secure Database", "desc": "PostgreSQL with row-level security" },
-        "cloud": { "title": "Firebase Security", "desc": "Cloud storage with strict security rules" },
-        "validation": { "title": "Input Validation", "desc": "Sanitization and validation of all inputs" }
-      }
-    },
+
     "testimonials": {
       "title": "Trusted by the",
       "titleHighlight": "Community",
@@ -339,8 +562,7 @@
           "speed": "Fast Resolution"
         }
       }
-    }
-  },
+    },
   "home": {
     "hero": {
       "title": "Your Voice, Your City",
