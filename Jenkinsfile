@@ -51,8 +51,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Removed sed command to avoid OS compatibility issues
-                    withKubeConfig([credentialsId: 'kubeconfig']) {
+                    // Use standard credentials binding instead of Kubernetes CLI plugin wrapper
+                    // This avoids the 'NoSuchMethodError: withKubeConfig'
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                          sh 'kubectl apply -f k8s/'
                          // Force restart to pull the new 'latest' image
                          sh "kubectl rollout restart deployment/nagar-sewak-deployment -n ${KUBE_NAMESPACE}"
