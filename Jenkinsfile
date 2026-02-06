@@ -40,11 +40,9 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', "${DOCKER_CREDS_ID}") {
-                        def appImage = docker.build("${IMAGE_NAME}:${BUILD_NUMBER}", "-f Dockerfile.merged .")
-                        
+                        // Build only the latest tag as requested
+                        def appImage = docker.build("${IMAGE_NAME}:latest", "-f Dockerfile.merged .")
                         appImage.push()
-                        
-                        appImage.push("latest")
                     }
                 }
             }
@@ -53,11 +51,12 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh "sed -i 's|${IMAGE_NAME}:.*|${IMAGE_NAME}:${BUILD_NUMBER}|' k8s/deployment.yaml"
-                    
+                    // Removed sed command to avoid OS compatibility issues
                     withKubeConfig([credentialsId: 'kubeconfig']) {
                          sh 'kubectl apply -f k8s/'
-                         sh "kubectl rollout status deployment/nagar-sewak -n ${KUBE_NAMESPACE}"
+                         // Force restart to pull the new 'latest' image
+                         sh "kubectl rollout restart deployment/nagar-sewak-deployment -n ${KUBE_NAMESPACE}"
+                         sh "kubectl rollout status deployment/nagar-sewak-deployment -n ${KUBE_NAMESPACE}"
                     }
                 }
             }

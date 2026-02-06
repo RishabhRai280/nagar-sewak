@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mysql-server \
     ca-certificates \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
+    && apt-get install -y --no-install-recommends nodejs dos2unix \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,7 +55,7 @@ COPY --from=frontend-build /app/.next/static /app/frontend/.next/static
 
 # Copy and prepare the startup script
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN dos2unix /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Environment Variables for Backend (Connect to localhost)
 ENV SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/nagar_sewak_db
